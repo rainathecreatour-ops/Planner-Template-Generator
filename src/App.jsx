@@ -6,6 +6,9 @@ const PlannerGenerator = () => {
   const [accessCode, setAccessCode] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
   const [pattern, setPattern] = useState('none');
+  const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
+const [pattern, setPattern] = useState('none');
+const [selectedSections, setSelectedSections] = useState([]); 
 
   const templates = {
     minimalist: {
@@ -149,6 +152,155 @@ const PlannerGenerator = () => {
       layout: 'classical-lines'
     }
   };
+  const optionalSections = {
+  monthlyReset: {
+    name: 'Monthly Reset',
+    height: 200,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">MONTHLY RESET</text>
+        <text x="120" y={yPos + 60} fontSize="12" fill={colors.text} fontWeight="600">What worked this month:</text>
+        <line x1="120" y1={yPos + 75} x2="710" y2={yPos + 75} stroke={colors.border} strokeWidth="1" />
+        <text x="120" y={yPos + 100} fontSize="12" fill={colors.text} fontWeight="600">What to improve:</text>
+        <line x1="120" y1={yPos + 115} x2="710" y2={yPos + 115} stroke={colors.border} strokeWidth="1" />
+        <text x="120" y={yPos + 140} fontSize="12" fill={colors.text} fontWeight="600">Next month's focus:</text>
+        <line x1="120" y1={yPos + 155} x2="710" y2={yPos + 155} stroke={colors.border} strokeWidth="1" />
+      </g>
+    )
+  },
+  weeklyCheckin: {
+    name: 'Weekly Check-in',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">WEEKLY CHECK-IN</text>
+        {['Wins', 'Challenges', 'Lessons Learned'].map((item, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 60 + i * 35} fontSize="11" fill={colors.text} fontWeight="600">{item}:</text>
+            <line x1="120" y1={yPos + 70 + i * 35} x2="710" y2={yPos + 70 + i * 35} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+  lifeBalance: {
+    name: 'Life Balance Wheel',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">LIFE BALANCE WHEEL</text>
+        <circle cx="425" cy={yPos + 120} r="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        {[0,1,2,3,4,5,6,7].map(i => {
+          const angle = (i * 45 - 90) * Math.PI / 180;
+          const x1 = 425 + 30 * Math.cos(angle);
+          const y1 = yPos + 120 + 30 * Math.sin(angle);
+          const x2 = 425 + 80 * Math.cos(angle);
+          const y2 = yPos + 120 + 80 * Math.sin(angle);
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.accent} strokeWidth="1" />;
+        })}
+        {['Health', 'Career', 'Finance', 'Relations', 'Growth', 'Fun', 'Spirit', 'Home'].map((area, i) => {
+          const angle = (i * 45 - 90) * Math.PI / 180;
+          const x = 425 + 100 * Math.cos(angle);
+          const y = yPos + 120 + 100 * Math.sin(angle);
+          return <text key={i} x={x} y={y} fontSize="9" fill={colors.text} textAnchor="middle">{area}</text>;
+        })}
+      </g>
+    )
+  },
+  energyTracker: {
+    name: 'Energy Tracker',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">ENERGY TRACKER</text>
+        <line x1="150" y1={yPos + 100} x2="700" y2={yPos + 100} stroke={colors.border} strokeWidth="1" />
+        <text x="120" y={yPos + 70} fontSize="10" fill={colors.text}>High</text>
+        <text x="120" y={yPos + 105} fontSize="10" fill={colors.text}>Low</text>
+        {[0,1,2,3,4,5,6].map(i => (
+          <circle key={i} cx={200 + i * 75} cy={yPos + 80} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
+        ))}
+      </g>
+    )
+  },
+  winsLessons: {
+    name: 'Wins & Lessons',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="300" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="250" y={yPos + 30} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">WINS 🎉</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="120" y1={yPos + 55 + i * 25} x2="380" y2={yPos + 55 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+        
+        <rect x="430" y={yPos} width="300" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="580" y={yPos + 30} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">LESSONS 📚</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="450" y1={yPos + 55 + i * 25} x2="710" y2={yPos + 55 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    )
+  },
+  quotesAffirmations: {
+    name: 'Quotes & Affirmations',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ DAILY AFFIRMATIONS</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="150" y1={yPos + 60 + i * 25} x2="700" y2={yPos + 60 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    )
+  },
+  notesDoodle: {
+    name: 'Notes & Doodles',
+    height: 200,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">NOTES & DOODLES</text>
+        <rect x="120" y={yPos + 50} width="590" height="110" fill="white" stroke={colors.border} strokeWidth="1" strokeDasharray="5,5" />
+      </g>
+    )
+  },
+  lettingGo: {
+    name: 'Letting Go',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">THINGS I'M LETTING GO OF 🍃</text>
+        {[0,1,2,3].map(i => (
+          <g key={i}>
+            <circle cx="130" cy={yPos + 60 + i * 25} r="5" fill="none" stroke={colors.accent} strokeWidth="1" />
+            <line x1="150" y1={yPos + 60 + i * 25} x2="710" y2={yPos + 60 + i * 25} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+  excitedAbout: {
+    name: 'Excited About',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">THINGS I'M EXCITED ABOUT ✨</text>
+        {[0,1,2,3].map(i => (
+          <g key={i}>
+            <text x="130" y={yPos + 63 + i * 25} fontSize="14" fill={colors.accent}>★</text>
+            <line x1="150" y1={yPos + 60 + i * 25} x2="710" y2={yPos + 60 + i * 25} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+      </g>
+    )
+  }
+};
 
   const renderMinimalistLayout = (colors) => {
     return (
@@ -914,6 +1066,41 @@ const renderParentingLayout = (colors) => {
       </defs>
     );
   };
+  <div>
+              <label className="block text-sm font-semibold mb-2">Background Pattern</label>
+              <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
+                <option value="none">None</option>
+                <option value="zebra">Zebra</option>
+                <option value="leopard">Leopard</option>
+                <option value="polkadot">Polka Dots</option>
+                <option value="hearts">Hearts</option>
+                <option value="stars">Stars</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2">Optional Sections</label>
+              <div className="space-y-2 max-h-64 overflow-y-auto border-2 rounded-lg p-3">
+                {Object.entries(optionalSections).map(([key, section]) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedSections.includes(key)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedSections([...selectedSections, key]);
+                        } else {
+                          setSelectedSections(selectedSections.filter(s => s !== key));
+                        }
+                      }}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">{section.name}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
+            </div>
 
   const getPatternFill = (patternType) => {
     if (patternType === 'none') return null;
@@ -1018,9 +1205,9 @@ const renderParentingLayout = (colors) => {
 
           <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 overflow-auto">
             <h2 className="text-xl font-bold mb-4">Preview</h2>
-            <svg id="template-svg" width="850" height="900" viewBox="0 0 850 900">
+           <svg id="template-svg" width="850" height={900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)} viewBox={`0 0 850 ${900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)}`}>
               {renderPattern(pattern, template)}
-              <rect width="850" height="900" fill={getPatternFill(pattern) || template.background} />
+              <rect width="850" height={900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)} fill={getPatternFill(pattern) || template.background} />
               
               <text x="750" y="30" fontSize="11" fill="#888">Date: _____</text>
               
@@ -1034,11 +1221,16 @@ const renderParentingLayout = (colors) => {
               {selectedTemplate === 'professional' && renderProfessionalLayout(template)}
               {selectedTemplate === 'cozy' && renderCozyLayout(template)}
               {selectedTemplate === 'selfWellness' && renderSelfWellnessLayout(template)}
-              {selectedTemplate === 'selfWellness' && renderSelfWellnessLayout(template)}
               {selectedTemplate === 'artistic' && renderArtisticLayout(template)}
               {selectedTemplate === 'whimsical' && renderWhimsicalLayout(template)}
               {selectedTemplate === 'luxury' && renderLuxuryLayout(template)}
               {selectedTemplate === 'elegant' && renderElegantLayout(template)}
+              
+              {/* Render optional sections */}
+              {selectedSections.map((sectionKey, index) => {
+                const yOffset = 900 + selectedSections.slice(0, index).reduce((total, key) => total + optionalSections[key].height, 0);
+                return <g key={sectionKey}>{optionalSections[sectionKey].render(template, yOffset)}</g>;
+              })}
             </svg>
           </div>
         </div>
