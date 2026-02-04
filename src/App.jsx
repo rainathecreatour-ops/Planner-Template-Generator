@@ -1060,10 +1060,6 @@ const renderParentingLayout = (colors) => {
           <pattern id="polkadotPattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
             <rect width="30" height="30" fill={colors.background} />
             <circle cx="15" cy="15" r="4" fill="#000" opacity="0.1" />
-          </pattern>
-        )}
-      </defs>
-    );
  </pattern>
         )}
       </defs>
