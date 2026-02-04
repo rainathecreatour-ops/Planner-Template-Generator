@@ -57,7 +57,7 @@ const PlannerGenerator = () => {
       border: '#C4B5FD',
       text: '#5B21B6',
       layout: 'vertical-sections'
-    }
+    },
     parenting: {
       name: 'Parenting',
       description: 'Organized, nurturing, family-focused',
