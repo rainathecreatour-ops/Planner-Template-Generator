@@ -198,13 +198,13 @@ const PlannerGenerator = () => {
         <text x="425" y="100" fontSize="32" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Monthly Intentions</text>
         
         {/* Curved sections with organic flow */}
-        <ellipse cx="250" cy="200" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
+        <ellipse cx="250" cy="240" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
         <text x="250" y="185" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Gratitude</text>
         {[0,1,2,3].map(i => (
           <text key={i} x="250" y={210 + i * 20} fontSize="10" fill={colors.text} textAnchor="middle">___________</text>
         ))}
         
-        <ellipse cx="600" cy="200" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
+        <ellipse cx="600" cy="240" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
         <text x="600" y="185" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Self-Care</text>
         {[0,1,2,3].map(i => (
           <text key={i} x="600" y={210 + i * 20} fontSize="10" fill={colors.text} textAnchor="middle">___________</text>
