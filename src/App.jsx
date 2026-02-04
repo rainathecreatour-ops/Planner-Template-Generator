@@ -1065,53 +1065,19 @@ const renderParentingLayout = (colors) => {
       </defs>
     );
   };
-
-  const getPatternFill = (patternType) => {
-    // ... rest of your code
+ const getPatternFill = (patternType) => {
+    if (patternType === 'none') return null;
+    const map = {
+      'zebra': 'url(#zebraPattern)',
+      'leopard': 'url(#leopardPattern)',
+      'stars': 'url(#starsPattern)',
+      'hearts': 'url(#heartsPattern)',
+      'polkadot': 'url(#polkadotPattern)'
+    };
+    return map[patternType];
   };
 
-  // ... more functions ...
-
-  // Then much later, inside your return statement:
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* ... */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
-            {/* ... */}
-            
-            <div>
-              <label className="block text-sm font-semibold mb-2">Background Pattern</label>
-              <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
-                <option value="none">None</option>
-                <option value="zebra">Zebra</option>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Optional Sections</label>
-              <div className="space-y-2 max-h-64 overflow-y-auto border-2 rounded-lg p-3">
-                {Object.entries(optionalSections).map(([key, section]) => (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedSections.includes(key)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedSections([...selectedSections, key]);
-                        } else {
-                          setSelectedSections(selectedSections.filter(s => s !== key));
-                        }
-                      }}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">{section.name}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
-            </div>
-
-  
+  const handleLogin = () => {
     if (accessCode === 'PLAN2024') setIsAuthenticated(true);
     else alert('Invalid code');
   };
@@ -1189,6 +1155,30 @@ const renderParentingLayout = (colors) => {
               </select>
             </div>
 
+            <div>
+              <label className="block text-sm font-semibold mb-2">Optional Sections</label>
+              <div className="space-y-2 max-h-64 overflow-y-auto border-2 rounded-lg p-3">
+                {Object.entries(optionalSections).map(([key, section]) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedSections.includes(key)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedSections([...selectedSections, key]);
+                        } else {
+                          setSelectedSections(selectedSections.filter(s => s !== key));
+                        }
+                      }}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">{section.name}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
+            </div>
+
             <button onClick={downloadSVG} className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
               <Download className="w-5 h-5" />
               Download SVG
@@ -1202,7 +1192,7 @@ const renderParentingLayout = (colors) => {
 
           <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 overflow-auto">
             <h2 className="text-xl font-bold mb-4">Preview</h2>
-           <svg id="template-svg" width="850" height={900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)} viewBox={`0 0 850 ${900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)}`}>
+            <svg id="template-svg" width="850" height={900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)} viewBox={`0 0 850 ${900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)}`}>
               {renderPattern(pattern, template)}
               <rect width="850" height={900 + selectedSections.reduce((total, key) => total + optionalSections[key].height, 0)} fill={getPatternFill(pattern) || template.background} />
               
@@ -1222,26 +1212,6 @@ const renderParentingLayout = (colors) => {
               {selectedTemplate === 'whimsical' && renderWhimsicalLayout(template)}
               {selectedTemplate === 'luxury' && renderLuxuryLayout(template)}
               {selectedTemplate === 'elegant' && renderElegantLayout(template)}
-            const getPatternFill = (patternType) => {
-  if (patternType === 'none') return null;
-  const map = {
-    'zebra': 'url(#zebraPattern)',
-    'leopard': 'url(#leopardPattern)',
-    'stars': 'url(#starsPattern)',
-    'hearts': 'url(#heartsPattern)',
-    'polkadot': 'url(#polkadotPattern)'
-  };
-  return map[patternType];
-};
-
-const handleLogin = () => {
-  if (accessCode === 'PLAN2024') setIsAuthenticated(true);
-  else alert('Invalid code');
-};
-
-const downloadSVG = () => {
-  // ... your download code
-};
               
               {/* Render optional sections */}
               {selectedSections.map((sectionKey, index) => {
