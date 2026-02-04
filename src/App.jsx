@@ -107,6 +107,46 @@ const PlannerGenerator = () => {
       border: '#B0E5DF',
       text: '#2F4F4F',
       layout: 'wellness-flow'
+    },
+    artistic: {
+      name: 'Artistic',
+      description: 'Creative, expressive, painterly',
+      background: '#FFFBF5',
+      primary: '#FFE5D9',
+      accent: '#E63946',
+      border: '#FFCDB2',
+      text: '#1D3557',
+      layout: 'canvas-flow'
+    },
+    whimsical: {
+      name: 'Whimsical',
+      description: 'Magical, dreamy, enchanting',
+      background: '#FFF8FC',
+      primary: '#F8E8FF',
+      accent: '#C77DFF',
+      border: '#E0AAFF',
+      text: '#5A189A',
+      layout: 'floating-elements'
+    },
+    luxury: {
+      name: 'Luxury',
+      description: 'Opulent, sophisticated, prestigious',
+      background: '#1A1A1A',
+      primary: '#2D2D2D',
+      accent: '#D4AF37',
+      border: '#B8960F',
+      text: '#F5F5F5',
+      layout: 'gold-frame'
+    },
+    elegant: {
+      name: 'Elegant',
+      description: 'Refined, graceful, timeless',
+      background: '#FEFEFE',
+      primary: '#F8F6F4',
+      accent: '#8B7355',
+      border: '#D4C4B0',
+      text: '#2C2416',
+      layout: 'classical-lines'
     }
   };
 
@@ -609,6 +649,227 @@ const renderParentingLayout = (colors) => {
       </g>
     );
   };
+  const renderArtisticLayout = (colors) => {
+    return (
+      <g>
+        {/* Paint splash header */}
+        <ellipse cx="425" cy="80" rx="280" ry="60" fill={colors.primary} opacity="0.5" transform="rotate(-5 425 80)" />
+        <text x="425" y="90" fontSize="34" fontWeight="700" fill={colors.text} textAnchor="middle" fontStyle="italic">Creative Journal</text>
+        
+        {/* Palette section - circular creative prompts */}
+        <text x="100" y="150" fontSize="16" fill={colors.accent} fontWeight="700">CREATIVE PROMPTS</text>
+        {[0,1,2,3,4].map(i => {
+          const angle = (i * 72 - 90) * Math.PI / 180;
+          const cx = 250 + 100 * Math.cos(angle);
+          const cy = 280 + 100 * Math.sin(angle);
+          return (
+            <g key={i}>
+              <circle cx={cx} cy={cy} r="45" fill={colors.primary} stroke={colors.accent} strokeWidth="3" />
+              <text x={cx} y={cy + 5} fontSize="10" fill={colors.text} textAnchor="middle" fontWeight="600">Prompt {i + 1}</text>
+            </g>
+          );
+        })}
+        
+        {/* Inspiration board - asymmetric boxes */}
+        <text x="480" y="150" fontSize="16" fill={colors.accent} fontWeight="700">INSPIRATION BOARD</text>
+        <rect x="480" y="170" width="250" height="130" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="5" transform="rotate(2 605 235)" />
+        <rect x="490" y="190" width="110" height="90" fill="white" stroke={colors.border} strokeWidth="2" />
+        <rect x="610" y="190" width="110" height="90" fill="white" stroke={colors.border} strokeWidth="2" />
+        
+        {/* Sketch area with organic border */}
+        <path d="M 100 450 Q 90 460 100 470 L 100 650 Q 90 660 100 670 L 730 670 Q 740 660 730 650 L 730 470 Q 740 460 730 450 Z" 
+              fill={colors.primary} stroke={colors.accent} strokeWidth="3" />
+        <text x="425" y="485" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">DAILY SKETCH SPACE</text>
+        {[0,1,2,3,4,5,6].map(i => (
+          <path key={i} d={`M ${150 + i * 85} 520 Q ${170 + i * 85} 540 ${150 + i * 85} 560`} 
+                fill="none" stroke={colors.border} strokeWidth="1.5" opacity="0.4" />
+        ))}
+        
+        {/* Color mood tracker */}
+        <text x="425" y="730" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">COLOR MOOD</text>
+        {['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Pink'].map((color, i) => (
+          <g key={i}>
+            <circle cx={165 + i * 85} cy="770" r="25" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+            <text x={165 + i * 85} y="815" fontSize="9" fill={colors.text} textAnchor="middle">{color}</text>
+          </g>
+        ))}
+        
+        {/* Creative notes with paint strokes */}
+        <text x="100" y="860" fontSize="16" fill={colors.accent} fontWeight="700">CREATIVE NOTES</text>
+        <path d="M 100 870 L 730 875" stroke={colors.accent} strokeWidth="2" opacity="0.6" />
+      </g>
+    );
+  };
+
+  const renderWhimsicalLayout = (colors) => {
+    return (
+      <g>
+        {/* Magical header with stars */}
+        <text x="425" y="90" fontSize="36" fontWeight="600" fill={colors.text} textAnchor="middle" fontFamily="cursive">Dream Diary</text>
+        {[0,1,2,3,4,5,6,7].map(i => {
+          const x = 150 + Math.random() * 550;
+          const y = 40 + Math.random() * 80;
+          const size = 8 + Math.random() * 8;
+          return (
+            <g key={i}>
+              <polygon points={`${x},${y-size} ${x+size*0.3},${y-size*0.3} ${x+size},${y} ${x+size*0.3},${y+size*0.3} ${x},${y+size} ${x-size*0.3},${y+size*0.3} ${x-size},${y} ${x-size*0.3},${y-size*0.3}`} 
+                       fill={colors.accent} opacity="0.3" />
+            </g>
+          );
+        })}
+        
+        {/* Floating cloud sections */}
+        <ellipse cx="250" cy="200" rx="170" ry="110" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <ellipse cx="200" cy="180" rx="60" ry="50" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <ellipse cx="300" cy="180" rx="60" ry="50" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <text x="250" y="190" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ Dreams</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="150" y1={210 + i * 25} x2="350" y2={210 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+        
+        <ellipse cx="600" cy="200" rx="170" ry="110" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <ellipse cx="550" cy="180" rx="60" ry="50" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <ellipse cx="650" cy="180" rx="60" ry="50" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <text x="600" y="190" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 Wishes</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="500" y1={210 + i * 25} x2="700" y2={210 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+        
+        {/* Magic wand tracker */}
+        <text x="425" y="370" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ Daily Magic Moments</text>
+        {[0,1,2,3,4,5,6].map(i => (
+          <g key={i}>
+            <path d={`M ${150 + i * 85} 400 L ${170 + i * 85} 380 L ${175 + i * 85} 390 L ${185 + i * 85} 385 L ${180 + i * 85} 395 L ${190 + i * 85} 395 L ${180 + i * 85} 400`} 
+                  fill={colors.accent} opacity="0.3" />
+            <circle cx={150 + i * 85} cy="425" r="20" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+          </g>
+        ))}
+        
+        {/* Fairy tale section */}
+        <path d="M 120 500 Q 100 520 120 540 L 120 680 Q 100 700 120 720 L 730 720 Q 750 700 730 680 L 730 540 Q 750 520 730 500 Z" 
+              fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <text x="425" y="535" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🦋 Today's Story</text>
+        {[0,1,2,3,4,5].map(i => (
+          <line key={i} x1="150" y1={565 + i * 25} x2="700" y2={565 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+        
+        {/* Rainbow mood tracker */}
+        <text x="425" y="780" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🌈 Mood Rainbow</text>
+        <path d="M 200 850 Q 425 780 650 850" fill="none" stroke={colors.accent} strokeWidth="3" opacity="0.4" />
+        <path d="M 220 850 Q 425 790 630 850" fill="none" stroke={colors.accent} strokeWidth="3" opacity="0.5" />
+        <path d="M 240 850 Q 425 800 610 850" fill="none" stroke={colors.accent} strokeWidth="3" opacity="0.6" />
+        {[0,1,2,3,4,5,6].map(i => (
+          <circle key={i} cx={240 + i * 65} cy="850" r="15" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        ))}
+      </g>
+    );
+  };
+
+  const renderLuxuryLayout = (colors) => {
+    return (
+      <g>
+        {/* Elegant gold frame border */}
+        <rect x="80" y="40" width="690" height="820" fill="none" stroke={colors.accent} strokeWidth="4" />
+        <rect x="90" y="50" width="670" height="800" fill="none" stroke={colors.accent} strokeWidth="1" />
+        
+        {/* Monogram header */}
+        <text x="425" y="110" fontSize="40" fontWeight="700" fill={colors.accent} textAnchor="middle" fontFamily="serif">PLANNER</text>
+        <line x1="200" y1="130" x2="650" y2="130" stroke={colors.accent} strokeWidth="2" />
+        
+        {/* Priority section with gold accents */}
+        <text x="120" y="180" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">PRIORITIES</text>
+        {[1,2,3,4,5].map(i => (
+          <g key={i}>
+            <rect x="120" y={195 + i * 45} width="610" height="35" fill={colors.primary} stroke={colors.accent} strokeWidth="1" />
+            <text x="140" y={218 + i * 45} fontSize="18" fill={colors.accent} fontWeight="700">{i}</text>
+            <line x1="170" y1={213 + i * 45} x2="710" y2={213 + i * 45} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Schedule - luxury time blocks */}
+        <text x="120" y="460" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">SCHEDULE</text>
+        {['MORNING', 'AFTERNOON', 'EVENING'].map((period, i) => (
+          <g key={i}>
+            <rect x="120" y={480 + i * 90} width="610" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+            <text x="425" y={510 + i * 90} fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">{period}</text>
+            <line x1="140" y1={525 + i * 90} x2="710" y2={525 + i * 90} stroke={colors.border} strokeWidth="0.5" />
+            <line x1="140" y1={545 + i * 90} x2="710" y2={545 + i * 90} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        {/* Notes section with ornamental border */}
+        <rect x="120" y="760" width="610" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        <text x="425" y="785" fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">NOTES</text>
+        {[0,1].map(i => (
+          <line key={i} x1="140" y1={800 + i * 20} x2="710" y2={800 + i * 20} stroke={colors.accent} strokeWidth="0.5" />
+        ))}
+        
+        {/* Corner ornaments */}
+        {[[100, 60], [750, 60], [100, 840], [750, 840]].map((pos, i) => (
+          <g key={i}>
+            <circle cx={pos[0]} cy={pos[1]} r="8" fill={colors.accent} />
+            <circle cx={pos[0]} cy={pos[1]} r="5" fill={colors.background} />
+          </g>
+        ))}
+      </g>
+    );
+  };
+
+  const renderElegantLayout = (colors) => {
+    return (
+      <g>
+        {/* Classic serif header */}
+        <text x="425" y="80" fontSize="32" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Daily Planner</text>
+        <line x1="250" y1="95" x2="600" y2="95" stroke={colors.accent} strokeWidth="1" />
+        <line x1="270" y1="100" x2="580" y2="100" stroke={colors.accent} strokeWidth="0.5" />
+        
+        {/* Morning section */}
+        <rect x="100" y="140" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
+        <text x="425" y="165" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Morning</text>
+        <line x1="350" y1="175" x2="500" y2="175" stroke={colors.border} strokeWidth="0.5" />
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="120" y1={195 + i * 25} x2="710" y2={195 + i * 25} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Afternoon section */}
+        <rect x="100" y="310" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
+        <text x="425" y="335" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Afternoon</text>
+        <line x1="350" y1="345" x2="500" y2="345" stroke={colors.border} strokeWidth="0.5" />
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="120" y1={365 + i * 25} x2="710" y2={365 + i * 25} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Evening section */}
+        <rect x="100" y="480" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
+        <text x="425" y="505" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Evening</text>
+        <line x1="350" y1="515" x2="500" y2="515" stroke={colors.border} strokeWidth="0.5" />
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="120" y1={535 + i * 25} x2="710" y2={535 + i * 25} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Important tasks */}
+        <text x="100" y="670" fontSize="14" fill={colors.accent} fontFamily="Georgia">Important Tasks</text>
+        <rect x="100" y="685" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
+        {[0,1,2,3,4,5].map(i => (
+          <g key={i}>
+            <circle cx="120" cy={707 + i * 22} r="4" fill="none" stroke={colors.accent} strokeWidth="1" />
+            <line x1="135" y1={707 + i * 22} x2="380" y2={707 + i * 22} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        {/* Notes section */}
+        <text x="420" y="670" fontSize="14" fill={colors.accent} fontFamily="Georgia">Notes</text>
+        <rect x="420" y="685" width="310" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
+        {[0,1,2,3,4,5,6].map(i => (
+          <line key={i} x1="440" y1={707 + i * 20} x2="710" y2={707 + i * 20} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Daily reflection */}
+        <text x="425" y="860" fontSize="13" fill={colors.accent} textAnchor="middle" fontFamily="Georgia" fontStyle="italic">"Today's Reflection"</text>
+        <line x1="150" y1="875" x2="700" y2="875" stroke={colors.border} strokeWidth="0.5" />
+      </g>
+    );
+  };
 
   const renderPattern = (patternType, colors) => {
     if (patternType === 'none') return null;
@@ -773,6 +1034,11 @@ const renderParentingLayout = (colors) => {
               {selectedTemplate === 'professional' && renderProfessionalLayout(template)}
               {selectedTemplate === 'cozy' && renderCozyLayout(template)}
               {selectedTemplate === 'selfWellness' && renderSelfWellnessLayout(template)}
+              {selectedTemplate === 'selfWellness' && renderSelfWellnessLayout(template)}
+              {selectedTemplate === 'artistic' && renderArtisticLayout(template)}
+              {selectedTemplate === 'whimsical' && renderWhimsicalLayout(template)}
+              {selectedTemplate === 'luxury' && renderLuxuryLayout(template)}
+              {selectedTemplate === 'elegant' && renderElegantLayout(template)}
             </svg>
           </div>
         </div>
