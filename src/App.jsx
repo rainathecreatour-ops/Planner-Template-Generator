@@ -1595,6 +1595,11 @@ const renderParentingLayout = (colors) => {
               {selectedTemplate === 'whimsical' && renderWhimsicalLayout(template)}
               {selectedTemplate === 'luxury' && renderLuxuryLayout(template)}
               {selectedTemplate === 'elegant' && renderElegantLayout(template)}
+               {selectedTemplate === 'journal' && renderJournalLayout(template)}
+              {selectedTemplate === 'dreamJournal' && renderDreamJournalLayout(template)}
+             {selectedTemplate === 'journal' && renderJournalLayout(template)}
+              {selectedTemplate === 'dreamJournal' && renderDreamJournalLayout(template)}
+
               
               {/* Render optional sections */}
               {selectedSections.map((sectionKey, index) => {
