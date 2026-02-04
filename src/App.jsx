@@ -298,6 +298,275 @@ const PlannerGenerator = () => {
         ))}
       </g>
     )
+  },
+   dailyJournal: {
+    name: 'Daily Journal',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">DAILY JOURNAL</text>
+        <text x="120" y={yPos + 55} fontSize="11" fill={colors.text}>Date: _________   Mood: _________</text>
+        {[0,1,2,3,4,5,6,7,8,9].map(i => (
+          <line key={i} x1="120" y1={yPos + 75 + i * 12} x2="710" y2={yPos + 75 + i * 12} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+  dreamJournal: {
+    name: 'Dream Journal',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 DREAM JOURNAL</text>
+        <text x="120" y={yPos + 55} fontSize="11" fill={colors.text}>Date: _________   Sleep Time: _________   Wake Time: _________</text>
+        <text x="120" y={yPos + 75} fontSize="11" fill={colors.text} fontWeight="600">Dream Description:</text>
+        {[0,1,2,3,4,5,6,7].map(i => (
+          <line key={i} x1="120" y1={yPos + 90 + i * 13} x2="710" y2={yPos + 90 + i * 13} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+  plainJournal: {
+    name: 'Plain Journal',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 25} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">JOURNAL</text>
+        {[0,1,2,3,4,5,6,7,8,9,10,11].map(i => (
+          <line key={i} x1="120" y1={yPos + 45 + i * 13} x2="710" y2={yPos + 45 + i * 13} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+  moodTracker: {
+    name: 'Mood Tracker',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">MOOD TRACKER</text>
+        <text x="120" y={yPos + 55} fontSize="11" fill={colors.text}>Track your mood each day:</text>
+        {['😊', '😌', '😐', '😔', '😢'].map((emoji, i) => (
+          <g key={i}>
+            <circle cx={180 + i * 110} cy={yPos + 90} r="25" fill="white" stroke={colors.accent} strokeWidth="2" />
+            <text x={180 + i * 110} y={yPos + 98} fontSize="24" textAnchor="middle">{emoji}</text>
+            <text x={180 + i * 110} y={yPos + 125} fontSize="9" fill={colors.text} textAnchor="middle">Day __</text>
+          </g>
+        ))}
+      </g>
+    )
+  },
+  stressAnxietyScale: {
+    name: 'Stress/Anxiety Scale',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">STRESS & ANXIETY SCALE</text>
+        <text x="120" y={yPos + 55} fontSize="10" fill={colors.text}>Rate your stress level (1-10):</text>
+        <line x1="150" y1={yPos + 90} x2="700" y2={yPos + 90} stroke={colors.accent} strokeWidth="2" />
+        <text x="140" y={yPos + 95} fontSize="10" fill={colors.text}>1</text>
+        <text x="700" y={yPos + 95} fontSize="10" fill={colors.text}>10</text>
+        {[1,2,3,4,5,6,7,8,9,10].map(i => (
+          <g key={i}>
+            <line x1={150 + (i - 1) * 55} y1={yPos + 85} x2={150 + (i - 1) * 55} y2={yPos + 95} stroke={colors.accent} strokeWidth="1" />
+            <circle cx={150 + (i - 1) * 55} cy={yPos + 75} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+  sleepQualityLog: {
+    name: 'Sleep Quality Log',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">💤 SLEEP QUALITY LOG</text>
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+          <g key={i}>
+            <rect x={130 + i * 80} y={yPos + 55} width="70" height="85" fill="white" stroke={colors.border} strokeWidth="1" rx="6" />
+            <text x={165 + i * 80} y={yPos + 75} fontSize="11" fill={colors.text} textAnchor="middle" fontWeight="600">{day}</text>
+            <text x={165 + i * 80} y={yPos + 95} fontSize="9" fill={colors.text} textAnchor="middle">Hours:</text>
+            <line x1={145 + i * 80} y1={yPos + 105} x2={185 + i * 80} y2={yPos + 105} stroke={colors.border} strokeWidth="1" />
+            <text x={165 + i * 80} y={yPos + 125} fontSize="9" fill={colors.text} textAnchor="middle">Quality:</text>
+            {[1,2,3,4,5].map(j => (
+              <circle key={j} cx={135 + j * 12 + i * 80} cy={yPos + 133} r="3" fill="none" stroke={colors.accent} strokeWidth="1" />
+            ))}
+          </g>
+        ))}
+      </g>
+    )
+  },
+  wellnessSummary: {
+    name: 'Wellness Summary',
+    height: 200,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">WELLNESS SUMMARY</text>
+        {['Physical Health', 'Mental Health', 'Emotional Health', 'Social Connection'].map((category, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 60 + i * 30} fontSize="11" fill={colors.text} fontWeight="600">{category}:</text>
+            <rect x="250" y={yPos + 47 + i * 30} width="440" height="18" fill="white" stroke={colors.border} strokeWidth="1" rx="9" />
+            <rect x="252" y={yPos + 49 + i * 30} width="0" height="14" fill={colors.accent} rx="7">
+              <animate attributeName="width" from="0" to="220" dur="1s" fill="freeze" />
+            </rect>
+          </g>
+        ))}
+      </g>
+    )
+  },
+  habitStreaks: {
+    name: 'Habit Streaks',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🔥 HABIT STREAKS</text>
+        {['Habit 1', 'Habit 2', 'Habit 3'].map((habit, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 63 + i * 35} fontSize="11" fill={colors.text} fontWeight="600">{habit}:</text>
+            <line x1="200" y1={yPos + 65 + i * 35} x2="360" y2={yPos + 65 + i * 35} stroke={colors.border} strokeWidth="1" />
+            <text x="380" y={yPos + 63 + i * 35} fontSize="11" fill={colors.accent} fontWeight="700">__ Day Streak!</text>
+            {[0,1,2,3,4,5,6].map(j => (
+              <rect key={j} x={530 + j * 25} y={yPos + 48 + i * 35} width="20" height="20" fill="none" stroke={colors.accent} strokeWidth="1.5" rx="3" />
+            ))}
+          </g>
+        ))}
+      </g>
+    )
+  },
+  progressBars: {
+    name: 'Progress Bars',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">📊 PROGRESS TRACKER</text>
+        {['Goal 1', 'Goal 2', 'Goal 3', 'Goal 4'].map((goal, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 58 + i * 30} fontSize="11" fill={colors.text} fontWeight="600">{goal}:</text>
+            <rect x="200" y={yPos + 45 + i * 30} width="490" height="16" fill="white" stroke={colors.border} strokeWidth="1" rx="8" />
+            <text x="680" y={yPos + 58 + i * 30} fontSize="10" fill={colors.text}>__%</text>
+          </g>
+        ))}
+      </g>
+    )
+  },
+  gentleReminders: {
+    name: 'Gentle Reminders',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">💝 GENTLE REMINDERS</text>
+        {[
+          '✨ You are doing your best',
+          '🌸 Progress, not perfection',
+          '💫 Rest is productive too',
+          '🌟 Small steps count'
+        ].map((reminder, i) => (
+          <g key={i}>
+            <rect x="130" y={yPos + 50 + i * 28} width="570" height="22" fill="white" stroke={colors.accent} strokeWidth="1" rx="11" />
+            <text x="425" y={yPos + 66 + i * 28} fontSize="11" fill={colors.text} textAnchor="middle">{reminder}</text>
+          </g>
+        ))}
+      </g>
+    )
+  },
+  weeklyGoalReview: {
+    name: 'Weekly Goal Review',
+    height: 200,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">WEEKLY GOAL REVIEW</text>
+        <text x="120" y={yPos + 60} fontSize="12" fill={colors.text} fontWeight="600">What I accomplished:</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="120" y1={yPos + 80 + i * 20} x2="710" y2={yPos + 80 + i * 20} stroke={colors.border} strokeWidth="1" />
+        ))}
+        <text x="120" y={yPos + 145} fontSize="12" fill={colors.text} fontWeight="600">Next week's focus:</text>
+        <line x1="120" y1={yPos + 160} x2="710" y2={yPos + 160} stroke={colors.border} strokeWidth="1" />
+      </g>
+    )
+  },
+  whyThisMatters: {
+    name: 'Why This Goal Matters',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">WHY THIS GOAL MATTERS</text>
+        <text x="120" y={yPos + 55} fontSize="11" fill={colors.text}>Goal: _________________________________</text>
+        <text x="120" y={yPos + 80} fontSize="11" fill={colors.text} fontWeight="600">This matters to me because:</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="120" y1={yPos + 100 + i * 15} x2="710" y2={yPos + 100 + i * 15} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+  doodlePages: {
+    name: 'Doodle Pages',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✏️ DOODLE SPACE</text>
+        <rect x="120" y={yPos + 45} width="590" height="140" fill="white" stroke={colors.border} strokeWidth="1" strokeDasharray="10,5" rx="8" />
+        {[0,1,2,3,4,5,6,7].map(i => (
+          <circle key={i} cx={200 + (i % 4) * 140} cy={yPos + 85 + Math.floor(i / 4) * 70} r="8" fill={colors.accent} opacity="0.1" />
+        ))}
+      </g>
+    )
+  },
+  visionBoard: {
+    name: 'Vision Board',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ VISION BOARD</text>
+        {[0,1,2,3,4,5].map(i => (
+          <rect key={i} x={130 + (i % 3) * 200} y={yPos + 50 + Math.floor(i / 3) * 75} width="180" height="65" fill="white" stroke={colors.accent} strokeWidth="2" strokeDasharray="5,5" rx="8" />
+        ))}
+      </g>
+    )
+  },
+  photoReflection: {
+    name: 'Photo + Reflection',
+    height: 220,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">📸 PHOTO MEMORIES</text>
+        <rect x="120" y={yPos + 50} width="240" height="135" fill="white" stroke={colors.accent} strokeWidth="2" rx="8" />
+        <text x="240" y={yPos + 125} fontSize="12" fill={colors.border} textAnchor="middle">Photo Here</text>
+        <text x="400" y={yPos + 65} fontSize="12" fill={colors.text} fontWeight="600">Reflection:</text>
+        {[0,1,2,3,4,5,6].map(i => (
+          <line key={i} x1="400" y1={yPos + 80 + i * 15} x2="710" y2={yPos + 80 + i * 15} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+  stickerElements: {
+    name: 'Sticker Elements',
+    height: 180,
+    render: (colors, yPos) => (
+      <g>
+        <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
+        <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ DECORATIVE ELEMENTS</text>
+        {['⭐', '💫', '🌸', '🌙', '☀️', '💖', '🦋', '🌈', '✨', '🎀'].map((sticker, i) => (
+          <g key={i}>
+            <circle cx={180 + (i % 5) * 110} cy={yPos + 75 + Math.floor(i / 5) * 55} r="25" fill="white" stroke={colors.accent} strokeWidth="2" />
+            <text x={180 + (i % 5) * 110} y={yPos + 85 + Math.floor(i / 5) * 55} fontSize="28" textAnchor="middle">{sticker}</text>
+          </g>
+        ))}
+      </g>
+    )
   }
 };
 
