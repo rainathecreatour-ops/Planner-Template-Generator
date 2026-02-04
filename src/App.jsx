@@ -149,6 +149,26 @@ const PlannerGenerator = () => {
       border: '#D4C4B0',
       text: '#2C2416',
       layout: 'classical-lines'
+    },
+   journal: {
+      name: 'Journal',
+      description: 'Clean, simple writing space',
+      background: '#FFFFF8',
+      primary: '#FFF9E6',
+      accent: '#8B7355',
+      border: '#D4C4B0',
+      text: '#2C2416',
+      layout: 'lined-pages'
+    },
+    dreamJournal: {
+      name: 'Dream Journal',
+      description: 'Track and explore your dreams',
+      background: '#F5F3FF',
+      primary: '#EDE9FE',
+      accent: '#7C3AED',
+      border: '#C4B5FD',
+      text: '#5B21B6',
+      layout: 'dream-sections'
     }
   };
   const optionalSections = {
@@ -1287,6 +1307,100 @@ const renderParentingLayout = (colors) => {
         {/* Daily reflection */}
         <text x="425" y="860" fontSize="13" fill={colors.accent} textAnchor="middle" fontFamily="Georgia" fontStyle="italic">"Today's Reflection"</text>
         <line x1="150" y1="875" x2="700" y2="875" stroke={colors.border} strokeWidth="0.5" />
+      </g>
+    );
+  };
+ const renderJournalLayout = (colors) => {
+    return (
+      <g>
+        {/* Simple header */}
+        <text x="425" y="70" fontSize="28" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Journal</text>
+        <line x1="300" y1="85" x2="550" y2="85" stroke={colors.accent} strokeWidth="1" />
+        
+        {/* Date line */}
+        <text x="100" y="130" fontSize="12" fill={colors.text}>Date: _______________</text>
+        <text x="600" y="130" fontSize="12" fill={colors.text}>Day: _______________</text>
+        
+        {/* Lined writing space */}
+        {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map(i => (
+          <line key={i} x1="100" y1={160 + i * 24} x2="750" y2={160 + i * 24} stroke={colors.border} strokeWidth="1" opacity="0.6" />
+        ))}
+        
+        {/* Margin line on left */}
+        <line x1="130" y1="160" x2="130" y2="880" stroke={colors.accent} strokeWidth="1" opacity="0.3" />
+        
+        {/* Bottom quote */}
+        <text x="425" y="870" fontSize="11" fill={colors.accent} textAnchor="middle" fontStyle="italic">"Write your story..."</text>
+      </g>
+    );
+  };
+
+  const renderDreamJournalLayout = (colors) => {
+    return (
+      <g>
+        {/* Dreamy header with moon and stars */}
+        <text x="425" y="70" fontSize="32" fontWeight="500" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Dream Journal</text>
+        {[0,1,2,3,4,5,6,7,8].map(i => {
+          const x = 150 + Math.random() * 550;
+          const y = 30 + Math.random() * 60;
+          const size = 6 + Math.random() * 6;
+          return (
+            <polygon key={i} points={`${x},${y-size} ${x+size*0.3},${y-size*0.3} ${x+size},${y} ${x+size*0.3},${y+size*0.3} ${x},${y+size} ${x-size*0.3},${y+size*0.3} ${x-size},${y} ${x-size*0.3},${y-size*0.3}`} 
+                     fill={colors.accent} opacity="0.3" />
+          );
+        })}
+        <path d="M 380 50 Q 375 55 380 60 Q 385 65 390 60 Q 395 55 390 50 Z" fill={colors.accent} opacity="0.4" />
+        
+        {/* Date and sleep info */}
+        <rect x="100" y="110" width="630" height="50" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="120" y="135" fontSize="12" fill={colors.text}>Date: ___________</text>
+        <text x="300" y="135" fontSize="12" fill={colors.text}>Bedtime: ___________</text>
+        <text x="500" y="135" fontSize="12" fill={colors.text}>Wake time: ___________</text>
+        
+        {/* Dream description section */}
+        <rect x="100" y="180" width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="425" y="205" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 DREAM DESCRIPTION</text>
+        {[0,1,2,3,4,5,6,7,8,9].map(i => (
+          <line key={i} x1="120" y1={225 + i * 15} x2="710" y2={225 + i * 15} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Dream elements */}
+        <rect x="100" y="400" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="250" y="425" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">KEY ELEMENTS</text>
+        {['People', 'Places', 'Objects', 'Emotions'].map((item, i) => (
+          <g key={i}>
+            <text x="120" y={450 + i * 22} fontSize="10" fill={colors.text} fontWeight="600">{item}:</text>
+            <line x1="180" y1={452 + i * 22} x2="380" y2={452 + i * 22} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        {/* Dream mood */}
+        <rect x="430" y="400" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="580" y="425" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">DREAM MOOD</text>
+        {['Happy', 'Calm', 'Confused', 'Scary', 'Exciting'].map((mood, i) => (
+          <g key={i}>
+            <circle cx="460" cy={447 + i * 20} r="6" fill="none" stroke={colors.accent} strokeWidth="1.5" />
+            <text x="480" y={452 + i * 20} fontSize="10" fill={colors.text}>{mood}</text>
+          </g>
+        ))}
+        
+        {/* Dream symbols */}
+        <rect x="100" y="560" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="425" y="585" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">SYMBOLS & MEANINGS</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="120" y1={600 + i * 20} x2="710" y2={600 + i * 20} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Interpretation */}
+        <rect x="100" y="680" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="425" y="705" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">MY INTERPRETATION</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="120" y1={720 + i * 18} x2="710" y2={720 + i * 18} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+        
+        {/* Recurring theme tracker */}
+        <text x="425" y="815" fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700">Recurring theme? ☐ Yes  ☐ No</text>
+        <text x="425" y="840" fontSize="10" fill={colors.text} textAnchor="middle" fontStyle="italic">Track patterns: _______________________________</text>
       </g>
     );
   };
