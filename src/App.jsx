@@ -1064,21 +1064,32 @@ const renderParentingLayout = (colors) => {
         )}
       </defs>
     );
+ </pattern>
+        )}
+      </defs>
+    );
   };
-  
- </div>
 
-<div>
-  <label className="block text-sm font-semibold mb-2">Background Pattern</label>
-  <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
+  const getPatternFill = (patternType) => {
+    // ... rest of your code
+  };
+
+  // ... more functions ...
+
+  // Then much later, inside your return statement:
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* ... */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
+            {/* ... */}
+            
+            <div>
+              <label className="block text-sm font-semibold mb-2">Background Pattern</label>
+              <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
                 <option value="none">None</option>
                 <option value="zebra">Zebra</option>
-                <option value="leopard">Leopard</option>
-                <option value="polkadot">Polka Dots</option>
-                <option value="hearts">Hearts</option>
-                <option value="stars">Stars</option>
-              </select>
-            </div>
 
             <div>
               <label className="block text-sm font-semibold mb-2">Optional Sections</label>
