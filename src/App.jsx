@@ -58,6 +58,56 @@ const PlannerGenerator = () => {
       text: '#5B21B6',
       layout: 'vertical-sections'
     }
+    parenting: {
+      name: 'Parenting',
+      description: 'Organized, nurturing, family-focused',
+      background: '#FFF5E6',
+      primary: '#FFE8CC',
+      accent: '#FF8C42',
+      border: '#FFD4A3',
+      text: '#8B4513',
+      layout: 'family-sections'
+    },
+    money: {
+      name: 'Money',
+      description: 'Professional, goal-oriented, structured',
+      background: '#F0F8F0',
+      primary: '#D4EDDA',
+      accent: '#28A745',
+      border: '#A8D5BA',
+      text: '#155724',
+      layout: 'financial-grid'
+    },
+    professional: {
+      name: 'Professional',
+      description: 'Clean, corporate, efficient',
+      background: '#F8F9FA',
+      primary: '#E9ECEF',
+      accent: '#2C5F8D',
+      border: '#CED4DA',
+      text: '#212529',
+      layout: 'business-blocks'
+    },
+    cozy: {
+      name: 'Cozy',
+      description: 'Warm, comfortable, inviting',
+      background: '#FFF9F5',
+      primary: '#FFE4D6',
+      accent: '#D4885C',
+      border: '#E8C4A8',
+      text: '#5D3A1A',
+      layout: 'soft-rounded'
+    },
+    selfWellness: {
+      name: 'Self Wellness',
+      description: 'Holistic, balanced, mindful',
+      background: '#F5FFFA',
+      primary: '#E0F7F4',
+      accent: '#20B2AA',
+      border: '#B0E5DF',
+      text: '#2F4F4F',
+      layout: 'wellness-flow'
+    }
   };
 
   const renderMinimalistLayout = (colors) => {
@@ -258,6 +308,307 @@ const PlannerGenerator = () => {
       </g>
     );
   };
+const renderParentingLayout = (colors) => {
+    return (
+      <g>
+        {/* Header with heart decoration */}
+        <text x="425" y="80" fontSize="32" fontWeight="600" fill={colors.text} textAnchor="middle">Family Planner</text>
+        <text x="350" y="75" fontSize="24" fill={colors.accent}>♥</text>
+        <text x="500" y="75" fontSize="24" fill={colors.accent}>♥</text>
+        
+        {/* Kids' schedule section */}
+        <rect x="100" y="120" width="300" height="250" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        <text x="250" y="150" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Kids' Schedule</text>
+        {['Morning', 'Afternoon', 'Evening', 'Bedtime'].map((time, i) => (
+          <g key={i}>
+            <text x="120" y={185 + i * 45} fontSize="12" fill={colors.text} fontWeight="600">{time}</text>
+            <line x1="120" y1={195 + i * 45} x2="380" y2={195 + i * 45} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Meal planning */}
+        <rect x="450" y="120" width="280" height="250" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        <text x="590" y="150" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Meal Planning</text>
+        {['Breakfast', 'Lunch', 'Dinner', 'Snacks'].map((meal, i) => (
+          <g key={i}>
+            <circle cx="470" cy={182 + i * 50} r="6" fill={colors.accent} />
+            <text x="490" y={187 + i * 50} fontSize="12" fill={colors.text} fontWeight="600">{meal}</text>
+            <line x1="490" y1={195 + i * 50} x2="710" y2={195 + i * 50} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Shopping list */}
+        <text x="100" y="420" fontSize="16" fill={colors.accent} fontWeight="700">Shopping List</text>
+        <rect x="100" y="440" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        {[0,1,2,3,4,5].map(i => (
+          <g key={i}>
+            <rect x={120 + (i % 3) * 210} y={465 + Math.floor(i / 3) * 45} width="15" height="15" fill="none" stroke={colors.accent} strokeWidth="2" />
+            <line x1={145 + (i % 3) * 210} y1={473 + Math.floor(i / 3) * 45} x2={310 + (i % 3) * 210} y2={473 + Math.floor(i / 3) * 45} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Activities tracker */}
+        <text x="100" y="630" fontSize="16" fill={colors.accent} fontWeight="700">Activities & Appointments</text>
+        <rect x="100" y="650" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        {[0,1,2].map(i => (
+          <line key={i} x1="120" y1={680 + i * 30} x2="710" y2={680 + i * 30} stroke={colors.border} strokeWidth="1" />
+        ))}
+        
+        {/* Gratitude section */}
+        <text x="425" y="800" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Today I'm Grateful For...</text>
+        {[0,1].map(i => (
+          <line key={i} x1="150" y1={830 + i * 35} x2="700" y2={830 + i * 35} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    );
+  };
+
+  const renderMoneyLayout = (colors) => {
+    return (
+      <g>
+        {/* Professional header */}
+        <rect x="100" y="50" width="630" height="60" fill={colors.accent} rx="8" />
+        <text x="425" y="90" fontSize="28" fontWeight="700" fill="white" textAnchor="middle">Financial Tracker</text>
+        
+        {/* Income section */}
+        <rect x="100" y="140" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="250" y="170" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">INCOME</text>
+        {['Salary', 'Side Hustle', 'Other', 'TOTAL'].map((item, i) => (
+          <g key={i}>
+            <text x="120" y={200 + i * 30} fontSize="11" fill={colors.text} fontWeight={i === 3 ? '700' : '400'}>{item}</text>
+            <line x1="220" y1={203 + i * 30} x2="380" y2={203 + i * 30} stroke={colors.border} strokeWidth={i === 3 ? '2' : '1'} />
+            <text x="370" y={200 + i * 30} fontSize="11" fill={colors.text} textAnchor="end">$</text>
+          </g>
+        ))}
+        
+        {/* Expenses section */}
+        <rect x="430" y="140" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        <text x="580" y="170" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">EXPENSES</text>
+        {['Housing', 'Food', 'Transport', 'Other', 'TOTAL'].map((item, i) => (
+          <g key={i}>
+            <text x="450" y={200 + i * 28} fontSize="11" fill={colors.text} fontWeight={i === 4 ? '700' : '400'}>{item}</text>
+            <line x1="560" y1={203 + i * 28} x2="710" y2={203 + i * 28} stroke={colors.border} strokeWidth={i === 4 ? '2' : '1'} />
+            <text x="700" y={200 + i * 28} fontSize="11" fill={colors.text} textAnchor="end">$</text>
+          </g>
+        ))}
+        
+        {/* Savings goals */}
+        <text x="425" y="360" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">SAVINGS GOALS</text>
+        {[0,1,2].map(i => (
+          <g key={i}>
+            <rect x={130 + i * 230} y="380" width="200" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="8" />
+            <text x={230 + i * 230} y="410" fontSize="12" fill={colors.text} textAnchor="middle" fontWeight="600">Goal {i + 1}</text>
+            <line x1={150 + i * 230} y1="430" x2={310 + i * 230} y2="430" stroke={colors.border} strokeWidth="1" />
+            <text x={150 + i * 230} y="460" fontSize="10" fill={colors.text}>Target: $</text>
+            <line x1={200 + i * 230} y1="462" x2={310 + i * 230} y2="462" stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Budget breakdown */}
+        <text x="100" y="530" fontSize="16" fill={colors.accent} fontWeight="700">BUDGET BREAKDOWN</text>
+        <rect x="100" y="550" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
+        {['Needs (50%)', 'Wants (30%)', 'Savings (20%)'].map((cat, i) => (
+          <g key={i}>
+            <rect x={140 + i * 210} y="575" width="180" height="35" fill="white" stroke={colors.accent} strokeWidth="2" rx="6" />
+            <text x={230 + i * 210} y="598" fontSize="11" fill={colors.text} textAnchor="middle" fontWeight="600">{cat}</text>
+            <line x1={150 + i * 210} y1="630" x2={310 + i * 210} y2="630" stroke={colors.border} strokeWidth="1" />
+            <text x={150 + i * 210} y="660" fontSize="10" fill={colors.text}>Actual: $</text>
+            <line x1={200 + i * 210} y1="662" x2={310 + i * 210} y2="662" stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Notes */}
+        <text x="100" y="740" fontSize="16" fill={colors.accent} fontWeight="700">FINANCIAL NOTES</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="100" y1={770 + i * 30} x2="730" y2={770 + i * 30} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    );
+  };
+
+  const renderProfessionalLayout = (colors) => {
+    return (
+      <g>
+        {/* Corporate header */}
+        <rect x="80" y="50" width="690" height="70" fill={colors.accent} />
+        <text x="425" y="95" fontSize="30" fontWeight="700" fill="white" textAnchor="middle">DAILY PLANNER</text>
+        
+        {/* Time blocks */}
+        <text x="100" y="160" fontSize="14" fill={colors.accent} fontWeight="700">SCHEDULE</text>
+        {['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM', '6:00 PM'].map((time, i) => (
+          <g key={i}>
+            <rect x="100" y={180 + i * 70} width="300" height="60" fill={colors.primary} stroke={colors.border} strokeWidth="1" />
+            <text x="115" y={205 + i * 70} fontSize="12" fill={colors.text} fontWeight="600">{time}</text>
+            <line x1="115" y1={215 + i * 70} x2="380" y2={215 + i * 70} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        {/* Priority tasks */}
+        <rect x="430" y="140" width="300" height="280" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
+        <text x="580" y="170" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">PRIORITY TASKS</text>
+        {[1,2,3,4,5,6,7].map(i => (
+          <g key={i}>
+            <rect x="450" y={185 + i * 35} width="20" height="20" fill="none" stroke={colors.accent} strokeWidth="2" />
+            <line x1="480" y1={196 + i * 35} x2="710" y2={196 + i * 35} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Goals section */}
+        <rect x="430" y="440" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
+        <text x="580" y="470" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">GOALS</text>
+        {['Today', 'This Week', 'This Month'].map((period, i) => (
+          <g key={i}>
+            <text x="450" y={500 + i * 30} fontSize="11" fill={colors.text} fontWeight="600">{period}:</text>
+            <line x1="520" y1={502 + i * 30} x2="710" y2={502 + i * 30} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Meetings */}
+        <text x="100" y="630" fontSize="14" fill={colors.accent} fontWeight="700">MEETINGS</text>
+        <rect x="100" y="650" width="630" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
+        {[0,1,2].map(i => (
+          <g key={i}>
+            <text x="120" y={680 + i * 35} fontSize="11" fill={colors.text}>Time:</text>
+            <line x1="165" y1={682 + i * 35} x2="260" y2={682 + i * 35} stroke={colors.border} strokeWidth="1" />
+            <text x="280" y={680 + i * 35} fontSize="11" fill={colors.text}>Topic:</text>
+            <line x1="330" y1={682 + i * 35} x2="710" y2={682 + i * 35} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Action items */}
+        <text x="425" y="820" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">ACTION ITEMS</text>
+        {[0,1].map(i => (
+          <line key={i} x1="120" y1={850 + i * 30} x2="710" y2={850 + i * 30} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    );
+  };
+
+  const renderCozyLayout = (colors) => {
+    return (
+      <g>
+        {/* Soft rounded header */}
+        <ellipse cx="425" cy="80" rx="250" ry="50" fill={colors.primary} opacity="0.7" />
+        <text x="425" y="90" fontSize="32" fontWeight="500" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Cozy Day Planner</text>
+        
+        {/* Morning routine - rounded box */}
+        <rect x="100" y="150" width="280" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
+        <text x="240" y="185" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">☀ Morning Routine</text>
+        {['Wake up time', 'Breakfast', 'Self-care', 'Start work'].map((item, i) => (
+          <g key={i}>
+            <circle cx="125" cy={212 + i * 35} r="5" fill={colors.accent} />
+            <line x1="140" y1={215 + i * 35} x2="360" y2={215 + i * 35} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+        
+        {/* Cozy activities */}
+        <rect x="420" y="150" width="310" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
+        <text x="575" y="185" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">✨ Cozy Activities</text>
+        {['Reading time', 'Tea/Coffee break', 'Creative project', 'Relaxation'].map((item, i) => (
+          <g key={i}>
+            <rect x="440" y={200 + i * 40} width="270" height="30" fill="white" stroke={colors.border} strokeWidth="1" rx="15" />
+            <text x="575" y={220 + i * 40} fontSize="11" fill={colors.text} textAnchor="middle">{item}</text>
+          </g>
+        ))}
+        
+        {/* Comfort tracker */}
+        <text x="425" y="400" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">🏠 Comfort Check-In</text>
+        {['Physical', 'Mental', 'Emotional', 'Environmental'].map((type, i) => (
+          <g key={i}>
+            <rect x={115 + i * 150} y="420" width="130" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="20" />
+            <text x={180 + i * 150} y="450" fontSize="11" fill={colors.text} textAnchor="middle" fontWeight="600">{type}</text>
+            {[0,1,2,3,4].map(j => (
+              <circle key={j} cx={130 + j * 20 + i * 150} cy="480" r="6" fill="none" stroke={colors.accent} strokeWidth="1.5" />
+            ))}
+          </g>
+        ))}
+        
+        {/* Meal & drink tracker */}
+        <rect x="100" y="560" width="630" height="130" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
+        <text x="425" y="590" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">☕ Nourishment Tracker</text>
+        <text x="150" y="620" fontSize="12" fill={colors.text} fontWeight="600">Meals:</text>
+        {[0,1,2].map(i => (
+          <circle key={i} cx={240 + i * 60} cy="615" r="18" fill="white" stroke={colors.accent} strokeWidth="2" />
+        ))}
+        <text x="450" y="620" fontSize="12" fill={colors.text} fontWeight="600">Water:</text>
+        {[0,1,2,3,4,5,6,7].map(i => (
+          <circle key={i} cx={530 + i * 25} cy="615" r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
+        ))}
+        <text x="425" y="665" fontSize="11" fill={colors.text} textAnchor="middle">Snacks & treats: ___________________</text>
+        
+        {/* Evening wind down */}
+        <rect x="100" y="730" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
+        <text x="425" y="765" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">🌙 Evening Wind Down</text>
+        {['Dinner time', 'Evening activity', 'Bedtime routine', 'Gratitude'].map((item, i) => (
+          <line key={i} x1="150" y1={790 + i * 25} x2="700" y2={790 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    );
+  };
+
+  const renderSelfWellnessLayout = (colors) => {
+    return (
+      <g>
+        {/* Flowing header */}
+        <path d="M 100 50 Q 425 90 750 50" fill="none" stroke={colors.accent} strokeWidth="3" opacity="0.6" />
+        <text x="425" y="90" fontSize="30" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Wellness Journey</text>
+        
+        {/* Mind, Body, Spirit sections */}
+        <rect x="100" y="130" width="200" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        <text x="200" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🧠 MIND</text>
+        {['Meditation', 'Journaling', 'Learning', 'Mindfulness'].map((item, i) => (
+          <g key={i}>
+            <circle cx="120" cy={187 + i * 45} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
+            <text x="140" y={192 + i * 45} fontSize="11" fill={colors.text}>{item}</text>
+            <line x1="140" y1={200 + i * 45} x2="280" y2={200 + i * 45} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        <rect x="325" y="130" width="200" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        <text x="425" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">💪 BODY</text>
+        {['Movement', 'Nutrition', 'Hydration', 'Rest'].map((item, i) => (
+          <g key={i}>
+            <circle cx="345" cy={187 + i * 45} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
+            <text x="365" y={192 + i * 45} fontSize="11" fill={colors.text}>{item}</text>
+            <line x1="365" y1={200 + i * 45} x2="505" y2={200 + i * 45} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        <rect x="550" y="130" width="180" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        <text x="640" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ SPIRIT</text>
+        {['Gratitude', 'Connection', 'Joy', 'Purpose'].map((item, i) => (
+          <g key={i}>
+            <circle cx="570" cy={187 + i * 45} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
+            <text x="590" y={192 + i * 45} fontSize="11" fill={colors.text}>{item}</text>
+            <line x1="590" y1={200 + i * 45} x2="710" y2={200 + i * 45} stroke={colors.border} strokeWidth="0.5" />
+          </g>
+        ))}
+        
+        {/* Energy levels tracker */}
+        <text x="425" y="420" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">ENERGY LEVELS</text>
+        <path d="M 150 480 L 200 450 L 250 470 L 300 440 L 350 460 L 400 430 L 450 450 L 500 420 L 550 440 L 600 410 L 650 430 L 700 400" fill="none" stroke={colors.accent} strokeWidth="2" strokeDasharray="5,5" />
+        <line x1="100" y1="500" x2="750" y2="500" stroke={colors.border} strokeWidth="1" />
+        <text x="80" y="455" fontSize="10" fill={colors.text}>High</text>
+        <text x="80" y="505" fontSize="10" fill={colors.text}>Low</text>
+        
+        {/* Self-care activities */}
+        <text x="425" y="560" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">SELF-CARE ACTIVITIES</text>
+        <rect x="100" y="580" width="630" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
+        {[0,1,2,3,4,5].map(i => (
+          <g key={i}>
+            <rect x={120 + (i % 3) * 210} y={605 + Math.floor(i / 3) * 50} width="180" height="35" fill="white" stroke={colors.accent} strokeWidth="1" rx="8" />
+            <circle cx={135 + (i % 3) * 210} cy={622 + Math.floor(i / 3) * 50} r="6" fill="none" stroke={colors.accent} strokeWidth="2" />
+          </g>
+        ))}
+        
+        {/* Reflections */}
+        <text x="100" y="750" fontSize="15" fill={colors.accent} fontWeight="700">TODAY'S REFLECTIONS</text>
+        {[0,1,2,3].map(i => (
+          <line key={i} x1="100" y1={780 + i * 28} x2="730" y2={780 + i * 28} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    );
+  };
 
   const renderPattern = (patternType, colors) => {
     if (patternType === 'none') return null;
@@ -417,6 +768,11 @@ const PlannerGenerator = () => {
               {selectedTemplate === 'funky' && renderFunkyLayout(template)}
               {selectedTemplate === 'zen' && renderZenLayout(template)}
               {selectedTemplate === 'prayer' && renderPrayerLayout(template)}
+              {selectedTemplate === 'parenting' && renderParentingLayout(template)}
+              {selectedTemplate === 'money' && renderMoneyLayout(template)}
+              {selectedTemplate === 'professional' && renderProfessionalLayout(template)}
+              {selectedTemplate === 'cozy' && renderCozyLayout(template)}
+              {selectedTemplate === 'selfWellness' && renderSelfWellnessLayout(template)}
             </svg>
           </div>
         </div>
