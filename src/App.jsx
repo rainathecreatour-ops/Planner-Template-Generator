@@ -787,13 +787,13 @@ const renderParentingLayout = (colors) => {
         ))}
         
         {/* Schedule - luxury time blocks */}
-        <text x="120" y="460" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">SCHEDULE</text>
-        {['MORNING', 'AFTERNOON', 'EVENING'].map((period, i) => (
-          <g key={i}>
-            <rect x="120" y={480 + i * 90} width="610" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-            <text x="425" y={510 + i * 90} fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">{period}</text>
-            <line x1="140" y1={525 + i * 90} x2="710" y2={525 + i * 90} stroke={colors.border} strokeWidth="0.5" />
-            <line x1="140" y1={545 + i * 90} x2="710" y2={545 + i * 90} stroke={colors.border} strokeWidth="0.5" />
+        <text x="120" y="480" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">SCHEDULE</text>
+      {['MORNING', 'AFTERNOON', 'EVENING'].map((period, i) => (
+  <g key={i}>
+    <rect x="120" y={500 + i * 90} width="610" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+    <text x="425" y={530 + i * 90} fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">{period}</text>
+    <line x1="140" y1={545 + i * 90} x2="710" y2={545 + i * 90} stroke={colors.border} strokeWidth="0.5" />
+    <line x1="140" y1={565 + i * 90} x2="710" y2={565 + i * 90} stroke={colors.border} strokeWidth="0.5" />
           </g>
         ))}
         
