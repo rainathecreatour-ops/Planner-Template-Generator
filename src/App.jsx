@@ -1111,19 +1111,7 @@ const renderParentingLayout = (colors) => {
               <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
             </div>
 
-  const getPatternFill = (patternType) => {
-    if (patternType === 'none') return null;
-    const map = {
-      'zebra': 'url(#zebraPattern)',
-      'leopard': 'url(#leopardPattern)',
-      'stars': 'url(#starsPattern)',
-      'hearts': 'url(#heartsPattern)',
-      'polkadot': 'url(#polkadotPattern)'
-    };
-    return map[patternType];
-  };
-
-  const handleLogin = () => {
+  
     if (accessCode === 'PLAN2024') setIsAuthenticated(true);
     else alert('Invalid code');
   };
@@ -1234,6 +1222,26 @@ const renderParentingLayout = (colors) => {
               {selectedTemplate === 'whimsical' && renderWhimsicalLayout(template)}
               {selectedTemplate === 'luxury' && renderLuxuryLayout(template)}
               {selectedTemplate === 'elegant' && renderElegantLayout(template)}
+            const getPatternFill = (patternType) => {
+  if (patternType === 'none') return null;
+  const map = {
+    'zebra': 'url(#zebraPattern)',
+    'leopard': 'url(#leopardPattern)',
+    'stars': 'url(#starsPattern)',
+    'hearts': 'url(#heartsPattern)',
+    'polkadot': 'url(#polkadotPattern)'
+  };
+  return map[patternType];
+};
+
+const handleLogin = () => {
+  if (accessCode === 'PLAN2024') setIsAuthenticated(true);
+  else alert('Invalid code');
+};
+
+const downloadSVG = () => {
+  // ... your download code
+};
               
               {/* Render optional sections */}
               {selectedSections.map((sectionKey, index) => {
