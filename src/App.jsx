@@ -5,8 +5,6 @@ const PlannerGenerator = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessCode, setAccessCode] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
-  const [pattern, setPattern] = useState('none');
-  const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
 const [pattern, setPattern] = useState('none');
 const [selectedSections, setSelectedSections] = useState([]); 
 
@@ -1066,9 +1064,12 @@ const renderParentingLayout = (colors) => {
       </defs>
     );
   };
-  <div>
-              <label className="block text-sm font-semibold mb-2">Background Pattern</label>
-              <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
+  
+ </div>
+
+<div>
+  <label className="block text-sm font-semibold mb-2">Background Pattern</label>
+  <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
                 <option value="none">None</option>
                 <option value="zebra">Zebra</option>
                 <option value="leopard">Leopard</option>
