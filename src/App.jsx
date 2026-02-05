@@ -10,6 +10,7 @@ const PlannerGenerator = () => {
   const [fontFamily, setFontFamily] = useState('default');
   const [customColors, setCustomColors] = useState(null);
   const [hiddenSections, setHiddenSections] = useState([]);
+  const [sectionReplacements, setSectionReplacements] = useState({});
 
   const templates = {
     minimalist: {
@@ -2069,31 +2070,58 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
               </div>
             </div>
 
-            {templateSections[selectedTemplate] && (
-              <div>
-                <label className="block text-sm font-semibold mb-2">Toggle Sections</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border-2 rounded-lg p-3">
-                  {templateSections[selectedTemplate].map((section) => (
-                    <label key={section.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!hiddenSections.includes(section.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setHiddenSections(hiddenSections.filter(s => s !== section.id));
-                          } else {
-                            setHiddenSections([...hiddenSections, section.id]);
-                          }
-                        }}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">{section.name}</span>
-                    </label>
-                  ))} 
-                </div>
-                <p className="text-xs text-gray-500 mt-2">Uncheck to hide sections</p>
-              </div>
-            )}
+           {templateSections[selectedTemplate] && (
+  <div>
+    <label className="block text-sm font-semibold mb-2">Toggle Sections</label>
+    <div className="space-y-3 max-h-48 overflow-y-auto border-2 rounded-lg p-3">
+      {templateSections[selectedTemplate].map((section) => (
+        <div key={section.id} className="space-y-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!hiddenSections.includes(section.id)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setHiddenSections(hiddenSections.filter(s => s !== section.id));
+                  // Remove replacement if re-enabled
+                  const newReplacements = {...sectionReplacements};
+                  delete newReplacements[section.id];
+                  setSectionReplacements(newReplacements);
+                } else {
+                  setHiddenSections([...hiddenSections, section.id]);
+                }
+              }}
+              className="w-4 h-4"
+            />
+            <span className="text-sm">{section.name}</span>
+          </label>
+          
+          {/* Show replacement dropdown when unchecked */}
+          {hiddenSections.includes(section.id) && (
+            <div className="ml-6">
+              <select
+                value={sectionReplacements[section.id] || ''}
+                onChange={(e) => {
+                  setSectionReplacements({
+                    ...sectionReplacements,
+                    [section.id]: e.target.value
+                  });
+                }}
+                className="w-full p-1 text-xs border rounded bg-gray-50"
+              >
+                <option value="">Replace with...</option>
+                {Object.entries(optionalSections).map(([key, opt]) => (
+                  <option key={key} value={key}>{opt.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+    <p className="text-xs text-gray-500 mt-2">Uncheck to hide sections, then optionally replace them</p>
+  </div>
+)}
 
             
             <div>
@@ -2222,11 +2250,12 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
            
 
               
-              {/* Render optional sections */}
-              {selectedSections.map((sectionKey, index) => {
-                const yOffset = 900 + selectedSections.slice(0, index).reduce((total, key) => total + optionalSections[key].height, 0);
-                return <g key={sectionKey}>{optionalSections[sectionKey].render(template, yOffset)}</g>;
-              })}
+             {/* Render optional sections AND replacements */}
+{[...selectedSections, ...Object.values(sectionReplacements).filter(Boolean)].map((sectionKey, index) => {
+  const allSections = [...selectedSections, ...Object.values(sectionReplacements).filter(Boolean)];
+  const yOffset = 900 + allSections.slice(0, index).reduce((total, key) => total + optionalSections[key].height, 0);
+  return <g key={sectionKey}>{optionalSections[sectionKey].render(getActiveColors(), yOffset)}</g>;
+})}
             </svg>
           </div>
         </div>
