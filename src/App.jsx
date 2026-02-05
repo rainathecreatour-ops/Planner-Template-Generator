@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Lock } from 'lucide-react'; 
 
+
 const PlannerGenerator = () => {
  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessCode, setAccessCode] = useState('');
@@ -10,7 +11,6 @@ const PlannerGenerator = () => {
   const [fontFamily, setFontFamily] = useState('default');
   const [customColors, setCustomColors] = useState(null);
   const [hiddenSections, setHiddenSections] = useState([]);
-
 
   const templates = {
     minimalist: {
