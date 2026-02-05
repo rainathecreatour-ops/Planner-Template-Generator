@@ -2020,7 +2020,6 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
                 <option value="stars">Stars</option>
               </select>
             </div>
-</div>
 
             <div>
               <label className="block text-sm font-semibold mb-2">Font Style</label>
