@@ -7,9 +7,6 @@ const PlannerGenerator = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
   const [pattern, setPattern] = useState('none');
   const [selectedSections, setSelectedSections] = useState([]);
- const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
-  const [pattern, setPattern] = useState('none');
-  const [selectedSections, setSelectedSections] = useState([]);
   const [fontFamily, setFontFamily] = useState('default');
   const [customColors, setCustomColors] = useState(null);
   const [hiddenSections, setHiddenSections] = useState([]);
