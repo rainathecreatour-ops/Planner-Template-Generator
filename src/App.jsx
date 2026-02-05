@@ -2207,7 +2207,7 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
               )}
               {selectedTemplate === 'elegant' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderElegnatLayout(getActiveColors(), hiddenSections)}
+                  {renderElegantLayout(getActiveColors(), hiddenSections)}
                 </g>
               )}
               {selectedTemplate === 'journal' && (
