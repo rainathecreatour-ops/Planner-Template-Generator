@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Lock } from 'lucide-react'; 
-
+ 
 const PlannerGenerator = () => {
  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessCode, setAccessCode] = useState('');
