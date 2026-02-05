@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Download, Lock } from 'lucide-react'; 
 
 const PlannerGenerator = () => {
- const [isAuthenticated, setIsAuthenticated] = useState(false);
+ const [isAuthenticated, setIsAuthenticated] = useState(True);
   const [accessCode, setAccessCode] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
   const [pattern, setPattern] = useState('none');
