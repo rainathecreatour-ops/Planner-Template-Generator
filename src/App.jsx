@@ -708,15 +708,22 @@ const PlannerGenerator = () => {
     { id: 'recurring', name: 'Recurring Theme' }
   ]
 };
-
- const renderMinimalistLayout = (colors, hiddenSections = []) => {
+const renderSectionOrReplacement = (sectionId, hiddenSections, replacements, colors, originalContent, yPosition) => {
+  if (!hiddenSections.includes(sectionId)) {
+    return originalContent;
+  } else if (replacements[sectionId] && optionalSections[replacements[sectionId]]) {
+    return optionalSections[replacements[sectionId]].render(colors, yPosition);
+  }
+  return null;
+};
+ 
+ const renderMinimalistLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
       <text x="100" y="80" fontSize="28" fontWeight="300" fill={colors.text}>Daily Notes</text>
       <line x1="100" y1="100" x2="750" y2="100" stroke={colors.border} strokeWidth="0.5" />
       
-      {/* To-do list section */}
-      {!hiddenSections.includes('todo') && (
+      {renderSectionOrReplacement('todo', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="140" fontSize="14" fill={colors.accent}>TO-DO LIST</text>
           {[0,1,2,3,4,5,6,7,8].map(i => (
@@ -726,10 +733,9 @@ const PlannerGenerator = () => {
             </g>
           ))}
         </>
-      )}
+      ), 140)}
       
-      {/* Monthly overview - right side */}
-      {!hiddenSections.includes('monthly') && (
+      {renderSectionOrReplacement('monthly', hiddenSections, replacements, colors, (
         <>
           <text x="450" y="140" fontSize="14" fill={colors.accent}>MONTHLY OVERVIEW</text>
           <rect x="450" y="160" width="280" height="320" fill={colors.primary} stroke={colors.border} strokeWidth="0.5" rx="4" />
@@ -738,10 +744,9 @@ const PlannerGenerator = () => {
           <line x1="470" y1="280" x2="710" y2="280" stroke={colors.border} strokeWidth="0.3" />
           <line x1="470" y1="320" x2="710" y2="320" stroke={colors.border} strokeWidth="0.3" />
         </>
-      )}
+      ), 140)}
       
-      {/* Habit tracker at bottom */}
-      {!hiddenSections.includes('habits') && (
+      {renderSectionOrReplacement('habits', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="530" fontSize="14" fill={colors.accent}>HABIT TRACKER</text>
           <rect x="100" y="550" width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="0.5" rx="4" />
@@ -749,30 +754,27 @@ const PlannerGenerator = () => {
             <rect key={i} x={120 + i * 85} y="580" width="70" height="20" fill="white" stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 530)}
       
-      {/* Reflections */}
-      {!hiddenSections.includes('reflections') && (
+      {renderSectionOrReplacement('reflections', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="770" fontSize="14" fill={colors.accent}>REFLECTIONS</text>
           {[0,1,2,3].map(i => (
             <line key={i} x1="100" y1={800 + i * 30} x2="730" y2={800 + i * 30} stroke={colors.border} strokeWidth="0.3" />
           ))}
         </>
-      )}
+      ), 770)}
     </g>
   );
 };
-
-const renderBohoLayout = (colors, hiddenSections = []) => {
+ 
+const renderBohoLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Arched header with organic shapes */}
       <path d="M 100 50 Q 425 80 750 50" fill={colors.primary} opacity="0.6" />
       <text x="425" y="100" fontSize="32" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Monthly Intentions</text>
       
-      {/* Curved sections with organic flow */}
-      {!hiddenSections.includes('gratitude') && (
+      {renderSectionOrReplacement('gratitude', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="250" cy="240" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
           <text x="250" y="225" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Gratitude</text>
@@ -780,9 +782,9 @@ const renderBohoLayout = (colors, hiddenSections = []) => {
             <text key={i} x="250" y={250 + i * 20} fontSize="10" fill={colors.text} textAnchor="middle">___________</text>
           ))}
         </>
-      )}
+      ), 180)}
       
-      {!hiddenSections.includes('selfcare') && (
+      {renderSectionOrReplacement('selfcare', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="600" cy="240" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
           <text x="600" y="225" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Self-Care</text>
@@ -790,10 +792,9 @@ const renderBohoLayout = (colors, hiddenSections = []) => {
             <text key={i} x="600" y={250 + i * 20} fontSize="10" fill={colors.text} textAnchor="middle">___________</text>
           ))}
         </>
-      )}
+      ), 180)}
       
-      {/* Mood tracker with circles */}
-      {!hiddenSections.includes('mood') && (
+      {renderSectionOrReplacement('mood', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="380" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">Mood Tracker</text>
           <path d="M 150 420 Q 425 380 700 420" fill="none" stroke={colors.border} strokeWidth="2" />
@@ -801,10 +802,9 @@ const renderBohoLayout = (colors, hiddenSections = []) => {
             <circle key={i} cx={200 + i * 75} cy="420" r="25" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
           ))}
         </>
-      )}
+      ), 380)}
       
-      {/* Affirmations in flowing text area */}
-      {!hiddenSections.includes('affirmations') && (
+      {renderSectionOrReplacement('affirmations', hiddenSections, replacements, colors, (
         <>
           <path d="M 120 550 Q 425 520 730 550 L 730 720 Q 425 750 120 720 Z" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
           <text x="425" y="590" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">Daily Affirmations</text>
@@ -812,20 +812,18 @@ const renderBohoLayout = (colors, hiddenSections = []) => {
             <text key={i} x="425" y={625 + i * 25} fontSize="11" fill={colors.text} textAnchor="middle">_________________________________</text>
           ))}
         </>
-      )}
+      ), 550)}
     </g>
   );
 };
 
-const renderFunkyLayout = (colors, hiddenSections = []) => {
+const renderFunkyLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Bold wavy header */}
       <path d="M 80 50 Q 200 30 320 50 T 560 50 T 800 50 L 800 120 Q 680 140 560 120 T 320 120 T 80 120 Z" fill={colors.accent} opacity="0.8" />
       <text x="425" y="95" fontSize="34" fontWeight="900" fill="white" textAnchor="middle">BRAIN DUMP</text>
       
-      {/* Blob shapes for different sections */}
-      {!hiddenSections.includes('creative') && (
+      {renderSectionOrReplacement('creative', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="220" cy="250" rx="160" ry="140" fill={colors.primary} stroke={colors.accent} strokeWidth="4" transform="rotate(-15 220 250)" />
           <text x="220" y="230" fontSize="16" fill={colors.text} textAnchor="middle" fontWeight="700">Creative Notes</text>
@@ -833,9 +831,9 @@ const renderFunkyLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="130" y1={250 + i * 25} x2="310" y2={250 + i * 25} stroke={colors.accent} strokeWidth="2" />
           ))}
         </>
-      )}
+      ), 180)}
       
-      {!hiddenSections.includes('loving') && (
+      {renderSectionOrReplacement('loving', hiddenSections, replacements, colors, (
         <>
           <rect x="450" y="150" width="280" height="240" fill={colors.primary} stroke={colors.accent} strokeWidth="4" rx="25" transform="rotate(5 590 270)" />
           <text x="590" y="200" fontSize="16" fill={colors.text} textAnchor="middle" fontWeight="700">Currently Loving</text>
@@ -843,20 +841,18 @@ const renderFunkyLayout = (colors, hiddenSections = []) => {
             <text key={i} x="590" y={230 + i * 30} fontSize="13" fill={colors.text} textAnchor="middle" fontWeight="600">♥ __________</text>
           ))}
         </>
-      )}
+      ), 150)}
       
-      {/* Mood tracker with color blocks */}
-      {!hiddenSections.includes('mood') && (
+      {renderSectionOrReplacement('mood', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="480" fontSize="18" fill={colors.accent} fontWeight="900">MOOD TRACKER</text>
           {[0,1,2,3,4,5,6].map(i => (
             <rect key={i} x={100 + i * 95} y="510" width="80" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />
           ))}
         </>
-      )}
+      ), 480)}
       
-      {/* Weekly highlights in dynamic boxes */}
-      {!hiddenSections.includes('highlights') && (
+      {renderSectionOrReplacement('highlights', hiddenSections, replacements, colors, (
         <>
           <path d="M 100 650 L 730 650 L 720 850 L 110 850 Z" fill={colors.primary} stroke={colors.accent} strokeWidth="4" />
           <text x="425" y="690" fontSize="18" fill={colors.text} textAnchor="middle" fontWeight="900">WEEKLY HIGHLIGHTS</text>
@@ -864,20 +860,18 @@ const renderFunkyLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="130" y1={720 + i * 30} x2="700" y2={720 + i * 30} stroke={colors.accent} strokeWidth="2" />
           ))}
         </>
-      )}
+      ), 650)}
     </g>
   );
 };
 
-const renderZenLayout = (colors, hiddenSections = []) => {
+const renderZenLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Centered minimalist header */}
       <circle cx="425" cy="100" r="60" fill="none" stroke={colors.accent} strokeWidth="0.5" opacity="0.5" />
       <text x="425" y="110" fontSize="24" fontWeight="300" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Daily Mindfulness</text>
       
-      {/* Breathing prompts in centered circles */}
-      {!hiddenSections.includes('breathing') && (
+      {renderSectionOrReplacement('breathing', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="200" fontSize="12" fill={colors.accent} textAnchor="middle">Breathing Exercise</text>
           <circle cx="425" cy="260" r="80" fill={colors.primary} stroke={colors.border} strokeWidth="1" />
@@ -885,20 +879,18 @@ const renderZenLayout = (colors, hiddenSections = []) => {
           <text x="425" y="275" fontSize="10" fill={colors.text} textAnchor="middle">Hold</text>
           <text x="425" y="295" fontSize="10" fill={colors.text} textAnchor="middle">Exhale</text>
         </>
-      )}
+      ), 200)}
       
-      {/* Intentions section - minimal lines */}
-      {!hiddenSections.includes('intentions') && (
+      {renderSectionOrReplacement('intentions', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="390" fontSize="12" fill={colors.accent} textAnchor="middle">Today's Intentions</text>
           {[0,1,2].map(i => (
             <line key={i} x1="200" y1={420 + i * 40} x2="650" y2={420 + i * 40} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 390)}
       
-      {/* Gratitude section */}
-      {!hiddenSections.includes('gratitude') && (
+      {renderSectionOrReplacement('gratitude', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="570" fontSize="12" fill={colors.accent} textAnchor="middle">Gratitude</text>
           <rect x="180" y="590" width="490" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="0.5" rx="10" />
@@ -906,33 +898,30 @@ const renderZenLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="200" y1={620 + i * 30} x2="650" y2={620 + i * 30} stroke={colors.border} strokeWidth="0.3" />
           ))}
         </>
-      )}
+      ), 570)}
       
-      {/* Mood reflection - soft circles */}
-      {!hiddenSections.includes('mood') && (
+      {renderSectionOrReplacement('mood', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="760" fontSize="12" fill={colors.accent} textAnchor="middle">Mood Reflection</text>
           {[0,1,2,3,4].map(i => (
             <circle key={i} cx={275 + i * 70} cy="810" r="22" fill="none" stroke={colors.accent} strokeWidth="1" opacity="0.6" />
           ))}
         </>
-      )}
+      ), 760)}
     </g>
   );
 };
-
-const renderPrayerLayout = (colors, hiddenSections = []) => {
+ 
+const renderPrayerLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Decorative header with cross */}
       <text x="425" y="80" fontSize="30" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Prayer Journal</text>
       <line x1="405" y1="50" x2="405" y2="70" stroke={colors.accent} strokeWidth="2" />
       <line x1="395" y1="60" x2="415" y2="60" stroke={colors.accent} strokeWidth="2" />
       <line x1="445" y1="50" x2="445" y2="70" stroke={colors.accent} strokeWidth="2" />
       <line x1="435" y1="60" x2="455" y2="60" stroke={colors.accent} strokeWidth="2" />
       
-      {/* Prayer requests section */}
-      {!hiddenSections.includes('requests') && (
+      {renderSectionOrReplacement('requests', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="120" width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="12" />
           <text x="425" y="150" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">Prayer Requests & Praise</text>
@@ -940,10 +929,9 @@ const renderPrayerLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={175 + i * 25} x2="710" y2={175 + i * 25} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 120)}
       
-      {/* Scripture reflection */}
-      {!hiddenSections.includes('scripture') && (
+      {renderSectionOrReplacement('scripture', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="340" fontSize="15" fill={colors.accent} fontWeight="600">Scripture of the Day</text>
           <rect x="100" y="360" width="310" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="12" />
@@ -952,10 +940,9 @@ const renderPrayerLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={415 + i * 25} x2="390" y2={415 + i * 25} stroke={colors.border} strokeWidth="0.3" />
           ))}
         </>
-      )}
+      ), 340)}
       
-      {/* Answered prayers */}
-      {!hiddenSections.includes('answered') && (
+      {renderSectionOrReplacement('answered', hiddenSections, replacements, colors, (
         <>
           <text x="420" y="340" fontSize="15" fill={colors.accent} fontWeight="600">Answered Prayers</text>
           <rect x="420" y="360" width="310" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="12" />
@@ -966,41 +953,37 @@ const renderPrayerLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 340)}
       
-      {/* Prayer time log */}
-      {!hiddenSections.includes('timelog') && (
+      {renderSectionOrReplacement('timelog', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="600" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">Prayer Time Log</text>
           {[0,1,2,3,4,5,6].map(i => (
             <rect key={i} x={135 + i * 85} y="625" width="70" height="35" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="6" />
           ))}
         </>
-      )}
+      ), 600)}
       
-      {/* Reflection space */}
-      {!hiddenSections.includes('reflections') && (
+      {renderSectionOrReplacement('reflections', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="710" fontSize="15" fill={colors.accent} fontWeight="600">Today's Reflections</text>
           {[0,1,2,3].map(i => (
             <line key={i} x1="100" y1={740 + i * 30} x2="730" y2={740 + i * 30} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 710)}
     </g>
   );
 };
 
-const renderParentingLayout = (colors, hiddenSections = []) => {
+const renderParentingLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Header with heart decoration */}
       <text x="425" y="80" fontSize="32" fontWeight="600" fill={colors.text} textAnchor="middle">Family Planner</text>
       <text x="350" y="75" fontSize="24" fill={colors.accent}>♥</text>
       <text x="500" y="75" fontSize="24" fill={colors.accent}>♥</text>
       
-      {/* Kids' schedule section */}
-      {!hiddenSections.includes('schedule') && (
+      {renderSectionOrReplacement('schedule', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="120" width="300" height="250" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
           <text x="250" y="150" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Kids' Schedule</text>
@@ -1011,10 +994,9 @@ const renderParentingLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 120)}
       
-      {/* Meal planning */}
-      {!hiddenSections.includes('meals') && (
+      {renderSectionOrReplacement('meals', hiddenSections, replacements, colors, (
         <>
           <rect x="450" y="120" width="280" height="250" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
           <text x="590" y="150" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Meal Planning</text>
@@ -1026,10 +1008,9 @@ const renderParentingLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 120)}
       
-      {/* Shopping list */}
-      {!hiddenSections.includes('shopping') && (
+      {renderSectionOrReplacement('shopping', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="420" fontSize="16" fill={colors.accent} fontWeight="700">Shopping List</text>
           <rect x="100" y="440" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
@@ -1040,10 +1021,9 @@ const renderParentingLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 420)}
       
-      {/* Activities tracker */}
-      {!hiddenSections.includes('activities') && (
+      {renderSectionOrReplacement('activities', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="630" fontSize="16" fill={colors.accent} fontWeight="700">Activities & Appointments</text>
           <rect x="100" y="650" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
@@ -1051,30 +1031,27 @@ const renderParentingLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={680 + i * 30} x2="710" y2={680 + i * 30} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 630)}
       
-      {/* Gratitude section */}
-      {!hiddenSections.includes('gratitude') && (
+      {renderSectionOrReplacement('gratitude', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="800" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Today I'm Grateful For...</text>
           {[0,1].map(i => (
             <line key={i} x1="150" y1={830 + i * 35} x2="700" y2={830 + i * 35} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 800)}
     </g>
   );
 };
-
-const renderMoneyLayout = (colors, hiddenSections = []) => {
+ 
+const renderMoneyLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Professional header */}
       <rect x="100" y="50" width="630" height="60" fill={colors.accent} rx="8" />
       <text x="425" y="90" fontSize="28" fontWeight="700" fill="white" textAnchor="middle">Financial Tracker</text>
       
-      {/* Income section */}
-      {!hiddenSections.includes('income') && (
+      {renderSectionOrReplacement('income', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="140" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="250" y="170" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">INCOME</text>
@@ -1086,10 +1063,9 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 140)}
       
-      {/* Expenses section */}
-      {!hiddenSections.includes('expenses') && (
+      {renderSectionOrReplacement('expenses', hiddenSections, replacements, colors, (
         <>
           <rect x="430" y="140" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="580" y="170" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">EXPENSES</text>
@@ -1101,10 +1077,9 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 140)}
       
-      {/* Savings goals */}
-      {!hiddenSections.includes('savings') && (
+      {renderSectionOrReplacement('savings', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="360" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">SAVINGS GOALS</text>
           {[0,1,2].map(i => (
@@ -1117,10 +1092,9 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 360)}
       
-      {/* Budget breakdown */}
-      {!hiddenSections.includes('budget') && (
+      {renderSectionOrReplacement('budget', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="530" fontSize="16" fill={colors.accent} fontWeight="700">BUDGET BREAKDOWN</text>
           <rect x="100" y="550" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
@@ -1134,34 +1108,31 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 530)}
       
-      {/* Notes */}
-      {!hiddenSections.includes('notes') && (
+      {renderSectionOrReplacement('notes', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="740" fontSize="16" fill={colors.accent} fontWeight="700">FINANCIAL NOTES</text>
           {[0,1,2,3].map(i => (
             <line key={i} x1="100" y1={770 + i * 30} x2="730" y2={770 + i * 30} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 740)}
     </g>
   );
 };
-
- const renderProfessionalLayout = (colors, hiddenSections = []) => {
+ 
+const renderProfessionalLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Corporate header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <rect x="80" y="50" width="690" height="70" fill={colors.accent} />
           <text x="425" y="95" fontSize="30" fontWeight="700" fill="white" textAnchor="middle">DAILY PLANNER</text>
         </>
-      )}
+      ), 50)}
       
-      {/* Time blocks */}
-      {!hiddenSections.includes('schedule') && (
+      {renderSectionOrReplacement('schedule', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="160" fontSize="14" fill={colors.accent} fontWeight="700">SCHEDULE</text>
           {['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM', '6:00 PM'].map((time, i) => (
@@ -1172,10 +1143,9 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 160)}
       
-      {/* Priority tasks */}
-      {!hiddenSections.includes('priorities') && (
+      {renderSectionOrReplacement('priorities', hiddenSections, replacements, colors, (
         <>
           <rect x="430" y="140" width="300" height="280" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
           <text x="580" y="170" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">PRIORITY TASKS</text>
@@ -1186,10 +1156,9 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 140)}
       
-      {/* Goals section */}
-      {!hiddenSections.includes('goals') && (
+      {renderSectionOrReplacement('goals', hiddenSections, replacements, colors, (
         <>
           <rect x="430" y="440" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
           <text x="580" y="470" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">GOALS</text>
@@ -1200,10 +1169,9 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 440)}
       
-      {/* Meetings */}
-      {!hiddenSections.includes('meetings') && (
+      {renderSectionOrReplacement('meetings', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="630" fontSize="14" fill={colors.accent} fontWeight="700">MEETINGS</text>
           <rect x="100" y="650" width="630" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
@@ -1216,34 +1184,31 @@ const renderMoneyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 630)}
       
-      {/* Action items */}
-      {!hiddenSections.includes('actions') && (
+      {renderSectionOrReplacement('actions', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="820" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">ACTION ITEMS</text>
           {[0,1].map(i => (
             <line key={i} x1="120" y1={850 + i * 30} x2="710" y2={850 + i * 30} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 820)}
     </g>
   );
 };
-
-const renderCozyLayout = (colors, hiddenSections = []) => {
+ 
+const renderCozyLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Soft rounded header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="425" cy="80" rx="250" ry="50" fill={colors.primary} opacity="0.7" />
           <text x="425" y="90" fontSize="32" fontWeight="500" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Cozy Day Planner</text>
         </>
-      )}
+      ), 80)}
       
-      {/* Morning routine - rounded box */}
-      {!hiddenSections.includes('morning') && (
+      {renderSectionOrReplacement('morning', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="150" width="280" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
           <text x="240" y="185" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">☀ Morning Routine</text>
@@ -1254,10 +1219,9 @@ const renderCozyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 150)}
       
-      {/* Cozy activities */}
-      {!hiddenSections.includes('activities') && (
+      {renderSectionOrReplacement('activities', hiddenSections, replacements, colors, (
         <>
           <rect x="420" y="150" width="310" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
           <text x="575" y="185" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">✨ Cozy Activities</text>
@@ -1268,10 +1232,9 @@ const renderCozyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 150)}
       
-      {/* Comfort tracker */}
-      {!hiddenSections.includes('comfort') && (
+      {renderSectionOrReplacement('comfort', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="400" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">🏠 Comfort Check-In</text>
           {['Physical', 'Mental', 'Emotional', 'Environmental'].map((type, i) => (
@@ -1284,10 +1247,9 @@ const renderCozyLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 400)}
       
-      {/* Meal & drink tracker */}
-      {!hiddenSections.includes('nourishment') && (
+      {renderSectionOrReplacement('nourishment', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="560" width="630" height="130" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
           <text x="425" y="590" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">☕ Nourishment Tracker</text>
@@ -1301,10 +1263,9 @@ const renderCozyLayout = (colors, hiddenSections = []) => {
           ))}
           <text x="425" y="665" fontSize="11" fill={colors.text} textAnchor="middle">Snacks & treats: ___________________</text>
         </>
-      )}
+      ), 560)}
       
-      {/* Evening wind down */}
-      {!hiddenSections.includes('evening') && (
+      {renderSectionOrReplacement('evening', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="730" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
           <text x="425" y="765" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">🌙 Evening Wind Down</text>
@@ -1312,24 +1273,22 @@ const renderCozyLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="150" y1={790 + i * 25} x2="700" y2={790 + i * 25} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 730)}
     </g>
   );
 };
 
-const renderSelfWellnessLayout = (colors, hiddenSections = []) => {
+const renderSelfWellnessLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Flowing header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <path d="M 100 50 Q 425 90 750 50" fill="none" stroke={colors.accent} strokeWidth="3" opacity="0.6" />
           <text x="425" y="90" fontSize="30" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Wellness Journey</text>
         </>
-      )}
+      ), 50)}
       
-      {/* Mind section */}
-      {!hiddenSections.includes('mind') && (
+      {renderSectionOrReplacement('mind', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="130" width="200" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
           <text x="200" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🧠 MIND</text>
@@ -1341,10 +1300,9 @@ const renderSelfWellnessLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 130)}
       
-      {/* Body section */}
-      {!hiddenSections.includes('body') && (
+      {renderSectionOrReplacement('body', hiddenSections, replacements, colors, (
         <>
           <rect x="325" y="130" width="200" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
           <text x="425" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">💪 BODY</text>
@@ -1356,10 +1314,9 @@ const renderSelfWellnessLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 130)}
       
-      {/* Spirit section */}
-      {!hiddenSections.includes('spirit') && (
+      {renderSectionOrReplacement('spirit', hiddenSections, replacements, colors, (
         <>
           <rect x="550" y="130" width="180" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
           <text x="640" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ SPIRIT</text>
@@ -1371,10 +1328,9 @@ const renderSelfWellnessLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 130)}
       
-      {/* Energy levels tracker */}
-      {!hiddenSections.includes('energy') && (
+      {renderSectionOrReplacement('energy', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="420" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">ENERGY LEVELS</text>
           <path d="M 150 480 L 200 450 L 250 470 L 300 440 L 350 460 L 400 430 L 450 450 L 500 420 L 550 440 L 600 410 L 650 430 L 700 400" fill="none" stroke={colors.accent} strokeWidth="2" strokeDasharray="5,5" />
@@ -1382,10 +1338,9 @@ const renderSelfWellnessLayout = (colors, hiddenSections = []) => {
           <text x="80" y="455" fontSize="10" fill={colors.text}>High</text>
           <text x="80" y="505" fontSize="10" fill={colors.text}>Low</text>
         </>
-      )}
+      ), 420)}
       
-      {/* Self-care activities */}
-      {!hiddenSections.includes('selfcare') && (
+      {renderSectionOrReplacement('selfcare', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="560" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">SELF-CARE ACTIVITIES</text>
           <rect x="100" y="580" width="630" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
@@ -1396,34 +1351,31 @@ const renderSelfWellnessLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 560)}
       
-      {/* Reflections */}
-      {!hiddenSections.includes('reflections') && (
+      {renderSectionOrReplacement('reflections', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="750" fontSize="15" fill={colors.accent} fontWeight="700">TODAY'S REFLECTIONS</text>
           {[0,1,2,3].map(i => (
             <line key={i} x1="100" y1={780 + i * 28} x2="730" y2={780 + i * 28} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 750)}
     </g>
   );
 };
 
-const renderArtisticLayout = (colors, hiddenSections = []) => {
+const renderArtisticLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Paint splash header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="425" cy="80" rx="280" ry="60" fill={colors.primary} opacity="0.5" transform="rotate(-5 425 80)" />
           <text x="425" y="90" fontSize="34" fontWeight="700" fill={colors.text} textAnchor="middle" fontStyle="italic">Creative Journal</text>
         </>
-      )}
+      ), 80)}
       
-      {/* Palette section - circular creative prompts */}
-      {!hiddenSections.includes('prompts') && (
+      {renderSectionOrReplacement('prompts', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="150" fontSize="16" fill={colors.accent} fontWeight="700">CREATIVE PROMPTS</text>
           {[0,1,2,3,4].map(i => {
@@ -1438,20 +1390,18 @@ const renderArtisticLayout = (colors, hiddenSections = []) => {
             );
           })}
         </>
-      )}
+      ), 150)}
       
-      {/* Inspiration board - asymmetric boxes */}
-      {!hiddenSections.includes('inspiration') && (
+      {renderSectionOrReplacement('inspiration', hiddenSections, replacements, colors, (
         <>
           <text x="480" y="150" fontSize="16" fill={colors.accent} fontWeight="700">INSPIRATION BOARD</text>
           <rect x="480" y="170" width="250" height="130" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="5" transform="rotate(2 605 235)" />
           <rect x="490" y="190" width="110" height="90" fill="white" stroke={colors.border} strokeWidth="2" />
           <rect x="610" y="190" width="110" height="90" fill="white" stroke={colors.border} strokeWidth="2" />
         </>
-      )}
+      ), 150)}
       
-      {/* Sketch area with organic border */}
-      {!hiddenSections.includes('sketch') && (
+      {renderSectionOrReplacement('sketch', hiddenSections, replacements, colors, (
         <>
           <path d="M 100 450 Q 90 460 100 470 L 100 650 Q 90 660 100 670 L 730 670 Q 740 660 730 650 L 730 470 Q 740 460 730 450 Z" 
                 fill={colors.primary} stroke={colors.accent} strokeWidth="3" />
@@ -1461,10 +1411,9 @@ const renderArtisticLayout = (colors, hiddenSections = []) => {
                   fill="none" stroke={colors.border} strokeWidth="1.5" opacity="0.4" />
           ))}
         </>
-      )}
+      ), 450)}
       
-      {/* Color mood tracker */}
-      {!hiddenSections.includes('mood') && (
+      {renderSectionOrReplacement('colormood', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="730" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">COLOR MOOD</text>
           {['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Pink'].map((color, i) => (
@@ -1474,24 +1423,22 @@ const renderArtisticLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 730)}
       
-      {/* Creative notes with paint strokes */}
-      {!hiddenSections.includes('notes') && (
+      {renderSectionOrReplacement('notes', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="860" fontSize="16" fill={colors.accent} fontWeight="700">CREATIVE NOTES</text>
           <path d="M 100 870 L 730 875" stroke={colors.accent} strokeWidth="2" opacity="0.6" />
         </>
-      )}
+      ), 860)}
     </g>
   );
 };
 
-const renderWhimsicalLayout = (colors, hiddenSections = []) => {
+const renderWhimsicalLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Magical header with stars */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="90" fontSize="36" fontWeight="600" fill={colors.text} textAnchor="middle" fontFamily="cursive">Dream Diary</text>
           {[0,1,2,3,4,5,6,7].map(i => {
@@ -1506,10 +1453,9 @@ const renderWhimsicalLayout = (colors, hiddenSections = []) => {
             );
           })}
         </>
-      )}
+      ), 90)}
       
-      {/* Floating cloud sections - Dreams */}
-      {!hiddenSections.includes('dreams') && (
+      {renderSectionOrReplacement('dreams', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="250" cy="200" rx="170" ry="110" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
           <ellipse cx="200" cy="180" rx="60" ry="50" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
@@ -1519,10 +1465,9 @@ const renderWhimsicalLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="150" y1={210 + i * 25} x2="350" y2={210 + i * 25} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 200)}
       
-      {/* Floating cloud sections - Wishes */}
-      {!hiddenSections.includes('wishes') && (
+      {renderSectionOrReplacement('wishes', hiddenSections, replacements, colors, (
         <>
           <ellipse cx="600" cy="200" rx="170" ry="110" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
           <ellipse cx="550" cy="180" rx="60" ry="50" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
@@ -1532,10 +1477,9 @@ const renderWhimsicalLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="500" y1={210 + i * 25} x2="700" y2={210 + i * 25} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 200)}
       
-      {/* Magic wand tracker */}
-      {!hiddenSections.includes('magic') && (
+      {renderSectionOrReplacement('magic', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="370" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ Daily Magic Moments</text>
           {[0,1,2,3,4,5,6].map(i => (
@@ -1546,10 +1490,9 @@ const renderWhimsicalLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 370)}
       
-      {/* Fairy tale section */}
-      {!hiddenSections.includes('story') && (
+      {renderSectionOrReplacement('story', hiddenSections, replacements, colors, (
         <>
           <path d="M 120 500 Q 100 520 120 540 L 120 680 Q 100 700 120 720 L 730 720 Q 750 700 730 680 L 730 540 Q 750 520 730 500 Z" 
                 fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
@@ -1558,10 +1501,9 @@ const renderWhimsicalLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="150" y1={565 + i * 25} x2="700" y2={565 + i * 25} stroke={colors.border} strokeWidth="1" />
           ))}
         </>
-      )}
+      ), 500)}
       
-      {/* Rainbow mood tracker */}
-      {!hiddenSections.includes('mood') && (
+      {renderSectionOrReplacement('rainbow', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="780" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🌈 Mood Rainbow</text>
           <path d="M 200 850 Q 425 780 650 850" fill="none" stroke={colors.accent} strokeWidth="3" opacity="0.4" />
@@ -1571,32 +1513,29 @@ const renderWhimsicalLayout = (colors, hiddenSections = []) => {
             <circle key={i} cx={240 + i * 65} cy="850" r="15" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
           ))}
         </>
-      )}
+      ), 780)}
     </g>
   );
 };
 
-const renderLuxuryLayout = (colors, hiddenSections = []) => {
+const renderLuxuryLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Elegant gold frame border */}
-      {!hiddenSections.includes('border') && (
+      {renderSectionOrReplacement('border', hiddenSections, replacements, colors, (
         <>
           <rect x="80" y="40" width="690" height="820" fill="none" stroke={colors.accent} strokeWidth="4" />
           <rect x="90" y="50" width="670" height="800" fill="none" stroke={colors.accent} strokeWidth="1" />
         </>
-      )}
+      ), 40)}
       
-      {/* Monogram header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="110" fontSize="40" fontWeight="700" fill={colors.accent} textAnchor="middle" fontFamily="serif">PLANNER</text>
           <line x1="200" y1="130" x2="650" y2="130" stroke={colors.accent} strokeWidth="2" />
         </>
-      )}
+      ), 110)}
       
-      {/* Priority section with gold accents */}
-      {!hiddenSections.includes('priorities') && (
+      {renderSectionOrReplacement('priorities', hiddenSections, replacements, colors, (
         <>
           <text x="120" y="180" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">PRIORITIES</text>
           {[1,2,3,4,5].map(i => (
@@ -1607,10 +1546,9 @@ const renderLuxuryLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 180)}
       
-      {/* Schedule - luxury time blocks */}
-      {!hiddenSections.includes('schedule') && (
+      {renderSectionOrReplacement('schedule', hiddenSections, replacements, colors, (
         <>
           <text x="120" y="480" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">SCHEDULE</text>
           {['MORNING', 'AFTERNOON', 'EVENING'].map((period, i) => (
@@ -1622,10 +1560,9 @@ const renderLuxuryLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 480)}
       
-      {/* Notes section with ornamental border */}
-      {!hiddenSections.includes('notes') && (
+      {renderSectionOrReplacement('notes', hiddenSections, replacements, colors, (
         <>
           <rect x="120" y="760" width="610" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
           <text x="425" y="785" fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">NOTES</text>
@@ -1633,10 +1570,9 @@ const renderLuxuryLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="140" y1={800 + i * 20} x2="710" y2={800 + i * 20} stroke={colors.accent} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 760)}
       
-      {/* Corner ornaments */}
-      {!hiddenSections.includes('ornaments') && (
+      {renderSectionOrReplacement('ornaments', hiddenSections, replacements, colors, (
         <>
           {[[100, 60], [750, 60], [100, 840], [750, 840]].map((pos, i) => (
             <g key={i}>
@@ -1645,25 +1581,23 @@ const renderLuxuryLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 60)}
     </g>
   );
 };
-
-const renderElegantLayout = (colors, hiddenSections = []) => {
+ 
+const renderElegantLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Classic serif header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="80" fontSize="32" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Daily Planner</text>
           <line x1="250" y1="95" x2="600" y2="95" stroke={colors.accent} strokeWidth="1" />
           <line x1="270" y1="100" x2="580" y2="100" stroke={colors.accent} strokeWidth="0.5" />
         </>
-      )}
+      ), 80)}
       
-      {/* Morning section */}
-      {!hiddenSections.includes('morning') && (
+      {renderSectionOrReplacement('morning', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="140" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
           <text x="425" y="165" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Morning</text>
@@ -1672,10 +1606,9 @@ const renderElegantLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={195 + i * 25} x2="710" y2={195 + i * 25} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 140)}
       
-      {/* Afternoon section */}
-      {!hiddenSections.includes('afternoon') && (
+      {renderSectionOrReplacement('afternoon', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="310" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
           <text x="425" y="335" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Afternoon</text>
@@ -1684,10 +1617,9 @@ const renderElegantLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={365 + i * 25} x2="710" y2={365 + i * 25} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 310)}
       
-      {/* Evening section */}
-      {!hiddenSections.includes('evening') && (
+      {renderSectionOrReplacement('evening', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="480" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
           <text x="425" y="505" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Evening</text>
@@ -1696,10 +1628,9 @@ const renderElegantLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={535 + i * 25} x2="710" y2={535 + i * 25} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 480)}
       
-      {/* Important tasks */}
-      {!hiddenSections.includes('tasks') && (
+      {renderSectionOrReplacement('tasks', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="670" fontSize="14" fill={colors.accent} fontFamily="Georgia">Important Tasks</text>
           <rect x="100" y="685" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
@@ -1710,10 +1641,9 @@ const renderElegantLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 670)}
       
-      {/* Notes section */}
-      {!hiddenSections.includes('notes') && (
+      {renderSectionOrReplacement('notes', hiddenSections, replacements, colors, (
         <>
           <text x="420" y="670" fontSize="14" fill={colors.accent} fontFamily="Georgia">Notes</text>
           <rect x="420" y="685" width="310" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
@@ -1721,65 +1651,58 @@ const renderElegantLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="440" y1={707 + i * 20} x2="710" y2={707 + i * 20} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 670)}
       
-      {/* Daily reflection */}
-      {!hiddenSections.includes('reflection') && (
+      {renderSectionOrReplacement('reflection', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="860" fontSize="13" fill={colors.accent} textAnchor="middle" fontFamily="Georgia" fontStyle="italic">"Today's Reflection"</text>
           <line x1="150" y1="875" x2="700" y2="875" stroke={colors.border} strokeWidth="0.5" />
         </>
-      )}
+      ), 860)}
     </g>
   );
 };
 
-const renderJournalLayout = (colors, hiddenSections = []) => {
+const renderJournalLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Simple header */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="70" fontSize="28" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Journal</text>
           <line x1="300" y1="85" x2="550" y2="85" stroke={colors.accent} strokeWidth="1" />
         </>
-      )}
+      ), 70)}
       
-      {/* Date line */}
-      {!hiddenSections.includes('date') && (
+      {renderSectionOrReplacement('date', hiddenSections, replacements, colors, (
         <>
           <text x="100" y="130" fontSize="12" fill={colors.text}>Date: _______________</text>
           <text x="600" y="130" fontSize="12" fill={colors.text}>Day: _______________</text>
         </>
-      )}
+      ), 130)}
       
-      {/* Lined writing space */}
-      {!hiddenSections.includes('lines') && (
+      {renderSectionOrReplacement('lines', hiddenSections, replacements, colors, (
         <>
           {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map(i => (
             <line key={i} x1="100" y1={160 + i * 24} x2="750" y2={160 + i * 24} stroke={colors.border} strokeWidth="1" opacity="0.6" />
           ))}
         </>
-      )}
+      ), 160)}
       
-      {/* Margin line on left */}
-      {!hiddenSections.includes('margin') && (
+      {renderSectionOrReplacement('margin', hiddenSections, replacements, colors, (
         <line x1="130" y1="160" x2="130" y2="880" stroke={colors.accent} strokeWidth="1" opacity="0.3" />
-      )}
+      ), 160)}
       
-      {/* Bottom quote */}
-      {!hiddenSections.includes('quote') && (
+      {renderSectionOrReplacement('quote', hiddenSections, replacements, colors, (
         <text x="425" y="870" fontSize="11" fill={colors.accent} textAnchor="middle" fontStyle="italic">"Write your story..."</text>
-      )}
+      ), 870)}
     </g>
   );
 };
-
-const renderDreamJournalLayout = (colors, hiddenSections = []) => {
+ 
+const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
-      {/* Dreamy header with moon and stars */}
-      {!hiddenSections.includes('header') && (
+      {renderSectionOrReplacement('header', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="70" fontSize="32" fontWeight="500" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Dream Journal</text>
           {[0,1,2,3,4,5,6,7,8].map(i => {
@@ -1793,20 +1716,18 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
           })}
           <path d="M 380 50 Q 375 55 380 60 Q 385 65 390 60 Q 395 55 390 50 Z" fill={colors.accent} opacity="0.4" />
         </>
-      )}
+      ), 70)}
       
-      {/* Date and sleep info */}
-      {!hiddenSections.includes('sleepinfo') && (
+      {renderSectionOrReplacement('sleepinfo', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="110" width="630" height="50" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="120" y="135" fontSize="12" fill={colors.text}>Date: ___________</text>
           <text x="300" y="135" fontSize="12" fill={colors.text}>Bedtime: ___________</text>
           <text x="500" y="135" fontSize="12" fill={colors.text}>Wake time: ___________</text>
         </>
-      )}
+      ), 110)}
       
-      {/* Dream description section */}
-      {!hiddenSections.includes('description') && (
+      {renderSectionOrReplacement('description', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="180" width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="425" y="205" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 DREAM DESCRIPTION</text>
@@ -1814,10 +1735,9 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={225 + i * 15} x2="710" y2={225 + i * 15} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 180)}
       
-      {/* Dream elements */}
-      {!hiddenSections.includes('elements') && (
+      {renderSectionOrReplacement('elements', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="400" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="250" y="425" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">KEY ELEMENTS</text>
@@ -1828,10 +1748,9 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 400)}
       
-      {/* Dream mood */}
-      {!hiddenSections.includes('mood') && (
+      {renderSectionOrReplacement('mood', hiddenSections, replacements, colors, (
         <>
           <rect x="430" y="400" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="580" y="425" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">DREAM MOOD</text>
@@ -1842,10 +1761,9 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
             </g>
           ))}
         </>
-      )}
+      ), 400)}
       
-      {/* Dream symbols */}
-      {!hiddenSections.includes('symbols') && (
+      {renderSectionOrReplacement('symbols', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="560" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="425" y="585" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">SYMBOLS & MEANINGS</text>
@@ -1853,10 +1771,9 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={600 + i * 20} x2="710" y2={600 + i * 20} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 560)}
       
-      {/* Interpretation */}
-      {!hiddenSections.includes('interpretation') && (
+      {renderSectionOrReplacement('interpretation', hiddenSections, replacements, colors, (
         <>
           <rect x="100" y="680" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
           <text x="425" y="705" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">MY INTERPRETATION</text>
@@ -1864,15 +1781,14 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
             <line key={i} x1="120" y1={720 + i * 18} x2="710" y2={720 + i * 18} stroke={colors.border} strokeWidth="0.5" />
           ))}
         </>
-      )}
+      ), 680)}
       
-      {/* Recurring theme tracker */}
-      {!hiddenSections.includes('recurring') && (
+      {renderSectionOrReplacement('recurring', hiddenSections, replacements, colors, (
         <>
           <text x="425" y="815" fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700">Recurring theme? ☐ Yes  ☐ No</text>
           <text x="425" y="840" fontSize="10" fill={colors.text} textAnchor="middle" fontStyle="italic">Track patterns: _______________________________</text>
         </>
-      )}
+      ), 815)}
     </g>
   );
 };
