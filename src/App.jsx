@@ -2090,7 +2090,7 @@ const renderDreamJournalLayout = (colors, hiddenSections = []) => {
                       />
                       <span className="text-sm">{section.name}</span>
                     </label>
-                  ))}
+                  ))} 
                 </div>
                 <p className="text-xs text-gray-500 mt-2">Uncheck to hide sections</p>
               </div>
