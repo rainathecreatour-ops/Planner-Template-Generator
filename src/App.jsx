@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Download, Lock } from 'lucide-react'; 
 
@@ -172,23 +173,7 @@ const PlannerGenerator = () => {
       border: '#C4B5FD',
       text: '#5B21B6',
       layout: 'dream-sections'
-    },
-   const templates = {
-  minimalist: {
-    // ... existing templates ...
-  },
-  // ... all other templates ...
-  children: {
-    name: 'Children',
-    description: 'Fun, colorful, kid-friendly tracker',
-    background: '#FFF9E6',
-    primary: '#FFE5CC',
-    accent: '#FF6B35',
-    border: '#FFB84D',
-    text: '#2D1B4E',
-    layout: 'kids-grid'
-  }
-};
+    }
   };
   const optionalSections = {
   monthlyReset: {
@@ -722,31 +707,17 @@ const PlannerGenerator = () => {
     { id: 'symbols', name: 'Symbols' },
     { id: 'interpretation', name: 'Interpretation' },
     { id: 'recurring', name: 'Recurring Theme' }
-  ],
-  const templateSections = {
-  // ... existing template sections ...
-  children: [
-    { id: 'chores', name: 'Daily Chores' },
-    { id: 'homework', name: 'Homework Tracker' },
-    { id: 'hygiene', name: 'Hygiene Checklist' },
-    { id: 'petcare', name: 'Pet Care' },
-    { id: 'weeklygoals', name: 'Weekly Goals' },
-    { id: 'rewards', name: 'Rewards & Stars' }
   ]
-};
 };
 const renderSectionOrReplacement = (sectionId, hiddenSections, replacements, colors, originalContent, yPosition) => {
   if (!hiddenSections.includes(sectionId)) {
     return originalContent;
   } else if (replacements[sectionId] && optionalSections[replacements[sectionId]]) {
-    return (
-      <g>
-        {optionalSections[replacements[sectionId]].render(colors, yPosition)}
-      </g>
-    );
+    return optionalSections[replacements[sectionId]].render(colors, yPosition);
   }
   return null;
 };
+ 
  const renderMinimalistLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
@@ -1822,103 +1793,6 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
     </g>
   );
 };
-const renderChildrenLayout = (colors, hiddenSections = [], replacements = {}) => {
-  return (
-    <g>
-      {/* Fun header with stars */}
-      <text x="425" y="80" fontSize="36" fontWeight="700" fill={colors.accent} textAnchor="middle">My Daily Planner ⭐</text>
-      <text x="200" y="75" fontSize="28" fill={colors.accent}>🌟</text>
-      <text x="650" y="75" fontSize="28" fill={colors.accent}>🌟</text>
-      
-      {/* Daily Chores */}
-      {renderSectionOrReplacement('chores', hiddenSections, replacements, colors, (
-        <>
-          <rect x="100" y="120" width="300" height="250" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />
-          <text x="250" y="155" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">📋 DAILY CHORES</text>
-          {['Make my bed', 'Clean my room', 'Put toys away', 'Help with dishes', 'Take out trash'].map((chore, i) => (
-            <g key={i}>
-              <rect x="120" y={175 + i * 35} width="25" height="25" fill="white" stroke={colors.accent} strokeWidth="2" rx="5" />
-              <text x="155" y={195 + i * 35} fontSize="13" fill={colors.text} fontWeight="600">{chore}</text>
-            </g>
-          ))}
-        </>
-      ), 120)}
-      
-      {/* Homework Tracker */}
-      {renderSectionOrReplacement('homework', hiddenSections, replacements, colors, (
-        <>
-          <rect x="430" y="120" width="300" height="250" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />
-          <text x="580" y="155" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">📚 HOMEWORK</text>
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day, i) => (
-            <g key={i}>
-              <text x="450" y={190 + i * 35} fontSize="12" fill={colors.text} fontWeight="600">{day}:</text>
-              <line x1="520" y1={192 + i * 35} x2="710" y2={192 + i * 35} stroke={colors.border} strokeWidth="2" />
-              <circle cx="715" cy={190 + i * 35} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
-            </g>
-          ))}
-        </>
-      ), 120)}
-      
-      {/* Hygiene Checklist */}
-      {renderSectionOrReplacement('hygiene', hiddenSections, replacements, colors, (
-        <>
-          <rect x="100" y="400" width="300" height="200" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />
-          <text x="250" y="435" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">🦷 HYGIENE</text>
-          {['Brush teeth (AM)', 'Brush teeth (PM)', 'Wash hands', 'Take a bath', 'Comb hair'].map((task, i) => (
-            <g key={i}>
-              <circle cx="130" cy={460 + i * 30} r="12" fill="white" stroke={colors.accent} strokeWidth="2" />
-              <text x="155" y={465 + i * 30} fontSize="13" fill={colors.text} fontWeight="600">{task}</text>
-            </g>
-          ))}
-        </>
-      ), 400)}
-      
-      {/* Pet Care */}
-      {renderSectionOrReplacement('petcare', hiddenSections, replacements, colors, (
-        <>
-          <rect x="430" y="400" width="300" height="200" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />
-          <text x="580" y="435" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">🐾 PET CARE</text>
-          {['Feed pet', 'Give water', 'Walk/Play time', 'Clean area'].map((task, i) => (
-            <g key={i}>
-              <rect x="450" y={455 + i * 35} width="240" height="28" fill="white" stroke={colors.accent} strokeWidth="2" rx="8" />
-              <text x="570" y={475 + i * 35} fontSize="12" fill={colors.text} textAnchor="middle" fontWeight="600">{task}</text>
-            </g>
-          ))}
-        </>
-      ), 400)}
-      
-      {/* Weekly Goals */}
-      {renderSectionOrReplacement('weeklygoals', hiddenSections, replacements, colors, (
-        <>
-          <text x="425" y="650" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">🎯 MY WEEKLY GOALS</text>
-          <rect x="100" y="670" width="630" height="140" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />
-          {[0,1,2].map(i => (
-            <g key={i}>
-              <text x="130" y={710 + i * 40} fontSize="16" fill={colors.accent} fontWeight="700">{i + 1}.</text>
-              <line x1="160" y1={712 + i * 40} x2="700" y2={712 + i * 40} stroke={colors.border} strokeWidth="2" />
-            </g>
-          ))}
-        </>
-      ), 650)}
-      
-      {/* Rewards & Stars */}
-      {renderSectionOrReplacement('rewards', hiddenSections, replacements, colors, (
-        <>
-          <text x="425" y="860" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">⭐ STARS EARNED THIS WEEK</text>
-          {[0,1,2,3,4,5,6].map(i => (
-            <g key={i}>
-              <circle cx={180 + i * 85} cy="890" r="30" fill={colors.primary} stroke={colors.accent} strokeWidth="3" />
-              <text x={180 + i * 85} y="900" fontSize="24" textAnchor="middle">⭐</text>
-              <text x={180 + i * 85} y="940" fontSize="11" fill={colors.text} textAnchor="middle" fontWeight="600">
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}
-              </text>
-            </g>
-          ))}
-        </>
-      ), 860)}
-    </g>
-  );
-};
 
   const renderPattern = (patternType, colors) => {
     if (patternType === 'none') return null;
@@ -2290,11 +2164,6 @@ const renderChildrenLayout = (colors, hiddenSections = [], replacements = {}) =>
                   {renderDreamJournalLayout(getActiveColors(), hiddenSections)}
                 </g>
               )}
-             {selectedTemplate === 'children' && (
-  <g fontFamily={fontOptions[fontFamily].family}>
-    {renderChildrenLayout(getActiveColors(), hiddenSections, sectionReplacements)}
-  </g>
-)}
            
 
               
