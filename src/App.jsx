@@ -12,7 +12,7 @@ const PlannerGenerator = () => {
   const [fontFamily, setFontFamily] = useState('default');
   const [customColors, setCustomColors] = useState(null);
   const [hiddenSections, setHiddenSections] = useState([]);
-  const [sectionReplacements, setSectionReplacements] = useState({});
+  
 
   const templates = {
     minimalist: {
@@ -1142,7 +1142,7 @@ const renderSectionOrReplacement = (sectionId, hiddenSections, replacements, col
   if (!hiddenSections.includes(sectionId)) {
     return originalContent;
   }
-  // If section is hidden, just don't render anything (no replacements for template sections)
+  // If section is hidden, don't render anything
   return null;
 };
  const renderMinimalistLayout = (colors, hiddenSections = [], replacements = {}) => {
@@ -2649,87 +2649,87 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
               
              {selectedTemplate === 'minimalist' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderMinimalistLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderMinimalistLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'boho' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderBohoLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderBohoLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'funky' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderFunkyLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderFunkyLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'zen' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderZenLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderZenLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'prayer' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderPrayerLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderPrayerLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'parenting' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderParentingLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderParentingLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'money' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderMoneyLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderMoneyLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'professional' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderProfessionalLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderProfessionalLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'cozy' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderCozyLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderCozyLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'selfWellness' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderSelfWellnessLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderSelfWellnessLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'artistic' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderArtisticLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderArtisticLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'whimsical' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderWhimsicalLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderWhimsicalLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'luxury' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderLuxuryLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderLuxuryLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'elegant' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderElegantLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderElegantLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'journal' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderJournalLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderJournalLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
               {selectedTemplate === 'dreamJournal' && (
                 <g fontFamily={fontOptions[fontFamily].family}>
-                  {renderDreamJournalLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+                  {renderDreamJournalLayout(getActiveColors(), hiddenSections, {})}
                 </g>
               )}
              {selectedTemplate === 'kidsChores' && (
   <g fontFamily={fontOptions[fontFamily].family}>
-    {renderKidsChoresLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+    {renderKidsChoresLayout(getActiveColors(), hiddenSections, {})}
   </g>
 )}
            
