@@ -604,6 +604,7 @@ const PlannerGenerator = () => {
     )
   }
 };
+ 
  const fontOptions = {
   default: { name: 'Default', family: 'sans-serif' },
   serif: { name: 'Serif', family: 'Georgia, serif' },
@@ -2147,21 +2148,53 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
           {/* Show replacement dropdown when unchecked */}
           {hiddenSections.includes(section.id) && (
             <div className="ml-6">
-              <select
-                value={sectionReplacements[section.id] || ''}
-                onChange={(e) => {
-                  setSectionReplacements({
-                    ...sectionReplacements,
-                    [section.id]: e.target.value
-                  });
-                }}
-                className="w-full p-1 text-xs border rounded bg-gray-50"
-              >
-                <option value="">Replace with...</option>
-                {Object.entries(optionalSections).map(([key, opt]) => (
-                  <option key={key} value={key}>{opt.name}</option>
-                ))}
-              </select>
+             <select
+  value={sectionReplacements[section.id] || ''}
+  onChange={(e) => {
+    setSectionReplacements({
+      ...sectionReplacements,
+      [section.id]: e.target.value
+    });
+  }}
+  className="w-full p-1 text-xs border rounded bg-gray-50"
+>
+  <option value="">Replace with...</option>
+  <optgroup label="✨ Compact (Recommended)">
+    <option value="notesCompact">Notes</option>
+    <option value="dailyJournalCompact">Daily Journal</option>
+    <option value="plainJournalCompact">Plain Journal</option>
+    <option value="dreamJournalCompact">Dream Journal</option>
+    <option value="monthlyResetCompact">Monthly Reset</option>
+    <option value="weeklyCheckinCompact">Weekly Check-in</option>
+    <option value="lifeBalanceCompact">Life Balance</option>
+    <option value="energyTrackerCompact">Energy Tracker</option>
+    <option value="winsLessonsCompact">Wins & Lessons</option>
+    <option value="quotesAffirmationsCompact">Affirmations</option>
+    <option value="notesDoodleCompact">Notes & Doodles</option>
+    <option value="lettingGoCompact">Letting Go</option>
+    <option value="excitedAboutCompact">Excited About</option>
+    <option value="moodTrackerCompact">Mood Tracker</option>
+    <option value="stressAnxietyScaleCompact">Stress Scale</option>
+    <option value="sleepQualityLogCompact">Sleep Log</option>
+    <option value="wellnessSummaryCompact">Wellness Summary</option>
+    <option value="habitStreaksCompact">Habit Streaks</option>
+    <option value="progressBarsCompact">Progress Bars</option>
+    <option value="gentleRemindersCompact">Gentle Reminders</option>
+    <option value="weeklyGoalReviewCompact">Weekly Review</option>
+    <option value="whyThisMattersCompact">Why It Matters</option>
+    <option value="doodlePagesCompact">Doodle Pages</option>
+    <option value="visionBoardCompact">Vision Board</option>
+    <option value="photoReflectionCompact">Photo Reflection</option>
+    <option value="stickerElementsCompact">Stickers</option>
+  </optgroup>
+  <optgroup label="📏 Full Size">
+    {Object.entries(optionalSections)
+      .filter(([key]) => !key.includes('Compact'))
+      .map(([key, opt]) => (
+        <option key={key} value={key}>{opt.name}</option>
+      ))}
+  </optgroup>
+</select>
             </div>
           )}
         </div>
