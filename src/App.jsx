@@ -2441,6 +2441,49 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
       </div>
     );
   }
+ const downloadPNG = async () => {
+  try {
+    const svg = document.getElementById('template-svg');
+    if (!svg) return alert('Not found');
+    
+    // Get the SVG dimensions
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    // Set high resolution for better quality
+    const scale = 3; // 3x resolution for crisp output
+    canvas.width = 850 * scale;
+    canvas.height = svg.getAttribute('height') * scale;
+    
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    
+    img.onload = () => {
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      
+      canvas.toBlob((blob) => {
+        const pngUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `${selectedTemplate}-planner.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(pngUrl);
+        alert('✅ PNG Downloaded! Upload to Canva to edit.');
+      });
+    };
+    
+    img.src = url;
+  } catch (e) {
+    console.error(e);
+    alert('PNG export failed. Try SVG instead.');
+  }
+};
 
   const template = templates[selectedTemplate];
 
@@ -2572,11 +2615,22 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
               </div>
               <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
             </div>
+<div className="space-y-2">
+  <button onClick={downloadSVG} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+    <Download className="w-5 h-5" />
+    Download SVG (Vector)
+  </button>
+  
+  <button onClick={downloadPNG} className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+    <Download className="w-5 h-5" />
+    Download PNG (For Canva)
+  </button>
+</div>
 
-            <button onClick={downloadSVG} className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-              <Download className="w-5 h-5" />
-              Download SVG
-            </button>
+<div className="bg-yellow-50 border border-yellow-200 p-3 rounded text-xs">
+  <p className="font-semibold mb-1 text-yellow-800">📌 For Canva Users:</p>
+  <p className="text-yellow-700">Download PNG, then upload to Canva. You can add text, stickers, and edit colors in Canva!</p>
+</div>
 
             <div className="bg-blue-50 p-3 rounded text-xs">
               <p className="font-semibold mb-1">✨ Unique Layouts</p>
