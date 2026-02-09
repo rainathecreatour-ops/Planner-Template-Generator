@@ -739,11 +739,14 @@ const renderSectionOrReplacement = (sectionId, hiddenSections, replacements, col
   if (!hiddenSections.includes(sectionId)) {
     return originalContent;
   } else if (replacements[sectionId] && optionalSections[replacements[sectionId]]) {
-    return optionalSections[replacements[sectionId]].render(colors, yPosition);
+    return (
+      <g>
+        {optionalSections[replacements[sectionId]].render(colors, yPosition)}
+      </g>
+    );
   }
   return null;
 };
- 
  const renderMinimalistLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
     <g>
