@@ -1138,15 +1138,11 @@ const PlannerGenerator = () => {
 ]
 };
 const renderSectionOrReplacement = (sectionId, hiddenSections, replacements, colors, originalContent, yPosition) => {
-  // If section is hidden and has a replacement, render the replacement
-  if (hiddenSections.includes(sectionId) && replacements[sectionId] && optionalSections[replacements[sectionId]]) {
-    return optionalSections[replacements[sectionId]].render(colors, yPosition);
-  }
   // If section is not hidden, render original content
   if (!hiddenSections.includes(sectionId)) {
     return originalContent;
   }
-  // If section is hidden but no replacement, render nothing
+  // If section is hidden, just don't render anything (no replacements for template sections)
   return null;
 };
  const renderMinimalistLayout = (colors, hiddenSections = [], replacements = {}) => {
@@ -2526,88 +2522,29 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
               </div>
             </div>
 
-           {templateSections[selectedTemplate] && (
+          {templateSections[selectedTemplate] && (
   <div>
     <label className="block text-sm font-semibold mb-2">Toggle Sections</label>
     <div className="space-y-3 max-h-48 overflow-y-auto border-2 rounded-lg p-3">
       {templateSections[selectedTemplate].map((section) => (
-        <div key={section.id} className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={!hiddenSections.includes(section.id)}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setHiddenSections(hiddenSections.filter(s => s !== section.id));
-                  // Remove replacement if re-enabled
-                  const newReplacements = {...sectionReplacements};
-                  delete newReplacements[section.id];
-                  setSectionReplacements(newReplacements);
-                } else {
-                  setHiddenSections([...hiddenSections, section.id]);
-                }
-              }}
-              className="w-4 h-4"
-            />
-            <span className="text-sm">{section.name}</span>
-          </label>
-          
-          {/* Show replacement dropdown when unchecked */}
-          {hiddenSections.includes(section.id) && (
-            <div className="ml-6">
-             <select
-  value={sectionReplacements[section.id] || ''}
-  onChange={(e) => {
-    setSectionReplacements({
-      ...sectionReplacements,
-      [section.id]: e.target.value
-    });
-  }}
-  className="w-full p-1 text-xs border rounded bg-gray-50"
->
-  <option value="">Replace with...</option>
-  <optgroup label="✨ Compact (Recommended)">
-    <option value="notesCompact">Notes</option>
-    <option value="dailyJournalCompact">Daily Journal</option>
-    <option value="plainJournalCompact">Plain Journal</option>
-    <option value="dreamJournalCompact">Dream Journal</option>
-    <option value="monthlyResetCompact">Monthly Reset</option>
-    <option value="weeklyCheckinCompact">Weekly Check-in</option>
-    <option value="lifeBalanceCompact">Life Balance</option>
-    <option value="energyTrackerCompact">Energy Tracker</option>
-    <option value="winsLessonsCompact">Wins & Lessons</option>
-    <option value="quotesAffirmationsCompact">Affirmations</option>
-    <option value="notesDoodleCompact">Notes & Doodles</option>
-    <option value="lettingGoCompact">Letting Go</option>
-    <option value="excitedAboutCompact">Excited About</option>
-    <option value="moodTrackerCompact">Mood Tracker</option>
-    <option value="stressAnxietyScaleCompact">Stress Scale</option>
-    <option value="sleepQualityLogCompact">Sleep Log</option>
-    <option value="wellnessSummaryCompact">Wellness Summary</option>
-    <option value="habitStreaksCompact">Habit Streaks</option>
-    <option value="progressBarsCompact">Progress Bars</option>
-    <option value="gentleRemindersCompact">Gentle Reminders</option>
-    <option value="weeklyGoalReviewCompact">Weekly Review</option>
-    <option value="whyThisMattersCompact">Why It Matters</option>
-    <option value="doodlePagesCompact">Doodle Pages</option>
-    <option value="visionBoardCompact">Vision Board</option>
-    <option value="photoReflectionCompact">Photo Reflection</option>
-    <option value="stickerElementsCompact">Stickers</option>
-  </optgroup>
-  <optgroup label="📏 Full Size">
-    {Object.entries(optionalSections)
-      .filter(([key]) => !key.includes('Compact'))
-      .map(([key, opt]) => (
-        <option key={key} value={key}>{opt.name}</option>
-      ))}
-  </optgroup>
-</select>
-            </div>
-          )}
-        </div>
+        <label key={section.id} className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!hiddenSections.includes(section.id)}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setHiddenSections(hiddenSections.filter(s => s !== section.id));
+              } else {
+                setHiddenSections([...hiddenSections, section.id]);
+              }
+            }}
+            className="w-4 h-4"
+          />
+          <span className="text-sm">{section.name}</span>
+        </label>
       ))}
     </div>
-    <p className="text-xs text-gray-500 mt-2">Uncheck to hide sections, then optionally replace them</p>
+    <p className="text-xs text-gray-500 mt-2">Uncheck to hide sections. Add custom sections using Optional Sections below.</p>
   </div>
 )}
 
