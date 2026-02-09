@@ -2400,6 +2400,26 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
     if (accessCode === 'PLAN2024') setIsAuthenticated(true);
     else alert('Invalid code');
   };
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+          <div className="flex justify-center mb-6">
+            <div className="bg-pink-100 p-4 rounded-full">
+              <Lock className="w-8 h-8 text-pink-600" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-center mb-2">Planner Generator</h1>
+          <p className="text-center text-gray-600 mb-6">Enter code</p>
+          <input type="text" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} placeholder="Code" className="w-full px-4 py-3 border-2 rounded-lg mb-4" />
+          <button onClick={handleLogin} className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-lg font-semibold">Enter</button>
+          <p className="text-xs text-center text-gray-500 mt-4">Code: PLAN2024</p>
+        </div>
+      </div>
+    );
+  }
+
+
 
   const downloadSVG = () => {
     try {
@@ -2465,26 +2485,6 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
     alert('PNG export failed. Try SVG instead.');
   }
 };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-          <div className="flex justify-center mb-6">
-            <div className="bg-pink-100 p-4 rounded-full">
-              <Lock className="w-8 h-8 text-pink-600" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-center mb-2">Planner Generator</h1>
-          <p className="text-center text-gray-600 mb-6">Enter code</p>
-          <input type="text" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLogin()} placeholder="Code" className="w-full px-4 py-3 border-2 rounded-lg mb-4" />
-          <button onClick={handleLogin} className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-lg font-semibold">Enter</button>
-          <p className="text-xs text-center text-gray-500 mt-4">Code: PLAN2024</p>
-        </div>
-      </div>
-    );
-  }
-
 
   const template = templates[selectedTemplate];
 
