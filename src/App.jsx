@@ -587,7 +587,7 @@ const PlannerGenerator = () => {
       </g>
     )
   },
-  stickerElements: {
+ stickerElements: {
     name: 'Sticker Elements',
     height: 180,
     render: (colors, yPos) => (
@@ -602,8 +602,415 @@ const PlannerGenerator = () => {
         ))}
       </g>
     )
+  },  // <-- ADD THIS COMMA!
+
+  // NOW ADD ALL THE COMPACT SECTIONS HERE:
+  
+  monthlyResetCompact: {
+    name: 'Monthly Reset (Compact)',
+    height: 150,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="14" fill={colors.accent} fontWeight="700">MONTHLY RESET</text>
+        <text x="120" y={yPos + 45} fontSize="11" fill={colors.text} fontWeight="600">What worked:</text>
+        <line x1="120" y1={yPos + 55} x2="710" y2={yPos + 55} stroke={colors.border} strokeWidth="1" />
+        <text x="120" y={yPos + 80} fontSize="11" fill={colors.text} fontWeight="600">To improve:</text>
+        <line x1="120" y1={yPos + 90} x2="710" y2={yPos + 90} stroke={colors.border} strokeWidth="1" />
+        <text x="120" y={yPos + 115} fontSize="11" fill={colors.text} fontWeight="600">Next focus:</text>
+        <line x1="120" y1={yPos + 125} x2="710" y2={yPos + 125} stroke={colors.border} strokeWidth="1" />
+      </g>
+    )
+  },
+
+  weeklyCheckinCompact: {
+    name: 'Weekly Check-in (Compact)',
+    height: 130,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="14" fill={colors.accent} fontWeight="700">WEEKLY CHECK-IN</text>
+        {['Wins', 'Challenges', 'Lessons'].map((item, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 50 + i * 30} fontSize="10" fill={colors.text} fontWeight="600">{item}:</text>
+            <line x1="180" y1={yPos + 52 + i * 30} x2="710" y2={yPos + 52 + i * 30} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  lifeBalanceCompact: {
+    name: 'Life Balance Wheel (Compact)',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">LIFE BALANCE</text>
+        <circle cx="425" cy={yPos + 90} r="60" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
+        {[0,1,2,3,4,5,6,7].map(i => {
+          const angle = (i * 45 - 90) * Math.PI / 180;
+          const x1 = 425 + 20 * Math.cos(angle);
+          const y1 = yPos + 90 + 20 * Math.sin(angle);
+          const x2 = 425 + 60 * Math.cos(angle);
+          const y2 = yPos + 90 + 60 * Math.sin(angle);
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.accent} strokeWidth="1" />;
+        })}
+        {['Health', 'Career', 'Money', 'Love', 'Growth', 'Fun', 'Spirit', 'Home'].map((area, i) => {
+          const angle = (i * 45 - 90) * Math.PI / 180;
+          const x = 425 + 75 * Math.cos(angle);
+          const y = yPos + 90 + 75 * Math.sin(angle);
+          return <text key={i} x={x} y={y} fontSize="8" fill={colors.text} textAnchor="middle">{area}</text>;
+        })}
+      </g>
+    )
+  },
+
+  energyTrackerCompact: {
+    name: 'Energy Tracker (Compact)',
+    height: 120,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="14" fill={colors.accent} fontWeight="700">ENERGY TRACKER</text>
+        <line x1="150" y1={yPos + 70} x2="700" y2={yPos + 70} stroke={colors.border} strokeWidth="1" />
+        <text x="120" y={yPos + 50} fontSize="9" fill={colors.text}>High</text>
+        <text x="120" y={yPos + 75} fontSize="9" fill={colors.text}>Low</text>
+        {[0,1,2,3,4,5,6].map(i => (
+          <circle key={i} cx={200 + i * 75} cy={yPos + 55} r="6" fill="none" stroke={colors.accent} strokeWidth="2" />
+        ))}
+      </g>
+    )
+  },
+
+  winsLessonsCompact: {
+    name: 'Wins & Lessons (Compact)',
+    height: 140,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="13" fill={colors.accent} fontWeight="700">WINS 🎉</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="120" y1={yPos + 40 + i * 20} x2="380" y2={yPos + 40 + i * 20} stroke={colors.border} strokeWidth="1" />
+        ))}
+        
+        <text x="430" y={yPos + 20} fontSize="13" fill={colors.accent} fontWeight="700">LESSONS 📚</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="430" y1={yPos + 40 + i * 20} x2="710" y2={yPos + 40 + i * 20} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    )
+  },
+
+  quotesAffirmationsCompact: {
+    name: 'Quotes & Affirmations (Compact)',
+    height: 120,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ AFFIRMATIONS</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="150" y1={yPos + 45 + i * 25} x2="700" y2={yPos + 45 + i * 25} stroke={colors.border} strokeWidth="1" />
+        ))}
+      </g>
+    )
+  },
+
+  notesDoodleCompact: {
+    name: 'Notes & Doodles (Compact)',
+    height: 140,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">NOTES & DOODLES</text>
+        <rect x="120" y={yPos + 35} width="590" height="85" fill="white" stroke={colors.border} strokeWidth="1" strokeDasharray="5,5" />
+      </g>
+    )
+  },
+
+  lettingGoCompact: {
+    name: 'Letting Go (Compact)',
+    height: 120,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">LETTING GO 🍃</text>
+        {[0,1,2].map(i => (
+          <g key={i}>
+            <circle cx="130" cy={yPos + 45 + i * 25} r="4" fill="none" stroke={colors.accent} strokeWidth="1" />
+            <line x1="145" y1={yPos + 45 + i * 25} x2="710" y2={yPos + 45 + i * 25} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  excitedAboutCompact: {
+    name: 'Excited About (Compact)',
+    height: 120,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">EXCITED ABOUT ✨</text>
+        {[0,1,2].map(i => (
+          <g key={i}>
+            <text x="130" y={yPos + 48 + i * 25} fontSize="12" fill={colors.accent}>★</text>
+            <line x1="150" y1={yPos + 45 + i * 25} x2="710" y2={yPos + 45 + i * 25} stroke={colors.border} strokeWidth="1" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  dailyJournalCompact: {
+    name: 'Daily Journal (Compact)',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">DAILY JOURNAL</text>
+        <text x="120" y={yPos + 40} fontSize="10" fill={colors.text}>Date: _____   Mood: _____</text>
+        {[0,1,2,3,4,5,6,7].map(i => (
+          <line key={i} x1="120" y1={yPos + 60 + i * 12} x2="710" y2={yPos + 60 + i * 12} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+
+  dreamJournalCompact: {
+    name: 'Dream Journal (Compact)',
+    height: 160,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 DREAM JOURNAL</text>
+        <text x="120" y={yPos + 40} fontSize="10" fill={colors.text}>Date: _____   Sleep: _____   Wake: _____</text>
+        <text x="120" y={yPos + 60} fontSize="10" fill={colors.text} fontWeight="600">Dream:</text>
+        {[0,1,2,3,4,5].map(i => (
+          <line key={i} x1="120" y1={yPos + 75 + i * 13} x2="710" y2={yPos + 75 + i * 13} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+
+  plainJournalCompact: {
+    name: 'Plain Journal (Compact)',
+    height: 150,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">JOURNAL</text>
+        {[0,1,2,3,4,5,6,7,8].map(i => (
+          <line key={i} x1="120" y1={yPos + 35 + i * 13} x2="710" y2={yPos + 35 + i * 13} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+
+  moodTrackerCompact: {
+    name: 'Mood Tracker (Compact)',
+    height: 130,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">MOOD TRACKER</text>
+        {['😊', '😌', '😐', '😔', '😢'].map((emoji, i) => (
+          <g key={i}>
+            <circle cx={180 + i * 110} cy={yPos + 65} r="20" fill="white" stroke={colors.accent} strokeWidth="2" />
+            <text x={180 + i * 110} y={yPos + 72} fontSize="20" textAnchor="middle">{emoji}</text>
+            <text x={180 + i * 110} y={yPos + 95} fontSize="8" fill={colors.text} textAnchor="middle">Day __</text>
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  stressAnxietyScaleCompact: {
+    name: 'Stress/Anxiety Scale (Compact)',
+    height: 120,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">STRESS SCALE</text>
+        <text x="120" y={yPos + 40} fontSize="9" fill={colors.text}>Rate 1-10:</text>
+        <line x1="150" y1={yPos + 70} x2="700" y2={yPos + 70} stroke={colors.accent} strokeWidth="2" />
+        <text x="140" y={yPos + 75} fontSize="9" fill={colors.text}>1</text>
+        <text x="700" y={yPos + 75} fontSize="9" fill={colors.text}>10</text>
+        {[1,2,3,4,5,6,7,8,9,10].map(i => (
+          <circle key={i} cx={150 + (i - 1) * 55} cy={yPos + 60} r="6" fill="none" stroke={colors.accent} strokeWidth="2" />
+        ))}
+      </g>
+    )
+  },
+
+  sleepQualityLogCompact: {
+    name: 'Sleep Quality Log (Compact)',
+    height: 140,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">💤 SLEEP LOG</text>
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+          <g key={i}>
+            <rect x={130 + i * 80} y={yPos + 35} width="70" height="70" fill="white" stroke={colors.border} strokeWidth="1" rx="6" />
+            <text x={165 + i * 80} y={yPos + 52} fontSize="10" fill={colors.text} textAnchor="middle" fontWeight="600">{day}</text>
+            <text x={165 + i * 80} y={yPos + 68} fontSize="8" fill={colors.text} textAnchor="middle">Hrs:</text>
+            <line x1={150 + i * 80} y1={yPos + 75} x2={180 + i * 80} y2={yPos + 75} stroke={colors.border} strokeWidth="1" />
+            {[1,2,3,4,5].map(j => (
+              <circle key={j} cx={145 + j * 8 + i * 80} cy={yPos + 92} r="2" fill="none" stroke={colors.accent} strokeWidth="1" />
+            ))}
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  wellnessSummaryCompact: {
+    name: 'Wellness Summary (Compact)',
+    height: 140,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">WELLNESS</text>
+        {['Physical', 'Mental', 'Emotional', 'Social'].map((category, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 48 + i * 28} fontSize="10" fill={colors.text} fontWeight="600">{category}:</text>
+            <rect x="200" y={yPos + 37 + i * 28} width="490" height="14" fill="white" stroke={colors.border} strokeWidth="1" rx="7" />
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  habitStreaksCompact: {
+    name: 'Habit Streaks (Compact)',
+    height: 130,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="14" fill={colors.accent} fontWeight="700">🔥 HABIT STREAKS</text>
+        {['Habit 1', 'Habit 2', 'Habit 3'].map((habit, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 50 + i * 30} fontSize="10" fill={colors.text} fontWeight="600">{habit}:</text>
+            <line x1="180" y1={yPos + 52 + i * 30} x2="300" y2={yPos + 52 + i * 30} stroke={colors.border} strokeWidth="1" />
+            <text x="320" y={yPos + 50 + i * 30} fontSize="10" fill={colors.accent} fontWeight="700">__ Days!</text>
+            {[0,1,2,3,4,5,6].map(j => (
+              <rect key={j} x={480 + j * 20} y={yPos + 38 + i * 30} width="16" height="16" fill="none" stroke={colors.accent} strokeWidth="1.5" rx="2" />
+            ))}
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  progressBarsCompact: {
+    name: 'Progress Bars (Compact)',
+    height: 140,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="14" fill={colors.accent} fontWeight="700">📊 PROGRESS</text>
+        {['Goal 1', 'Goal 2', 'Goal 3', 'Goal 4'].map((goal, i) => (
+          <g key={i}>
+            <text x="120" y={yPos + 48 + i * 28} fontSize="10" fill={colors.text} fontWeight="600">{goal}:</text>
+            <rect x="180" y={yPos + 37 + i * 28} width="480" height="14" fill="white" stroke={colors.border} strokeWidth="1" rx="7" />
+            <text x="670" y={yPos + 48 + i * 28} fontSize="9" fill={colors.text}>__%</text>
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  gentleRemindersCompact: {
+    name: 'Gentle Reminders (Compact)',
+    height: 130,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">💝 REMINDERS</text>
+        {[
+          '✨ You are doing great',
+          '🌸 Progress over perfection',
+          '💫 Rest is productive',
+          '🌟 Small steps count'
+        ].map((reminder, i) => (
+          <g key={i}>
+            <rect x="140" y={yPos + 38 + i * 24} width="540" height="18" fill="white" stroke={colors.accent} strokeWidth="1" rx="9" />
+            <text x="425" y={yPos + 52 + i * 24} fontSize="10" fill={colors.text} textAnchor="middle">{reminder}</text>
+          </g>
+        ))}
+      </g>
+    )
+  },
+
+  weeklyGoalReviewCompact: {
+    name: 'Weekly Goal Review (Compact)',
+    height: 150,
+    render: (colors, yPos) => (
+      <g>
+        <text x="120" y={yPos + 20} fontSize="14" fill={colors.accent} fontWeight="700">WEEKLY REVIEW</text>
+        <text x="120" y={yPos + 45} fontSize="11" fill={colors.text} fontWeight="600">Accomplished:</text>
+        {[0,1].map(i => (
+          <line key={i} x1="120" y1={yPos + 60 + i * 20} x2="710" y2={yPos + 60 + i * 20} stroke={colors.border} strokeWidth="1" />
+        ))}
+        <text x="120" y={yPos + 110} fontSize="11" fill={colors.text} fontWeight="600">Next week:</text>
+        <line x1="120" y1={yPos + 125} x2="710" y2={yPos + 125} stroke={colors.border} strokeWidth="1" />
+      </g>
+    )
+  },
+
+  whyThisMattersCompact: {
+    name: 'Why This Goal Matters (Compact)',
+    height: 130,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">WHY IT MATTERS</text>
+        <text x="120" y={yPos + 45} fontSize="10" fill={colors.text}>Goal: _________________________</text>
+        <text x="120" y={yPos + 65} fontSize="10" fill={colors.text} fontWeight="600">Because:</text>
+        {[0,1,2].map(i => (
+          <line key={i} x1="120" y1={yPos + 80 + i * 15} x2="710" y2={yPos + 80 + i * 15} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+
+  doodlePagesCompact: {
+    name: 'Doodle Pages (Compact)',
+    height: 150,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✏️ DOODLE SPACE</text>
+        <rect x="120" y={yPos + 35} width="590" height="100" fill="white" stroke={colors.border} strokeWidth="1" strokeDasharray="8,4" rx="8" />
+      </g>
+    )
+  },
+
+  visionBoardCompact: {
+    name: 'Vision Board (Compact)',
+    height: 150,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ VISION BOARD</text>
+        {[0,1,2,3,4,5].map(i => (
+          <rect key={i} x={130 + (i % 3) * 200} y={yPos + 35 + Math.floor(i / 3) * 60} width="180" height="50" fill="white" stroke={colors.accent} strokeWidth="2" strokeDasharray="4,4" rx="6" />
+        ))}
+      </g>
+    )
+  },
+
+  photoReflectionCompact: {
+    name: 'Photo + Reflection (Compact)',
+    height: 150,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">📸 PHOTO MEMORIES</text>
+        <rect x="120" y={yPos + 35} width="180" height="100" fill="white" stroke={colors.accent} strokeWidth="2" rx="6" />
+        <text x="210" y={yPos + 90} fontSize="11" fill={colors.border} textAnchor="middle">Photo</text>
+        <text x="330" y={yPos + 50} fontSize="11" fill={colors.text} fontWeight="600">Reflection:</text>
+        {[0,1,2,3,4].map(i => (
+          <line key={i} x1="330" y1={yPos + 62 + i * 13} x2="710" y2={yPos + 62 + i * 13} stroke={colors.border} strokeWidth="0.5" />
+        ))}
+      </g>
+    )
+  },
+
+  stickerElementsCompact: {
+    name: 'Sticker Elements (Compact)',
+    height: 120,
+    render: (colors, yPos) => (
+      <g>
+        <text x="425" y={yPos + 20} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ STICKERS</text>
+        {['⭐', '💫', '🌸', '🌙', '☀️', '💖', '🦋', '🌈', '✨', '🎀'].map((sticker, i) => (
+          <g key={i}>
+            <circle cx={180 + (i % 5) * 110} cy={yPos + 55 + Math.floor(i / 5) * 45} r="18" fill="white" stroke={colors.accent} strokeWidth="1.5" />
+            <text x={180 + (i % 5) * 110} y={yPos + 63 + Math.floor(i / 5) * 45} fontSize="22" textAnchor="middle">{sticker}</text>
+          </g>
+        ))}
+      </g>
+    )
   }
-};
+};  // <-- Make sure to close the optionalSections object
  
  const fontOptions = {
   default: { name: 'Default', family: 'sans-serif' },
