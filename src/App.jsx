@@ -718,7 +718,7 @@ const PlannerGenerator = () => {
     { id: 'symbols', name: 'Symbols' },
     { id: 'interpretation', name: 'Interpretation' },
     { id: 'recurring', name: 'Recurring Theme' }
-  ]
+  ],
     children: [
       { id: 'chores', name: 'Daily Chores' },
       { id: 'homework', name: 'Homework Tracker' },
@@ -1718,7 +1718,6 @@ const renderJournalLayout = (colors, hiddenSections = [], replacements = {}) => 
       ), 870)}
     </g>
   );
-};
  
 const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}) => {
   return (
@@ -2285,10 +2284,9 @@ const renderChildrenLayout = (colors, hiddenSections = [], replacements = {}) =>
              )}
 {selectedTemplate === 'children' && (
   <g fontFamily={fontOptions[fontFamily].family}>
-    {renderFunkyLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+    {renderChildrenLayout(getActiveColors(), hiddenSections, sectionReplacements)}  // ✅ CORRECT!
   </g>
 )}
-             
            
 
               
