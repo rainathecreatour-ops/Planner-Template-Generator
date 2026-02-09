@@ -2281,7 +2281,6 @@ const renderChildrenLayout = (colors, hiddenSections = [], replacements = {}) =>
                   {renderDreamJournalLayout(getActiveColors(), hiddenSections)}
                 </g>
               )}
-             )}
 {selectedTemplate === 'children' && (
   <g fontFamily={fontOptions[fontFamily].family}>
     {renderChildrenLayout(getActiveColors(), hiddenSections, sectionReplacements)}  // ✅ CORRECT!
