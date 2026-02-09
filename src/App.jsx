@@ -173,8 +173,19 @@ const PlannerGenerator = () => {
       border: '#C4B5FD',
       text: '#5B21B6',
       layout: 'dream-sections'
+    },
+   children: {
+      name: 'Children',
+      description: 'Fun, colorful, kid-friendly tracker',
+      background: '#FFF9E6',
+      primary: '#FFE5CC',
+      accent: '#FF6B35',
+      border: '#FFB84D',
+      text: '#2D1B4E',
+      layout: 'kids-grid'
     }
   };
+  
   const optionalSections = {
   monthlyReset: {
     name: 'Monthly Reset',
@@ -708,6 +719,14 @@ const PlannerGenerator = () => {
     { id: 'interpretation', name: 'Interpretation' },
     { id: 'recurring', name: 'Recurring Theme' }
   ]
+    children: [
+      { id: 'chores', name: 'Daily Chores' },
+      { id: 'homework', name: 'Homework Tracker' },
+      { id: 'hygiene', name: 'Hygiene Checklist' },
+      { id: 'petcare', name: 'Pet Care' },
+      { id: 'weeklygoals', name: 'Weekly Goals' },
+      { id: 'rewards', name: 'Rewards & Stars' }
+    ]
 };
 const renderSectionOrReplacement = (sectionId, hiddenSections, replacements, colors, originalContent, yPosition) => {
   if (!hiddenSections.includes(sectionId)) {
@@ -2164,6 +2183,13 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
                   {renderDreamJournalLayout(getActiveColors(), hiddenSections)}
                 </g>
               )}
+             )}
+{selectedTemplate === 'children' && (
+  <g fontFamily={fontOptions[fontFamily].family}>
+    {renderFunkyLayout(getActiveColors(), hiddenSections, sectionReplacements)}
+  </g>
+)}
+             
            
 
               
