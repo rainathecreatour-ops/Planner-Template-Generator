@@ -21,6 +21,170 @@ const TEMPLATES = {
   kidsChores:   { name:"Kids Chores",   bg:"#FFF9E6", primary:"#FFE5CC", accent:"#FF9500", border:"#FFD4A3", text:"#8B4513" },
 };
 
+/* ── BACKGROUND PATTERNS ────────────────────────────────────────────────── */
+const PATTERNS = {
+  none:         { name:"None",            render:()=>null },
+  colorfulStars:{ name:"⭐ Colorful Stars", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_stars" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+          {[["#FFD700",8,8,10],["#FF69B4",30,20,8],["#87CEEB",50,10,12],["#98FB98",15,40,9],["#FF6B9D",45,45,11],["#C77DFF",25,55,8]].map(([col,cx,cy,r],i)=>(
+            <polygon key={i} points={`${cx},${cy-r} ${cx+r*0.4},${cy-r*0.3} ${cx+r},${cy-r*0.3} ${cx+r*0.5},${cy+r*0.2} ${cx+r*0.6},${cy+r} ${cx},${cy+r*0.5} ${cx-r*0.6},${cy+r} ${cx-r*0.5},${cy+r*0.2} ${cx-r},${cy-r*0.3} ${cx-r*0.4},${cy-r*0.3}`} fill={col} opacity={opacity} />
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_stars)" />
+    </svg>
+  )},
+  zebra:{ name:"🦓 Zebra", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_zebra" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+          <rect width="40" height="40" fill="transparent"/>
+          <rect x="0" y="0" width="16" height="40" fill="#222" opacity={opacity}/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_zebra)" />
+    </svg>
+  )},
+  leopard:{ name:"🐆 Leopard", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_leopard" x="0" y="0" width="70" height="70" patternUnits="userSpaceOnUse">
+          {[[15,15],[50,40],[20,55],[60,10],[38,28]].map(([cx,cy],i)=>(
+            <g key={i}>
+              <ellipse cx={cx} cy={cy} rx="9" ry="6" fill="#8B4513" opacity={opacity}/>
+              <ellipse cx={cx-7} cy={cy-4} rx="4" ry="3" fill="#8B4513" opacity={opacity*0.7} transform={`rotate(-30,${cx-7},${cy-4})`}/>
+              <ellipse cx={cx+7} cy={cy-4} rx="4" ry="3" fill="#8B4513" opacity={opacity*0.7} transform={`rotate(30,${cx+7},${cy-4})`}/>
+              <ellipse cx={cx} cy={cy+7} rx="4" ry="3" fill="#8B4513" opacity={opacity*0.7}/>
+            </g>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_leopard)" />
+    </svg>
+  )},
+  hearts:{ name:"💕 Hearts", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_hearts" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+          {[["#FF69B4",12,15],["#FF1493",37,38]].map(([col,cx,cy],i)=>(
+            <path key={i} d={`M${cx},${cy+6} C${cx},${cy} ${cx-10},${cy} ${cx-10},${cy-4} C${cx-10},${cy-9} ${cx-5},${cy-12} ${cx},${cy-8} C${cx+5},${cy-12} ${cx+10},${cy-9} ${cx+10},${cy-4} C${cx+10},${cy} ${cx},${cy} ${cx},${cy+6}Z`} fill={col} opacity={opacity}/>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_hearts)" />
+    </svg>
+  )},
+  polkaDots:{ name:"⚫ Polka Dots", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+          <circle cx="15" cy="15" r="5" fill="#000" opacity={opacity}/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_dots)" />
+    </svg>
+  )},
+  rainbowStripes:{ name:"🌈 Rainbow Stripes", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_rainbow" x="0" y="0" width="70" height="70" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          {["#FF0000","#FF7F00","#FFFF00","#00CC00","#0000FF","#8B00FF","#FF69B4"].map((col,i)=>(
+            <rect key={i} x="0" y={i*10} width="70" height="10" fill={col} opacity={opacity}/>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_rainbow)" />
+    </svg>
+  )},
+  butterflies:{ name:"🦋 Butterflies", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_butterflies" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+          {[["#C77DFF",20,20],["#FF69B4",60,55]].map(([col,cx,cy],i)=>(
+            <g key={i}>
+              <ellipse cx={cx-7} cy={cy-5} rx="8" ry="5" fill={col} opacity={opacity} transform={`rotate(-30,${cx-7},${cy-5})`}/>
+              <ellipse cx={cx+7} cy={cy-5} rx="8" ry="5" fill={col} opacity={opacity} transform={`rotate(30,${cx+7},${cy-5})`}/>
+              <ellipse cx={cx-5} cy={cy+5} rx="5" ry="4" fill={col} opacity={opacity*0.8} transform={`rotate(20,${cx-5},${cy+5})`}/>
+              <ellipse cx={cx+5} cy={cy+5} rx="5" ry="4" fill={col} opacity={opacity*0.8} transform={`rotate(-20,${cx+5},${cy+5})`}/>
+              <line x1={cx} y1={cy-10} x2={cx} y2={cy+10} stroke="#333" strokeWidth="1" opacity={opacity}/>
+            </g>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_butterflies)" />
+    </svg>
+  )},
+  flowers:{ name:"🌸 Flowers", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_flowers" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+          {[[15,15,"#FF69B4"],[45,45,"#FF9EC4"],[15,45,"#FFB347"],[45,15,"#87CEEB"]].map(([cx,cy,col],i)=>(
+            <g key={i}>
+              {[0,60,120,180,240,300].map((angle,j)=>(
+                <ellipse key={j} cx={cx+Math.cos(angle*Math.PI/180)*6} cy={cy+Math.sin(angle*Math.PI/180)*6} rx="5" ry="3" fill={col} opacity={opacity} transform={`rotate(${angle},${cx+Math.cos(angle*Math.PI/180)*6},${cy+Math.sin(angle*Math.PI/180)*6})`}/>
+              ))}
+              <circle cx={cx} cy={cy} r="3" fill="#FFD700" opacity={opacity}/>
+            </g>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_flowers)" />
+    </svg>
+  )},
+  clouds:{ name:"☁️ Clouds", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_clouds" x="0" y="0" width="120" height="80" patternUnits="userSpaceOnUse">
+          {[[30,25,"#B0C4DE"],[85,50,"#87CEEB"]].map(([cx,cy,col],i)=>(
+            <g key={i}>
+              <circle cx={cx} cy={cy} r="12" fill={col} opacity={opacity}/>
+              <circle cx={cx+14} cy={cy+3} r="10" fill={col} opacity={opacity}/>
+              <circle cx={cx-10} cy={cy+3} r="9" fill={col} opacity={opacity}/>
+              <circle cx={cx+4} cy={cy-8} r="10" fill={col} opacity={opacity}/>
+            </g>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_clouds)" />
+    </svg>
+  )},
+  diamonds:{ name:"💎 Diamonds", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_diamonds" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <polygon points="20,2 38,20 20,38 2,20" fill="none" stroke="#87CEEB" strokeWidth="1.5" opacity={opacity}/>
+          <polygon points="20,8 32,20 20,32 8,20" fill="none" stroke="#4169E1" strokeWidth="1" opacity={opacity*0.6}/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_diamonds)" />
+    </svg>
+  )},
+  checkerboard:{ name:"♟ Checkerboard", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_checker" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <rect x="0" y="0" width="20" height="20" fill="#000" opacity={opacity}/>
+          <rect x="20" y="20" width="20" height="20" fill="#000" opacity={opacity}/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_checker)" />
+    </svg>
+  )},
+  waves:{ name:"🌊 Waves", render:(opacity)=>(
+    <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pat_waves" x="0" y="0" width="100" height="30" patternUnits="userSpaceOnUse">
+          <path d="M0,15 C25,5 75,25 100,15" fill="none" stroke="#87CEEB" strokeWidth="2" opacity={opacity}/>
+          <path d="M0,25 C25,15 75,35 100,25" fill="none" stroke="#4169E1" strokeWidth="1.5" opacity={opacity*0.6}/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#pat_waves)" />
+    </svg>
+  )},
+};
+
 /* ── EDITABLE FIELD COMPONENTS ──────────────────────────────────────────── */
 
 // Single editable line
@@ -737,15 +901,17 @@ const OPTIONAL = {
 
 /* ── MAIN APP ────────────────────────────────────────────────────────────── */
 export default function PlannerGenerator() {
-  const [auth, setAuth]           = useState(false);
-  const [code, setCode]           = useState("");
-  const [tmpl, setTmpl]           = useState("minimalist");
-  const [optionals, setOptionals] = useState([]);
-  const [customColors, setCC]     = useState(null);
-  const [font, setFont]           = useState("'Segoe UI',sans-serif");
-  const [values, setValues]       = useState({});
-  const [exporting, setExp]       = useState(false);
-  const previewRef                = useRef(null);
+  const [auth, setAuth]               = useState(false);
+  const [code, setCode]               = useState("");
+  const [tmpl, setTmpl]               = useState("minimalist");
+  const [optionals, setOptionals]     = useState([]);
+  const [customColors, setCC]         = useState(null);
+  const [font, setFont]               = useState("'Segoe UI',sans-serif");
+  const [values, setValues]           = useState({});
+  const [exporting, setExp]           = useState(false);
+  const [pattern, setPattern]         = useState("none");
+  const [patternOpacity, setPOpacity] = useState(0.08);
+  const previewRef                    = useRef(null);
 
   const c   = { ...TEMPLATES[tmpl], ...(customColors || {}) };
   const upd = (k, val) => setValues(prev => ({ ...prev, [k]: val }));
@@ -855,6 +1021,20 @@ export default function PlannerGenerator() {
           </div>
 
           <div style={{ marginBottom:16 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:"#6c757d", marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Background Pattern</div>
+            <select value={pattern} onChange={e=>setPattern(e.target.value)} style={{ width:"100%", padding:"8px 10px", border:"2px solid #e9ecef", borderRadius:8, fontSize:13, outline:"none", marginBottom:8 }}>
+              {Object.entries(PATTERNS).map(([k,p])=><option key={k} value={k}>{p.name}</option>)}
+            </select>
+            {pattern !== "none" && (
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ fontSize:11, color:"#666", whiteSpace:"nowrap" }}>Opacity</span>
+                <input type="range" min="0.02" max="0.25" step="0.01" value={patternOpacity} onChange={e=>setPOpacity(parseFloat(e.target.value))} style={{ flex:1, accentColor:"#7c3aed" }} />
+                <span style={{ fontSize:11, color:"#666", width:32 }}>{Math.round(patternOpacity*100)}%</span>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom:16 }}>
             <div style={{ fontSize:11, fontWeight:700, color:"#6c757d", marginBottom:6, textTransform:"uppercase", letterSpacing:1 }}>Colors</div>
             {[["accent","Accent"],["border","Border"],["text","Text"],["bg","Background"],["primary","Section Fill"]].map(([key,label])=>(
               <div key={key} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
@@ -880,7 +1060,12 @@ export default function PlannerGenerator() {
         {/* Preview / Edit area */}
         <div style={{ overflowY:"auto", background:"#e9ecef", padding:24 }}>
           <div style={{ background:"white", borderRadius:4, boxShadow:"0 4px 24px rgba(0,0,0,0.12)", maxWidth:794, margin:"0 auto" }}>
-            <div ref={previewRef} style={{ background:c.bg, fontFamily:font, padding:36, minHeight:1000 }}>
+            <div ref={previewRef} style={{ background:c.bg, fontFamily:font, padding:36, minHeight:1000, position:"relative" }}>
+              {/* Background pattern overlay */}
+              {pattern !== "none" && PATTERNS[pattern].render(patternOpacity)}
+
+              {/* Content sits above pattern */}
+              <div style={{ position:"relative", zIndex:1 }}>
 
               {/* Top row */}
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, paddingBottom:12, borderBottom:`2px solid ${c.border}` }}>
@@ -907,6 +1092,8 @@ export default function PlannerGenerator() {
               <div style={{ marginTop:20, paddingTop:10, borderTop:`1px solid ${c.border}`, textAlign:"center", fontSize:9, color:c.border }}>
                 Made with Planner Generator
               </div>
+
+              </div>{/* end content wrapper */}
             </div>
           </div>
         </div>
