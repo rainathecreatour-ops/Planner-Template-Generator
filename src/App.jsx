@@ -2442,63 +2442,47 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
       alert('Failed');
     }
   };
- const downloadPDF = () => {
+const downloadPDF = () => {
   try {
     const svg = document.getElementById('template-svg');
     if (!svg) return alert('Not found');
-    
     const svgData = new XMLSerializer().serializeToString(svg);
     const svgHeight = parseInt(svg.getAttribute('height'));
-    
-    // Convert to high-res canvas then PDF-ready PNG
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    
-    // A4 ratio at 300 DPI = 2480 x 3508
     const pdfWidth = 2480;
     const pdfHeight = 3508;
-    
     canvas.width = pdfWidth;
     canvas.height = pdfHeight;
-    
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
-    
     img.onload = () => {
-      // White background
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, pdfWidth, pdfHeight);
-      
-      // Scale to fit A4
       const scaleX = pdfWidth / 850;
       const scaleY = pdfHeight / svgHeight;
       const scale = Math.min(scaleX, scaleY);
-      
       const offsetX = (pdfWidth - 850 * scale) / 2;
       const offsetY = (pdfHeight - svgHeight * scale) / 2;
-      
       ctx.save();
       ctx.translate(offsetX, offsetY);
       ctx.scale(scale, scale);
       ctx.drawImage(img, 0, 0);
       ctx.restore();
-      
       URL.revokeObjectURL(url);
-      
       canvas.toBlob((blob) => {
-        const pdfUrl = URL.createObjectURL(blob);
+        const pngUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = pdfUrl;
+        link.href = pngUrl;
         link.download = `${selectedTemplate}-planner-A4.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(pdfUrl);
-        alert('✅ A4 PNG Downloaded! In Canva: Upload image → resize canvas to A4 → fit image to page!');
+        URL.revokeObjectURL(pngUrl);
+        alert('✅ Downloaded! In Canva: New design → A4 → Upload image → drag to fit page.');
       }, 'image/png');
     };
-    
     img.src = url;
   } catch (e) {
     console.error(e);
