@@ -2442,47 +2442,67 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
       alert('Failed');
     }
   };
-  const downloadPNG = async () => {
+ const downloadPDF = () => {
   try {
     const svg = document.getElementById('template-svg');
     if (!svg) return alert('Not found');
     
-    // Get the SVG dimensions
     const svgData = new XMLSerializer().serializeToString(svg);
+    const svgHeight = parseInt(svg.getAttribute('height'));
+    
+    // Convert to high-res canvas then PDF-ready PNG
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
     
-    // Set high resolution for better quality
-    const scale = 3; // 3x resolution for crisp output
-    canvas.width = 850 * scale;
-    canvas.height = svg.getAttribute('height') * scale;
+    // A4 ratio at 300 DPI = 2480 x 3508
+    const pdfWidth = 2480;
+    const pdfHeight = 3508;
+    
+    canvas.width = pdfWidth;
+    canvas.height = pdfHeight;
     
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
     
     img.onload = () => {
+      // White background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, pdfWidth, pdfHeight);
+      
+      // Scale to fit A4
+      const scaleX = pdfWidth / 850;
+      const scaleY = pdfHeight / svgHeight;
+      const scale = Math.min(scaleX, scaleY);
+      
+      const offsetX = (pdfWidth - 850 * scale) / 2;
+      const offsetY = (pdfHeight - svgHeight * scale) / 2;
+      
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
       ctx.scale(scale, scale);
       ctx.drawImage(img, 0, 0);
+      ctx.restore();
+      
       URL.revokeObjectURL(url);
       
       canvas.toBlob((blob) => {
-        const pngUrl = URL.createObjectURL(blob);
+        const pdfUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = pngUrl;
-        link.download = `${selectedTemplate}-planner.png`;
+        link.href = pdfUrl;
+        link.download = `${selectedTemplate}-planner-A4.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(pngUrl);
-        alert('✅ PNG Downloaded! Upload to Canva to edit.');
-      });
+        URL.revokeObjectURL(pdfUrl);
+        alert('✅ A4 PNG Downloaded! In Canva: Upload image → resize canvas to A4 → fit image to page!');
+      }, 'image/png');
     };
     
     img.src = url;
   } catch (e) {
     console.error(e);
-    alert('PNG export failed. Try SVG instead.');
+    alert('Export failed');
   }
 };
 
@@ -2617,15 +2637,33 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
               <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
             </div>
 <div className="space-y-2">
+ <div className="space-y-2">
   <button onClick={downloadSVG} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
     <Download className="w-5 h-5" />
-    Download SVG (Vector)
+    Download SVG
   </button>
   
   <button onClick={downloadPNG} className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
     <Download className="w-5 h-5" />
-    Download PNG (For Canva)
+    Download PNG
   </button>
+
+  <button onClick={downloadPDF} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+    <Download className="w-5 h-5" />
+    Download A4 (For Canva)
+  </button>
+</div>
+
+<div className="bg-yellow-50 border border-yellow-200 p-3 rounded text-xs">
+  <p className="font-semibold mb-1 text-yellow-800">📌 Canva Instructions:</p>
+  <ol className="text-yellow-700 space-y-1 list-decimal list-inside">
+    <li>Download A4 PNG</li>
+    <li>Open Canva → Create design → A4</li>
+    <li>Upload the PNG → drag to page</li>
+    <li>Click image → crop/resize to fit</li>
+    <li>Add text boxes on top to fill in!</li>
+  </ol>
+</div>
 </div>
 
 <div className="bg-yellow-50 border border-yellow-200 p-3 rounded text-xs">
