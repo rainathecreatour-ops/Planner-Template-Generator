@@ -2734,13 +2734,12 @@ const renderDreamJournalLayout = (colors, hiddenSections = [], replacements = {}
 )}
            
 
-              
-             {/* Render optional sections AND replacements */}
-{[...selectedSections, ...Object.values(sectionReplacements).filter(Boolean)].map((sectionKey, index) => {
-  const allSections = [...selectedSections, ...Object.values(sectionReplacements).filter(Boolean)];
-  const yOffset = 900 + allSections.slice(0, index).reduce((total, key) => total + optionalSections[key].height, 0);
+ {/* Render optional sections */}
+{selectedSections.map((sectionKey, index) => {
+  const yOffset = 900 + selectedSections.slice(0, index).reduce((total, key) => total + optionalSections[key].height, 0);
   return <g key={sectionKey}>{optionalSections[sectionKey].render(getActiveColors(), yOffset)}</g>;
-})}
+})}             
+ 
             </svg>
           </div>
         </div>
