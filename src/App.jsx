@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 /* ── TEMPLATES ──────────────────────────────────────────────────────────── */
 const TEMPLATES = {
@@ -903,6 +903,8 @@ const OPTIONAL = {
 export default function PlannerGenerator() {
   const [auth, setAuth]               = useState(false);
   const [code, setCode]               = useState("");
+  const [loginError, setLoginError]   = useState("");
+  const [loginLoading, setLoginLoad]  = useState(false);
   const [tmpl, setTmpl]               = useState("minimalist");
   const [optionals, setOptionals]     = useState([]);
   const [customColors, setCC]         = useState(null);
@@ -913,10 +915,52 @@ export default function PlannerGenerator() {
   const [patternOpacity, setPOpacity] = useState(0.08);
   const previewRef                    = useRef(null);
 
+  // ── YOUR GUMROAD PRODUCT PERMALINK ──────────────────────────────────────
+  // Replace "your_product_permalink" with the permalink from your Gumroad product URL
+  // e.g. if your product URL is gumroad.com/l/abcdef  →  put "abcdef" below
+  const GUMROAD_PRODUCT_ID = "your_product_permalink";
+  // ────────────────────────────────────────────────────────────────────────
+
   const c   = { ...TEMPLATES[tmpl], ...(customColors || {}) };
   const upd = (k, val) => setValues(prev => ({ ...prev, [k]: val }));
 
-  const login = () => { if (code === "PLAN2024") setAuth(true); else alert("Invalid code"); };
+  const login = async () => {
+    const key = code.trim();
+    if (!key) { setLoginError("Please enter your license key."); return; }
+    setLoginLoad(true);
+    setLoginError("");
+    try {
+      const res = await fetch(
+        `https://api.gumroad.com/v2/licenses/verify`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            product_permalink: GUMROAD_PRODUCT_ID,
+            license_key: key,
+            increment_uses_count: "false",
+          }),
+        }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setAuth(true);
+        // Save to localStorage so they don't have to re-enter next visit
+        localStorage.setItem("planner_license", key);
+      } else {
+        setLoginError(data.message || "Invalid license key. Please check and try again.");
+      }
+    } catch (e) {
+      setLoginError("Could not verify license. Check your internet connection and try again.");
+    }
+    setLoginLoad(false);
+  };
+
+  // Auto-fill license key if already verified previously
+  useEffect(() => {
+    const saved = localStorage.getItem("planner_license");
+    if (saved) setCode(saved);
+  }, []);
 
   const loadScript = (src) => new Promise((res, rej) => {
     if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
@@ -967,13 +1011,60 @@ export default function PlannerGenerator() {
   /* ── Login ── */
   if (!auth) return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#fce4ec,#e3f2fd)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"sans-serif" }}>
-      <div style={{ background:"white", borderRadius:24, boxShadow:"0 20px 60px rgba(0,0,0,0.15)", padding:40, width:360, textAlign:"center" }}>
-        <div style={{ fontSize:40, marginBottom:16 }}>🔒</div>
-        <h1 style={{ fontSize:24, fontWeight:700, margin:"0 0 8px" }}>Planner Generator</h1>
-        <p style={{ color:"#666", marginBottom:24, fontSize:14 }}>Enter your access code</p>
-        <input value={code} onChange={e=>setCode(e.target.value)} onKeyPress={e=>e.key==="Enter"&&login()} placeholder="Access Code" style={{ width:"100%", padding:"12px 16px", border:"2px solid #eee", borderRadius:12, fontSize:14, marginBottom:16, boxSizing:"border-box", outline:"none" }} />
-        <button onClick={login} style={{ width:"100%", padding:13, background:"linear-gradient(135deg,#f06292,#ab47bc)", color:"white", border:"none", borderRadius:12, fontSize:15, fontWeight:600, cursor:"pointer" }}>Enter →</button>
-        <p style={{ color:"#aaa", fontSize:11, marginTop:16 }}>Code: PLAN2024</p>
+      <div style={{ background:"white", borderRadius:24, boxShadow:"0 20px 60px rgba(0,0,0,0.15)", padding:40, width:400, textAlign:"center" }}>
+        <div style={{ fontSize:44, marginBottom:12 }}>✨</div>
+        <h1 style={{ fontSize:24, fontWeight:700, margin:"0 0 6px" }}>Planner Generator</h1>
+        <p style={{ color:"#888", fontSize:13, marginBottom:6 }}>Enter your Gumroad license key to unlock</p>
+        <p style={{ color:"#bbb", fontSize:11, marginBottom:24 }}>
+          Find your key in the purchase receipt email from Gumroad
+        </p>
+
+        <input
+          value={code}
+          onChange={e=>{ setCode(e.target.value); setLoginError(""); }}
+          onKeyPress={e=>e.key==="Enter"&&login()}
+          placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+          style={{
+            width:"100%", padding:"12px 16px", border:`2px solid ${loginError?"#f06292":"#eee"}`,
+            borderRadius:12, fontSize:13, marginBottom:10, boxSizing:"border-box",
+            outline:"none", letterSpacing:1, textAlign:"center", fontFamily:"monospace",
+            transition:"border-color 0.2s",
+          }}
+        />
+
+        {loginError && (
+          <div style={{ background:"#fff0f3", border:"1px solid #ffb3c1", borderRadius:8, padding:"8px 12px", marginBottom:12, fontSize:12, color:"#c0392b" }}>
+            ⚠️ {loginError}
+          </div>
+        )}
+
+        <button
+          onClick={login}
+          disabled={loginLoading}
+          style={{
+            width:"100%", padding:13,
+            background: loginLoading ? "#ccc" : "linear-gradient(135deg,#f06292,#ab47bc)",
+            color:"white", border:"none", borderRadius:12, fontSize:15,
+            fontWeight:600, cursor: loginLoading ? "not-allowed" : "pointer",
+            display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+          }}
+        >
+          {loginLoading ? (
+            <>
+              <span style={{ display:"inline-block", width:16, height:16, border:"2px solid white", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
+              Verifying…
+            </>
+          ) : "Unlock →"}
+        </button>
+
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+        <div style={{ marginTop:20, padding:"12px 16px", background:"#f8f9fa", borderRadius:10, fontSize:11, color:"#666", textAlign:"left", lineHeight:1.7 }}>
+          <strong>How to find your license key:</strong><br/>
+          1. Check your purchase receipt email from Gumroad<br/>
+          2. Click "View content" or "Access product"<br/>
+          3. Your license key will be shown on the page
+        </div>
       </div>
     </div>
   );
