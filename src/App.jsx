@@ -2621,6 +2621,7 @@ const downloadPDF = () => {
               <p className="text-xs text-gray-500 mt-2">Sections will appear at the bottom of your template</p>
             </div>
 <div className="space-y-2">
+ <div className="space-y-2">
   <button onClick={downloadSVG} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
     <Download className="w-5 h-5" />
     Download SVG
