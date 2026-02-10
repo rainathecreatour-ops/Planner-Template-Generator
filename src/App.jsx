@@ -1,1486 +1,905 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Download, Lock } from 'lucide-react';
 
-const PlannerGenerator = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [accessCode, setAccessCode] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState('minimalist');
-  const [pattern, setPattern] = useState('none');
-  const [selectedSections, setSelectedSections] = useState([]);
-  const [fontFamily, setFontFamily] = useState('default');
-  const [customColors, setCustomColors] = useState(null);
-  const [hiddenSections, setHiddenSections] = useState([]);
+/* ─── TEMPLATES ─────────────────────────────────────────────────────────── */
+const TEMPLATES = {
+  minimalist:   { name:'Minimalist',    bg:'#FFFFFF', primary:'#F5F5F5', accent:'#555555', border:'#CCCCCC', text:'#333333', head:'#EEEEEE' },
+  boho:         { name:'Boho',          bg:'#FFF8F0', primary:'#F4E4D7', accent:'#A67C52', border:'#D4C4B0', text:'#5C4033', head:'#F0DDD0' },
+  funky:        { name:'Funky',         bg:'#FFF9E6', primary:'#FFE5B4', accent:'#FF6B9D', border:'#FFB84D', text:'#2D1B4E', head:'#FFE5B4' },
+  zen:          { name:'Zen',           bg:'#F7F9F9', primary:'#E8EEEE', accent:'#6B7F7F', border:'#C2D1D1', text:'#3A4848', head:'#DDE6E6' },
+  prayer:       { name:'Prayer',        bg:'#F3F0FF', primary:'#E6DEFF', accent:'#7C3AED', border:'#C4B5FD', text:'#5B21B6', head:'#D9D0FF' },
+  parenting:    { name:'Parenting',     bg:'#FFF5E6', primary:'#FFE8CC', accent:'#FF8C42', border:'#FFD4A3', text:'#8B4513', head:'#FFD4A3' },
+  money:        { name:'Money',         bg:'#F0F8F0', primary:'#D4EDDA', accent:'#28A745', border:'#A8D5BA', text:'#155724', head:'#C3E6CB' },
+  professional: { name:'Professional',  bg:'#F8F9FA', primary:'#E9ECEF', accent:'#2C5F8D', border:'#CED4DA', text:'#212529', head:'#DEE2E6' },
+  cozy:         { name:'Cozy',          bg:'#FFF9F5', primary:'#FFE4D6', accent:'#D4885C', border:'#E8C4A8', text:'#5D3A1A', head:'#FFD4BD' },
+  selfWellness: { name:'Self Wellness', bg:'#F5FFFA', primary:'#E0F7F4', accent:'#20B2AA', border:'#B0E5DF', text:'#2F4F4F', head:'#C5EDE9' },
+  artistic:     { name:'Artistic',      bg:'#FFFBF5', primary:'#FFE5D9', accent:'#E63946', border:'#FFCDB2', text:'#1D3557', head:'#FFD4C0' },
+  whimsical:    { name:'Whimsical',     bg:'#FFF8FC', primary:'#F8E8FF', accent:'#C77DFF', border:'#E0AAFF', text:'#5A189A', head:'#EDD5FF' },
+  luxury:       { name:'Luxury',        bg:'#1A1A1A', primary:'#2D2D2D', accent:'#D4AF37', border:'#8B7300', text:'#F5F5F5', head:'#333300' },
+  elegant:      { name:'Elegant',       bg:'#FEFEFE', primary:'#F8F6F4', accent:'#8B7355', border:'#D4C4B0', text:'#2C2416', head:'#EDE8E0' },
+  journal:      { name:'Journal',       bg:'#FFFFF8', primary:'#FFF9E6', accent:'#8B7355', border:'#D4C4B0', text:'#2C2416', head:'#FFF0CC' },
+  dreamJournal: { name:'Dream Journal', bg:'#F5F3FF', primary:'#EDE9FE', accent:'#7C3AED', border:'#C4B5FD', text:'#5B21B6', head:'#DDD6FE' },
+  kidsChores:   { name:'Kids Chores',   bg:'#FFF9E6', primary:'#FFE5CC', accent:'#FF9500', border:'#FFD4A3', text:'#8B4513', head:'#FFD4A3' },
+};
 
-  const templates = {
-    minimalist: { name: 'Minimalist', description: 'Clean, simple, uncluttered', background: '#FFFFFF', primary: '#F5F5F5', accent: '#666666', border: '#CCCCCC', text: '#333333' },
-    boho: { name: 'Boho', description: 'Warm, earthy, relaxed', background: '#FFF8F0', primary: '#F4E4D7', accent: '#A67C52', border: '#D4C4B0', text: '#5C4033' },
-    funky: { name: 'Funky', description: 'Bold, expressive, playful', background: '#FFF9E6', primary: '#FFE5B4', accent: '#FF6B9D', border: '#FFB84D', text: '#2D1B4E' },
-    zen: { name: 'Zen', description: 'Calm, mindful, peaceful', background: '#F7F9F9', primary: '#E8EEEE', accent: '#6B7F7F', border: '#C2D1D1', text: '#3A4848' },
-    prayer: { name: 'Prayer', description: 'Spiritual, peaceful, reflective', background: '#F3F0FF', primary: '#E6DEFF', accent: '#7C3AED', border: '#C4B5FD', text: '#5B21B6' },
-    parenting: { name: 'Parenting', description: 'Organized, nurturing, family-focused', background: '#FFF5E6', primary: '#FFE8CC', accent: '#FF8C42', border: '#FFD4A3', text: '#8B4513' },
-    money: { name: 'Money', description: 'Professional, goal-oriented, structured', background: '#F0F8F0', primary: '#D4EDDA', accent: '#28A745', border: '#A8D5BA', text: '#155724' },
-    professional: { name: 'Professional', description: 'Clean, corporate, efficient', background: '#F8F9FA', primary: '#E9ECEF', accent: '#2C5F8D', border: '#CED4DA', text: '#212529' },
-    cozy: { name: 'Cozy', description: 'Warm, comfortable, inviting', background: '#FFF9F5', primary: '#FFE4D6', accent: '#D4885C', border: '#E8C4A8', text: '#5D3A1A' },
-    selfWellness: { name: 'Self Wellness', description: 'Holistic, balanced, mindful', background: '#F5FFFA', primary: '#E0F7F4', accent: '#20B2AA', border: '#B0E5DF', text: '#2F4F4F' },
-    artistic: { name: 'Artistic', description: 'Creative, expressive, painterly', background: '#FFFBF5', primary: '#FFE5D9', accent: '#E63946', border: '#FFCDB2', text: '#1D3557' },
-    whimsical: { name: 'Whimsical', description: 'Magical, dreamy, enchanting', background: '#FFF8FC', primary: '#F8E8FF', accent: '#C77DFF', border: '#E0AAFF', text: '#5A189A' },
-    luxury: { name: 'Luxury', description: 'Opulent, sophisticated, prestigious', background: '#1A1A1A', primary: '#2D2D2D', accent: '#D4AF37', border: '#B8960F', text: '#F5F5F5' },
-    elegant: { name: 'Elegant', description: 'Refined, graceful, timeless', background: '#FEFEFE', primary: '#F8F6F4', accent: '#8B7355', border: '#D4C4B0', text: '#2C2416' },
-    journal: { name: 'Journal', description: 'Clean, simple writing space', background: '#FFFFF8', primary: '#FFF9E6', accent: '#8B7355', border: '#D4C4B0', text: '#2C2416' },
-    dreamJournal: { name: 'Dream Journal', description: 'Track and explore your dreams', background: '#F5F3FF', primary: '#EDE9FE', accent: '#7C3AED', border: '#C4B5FD', text: '#5B21B6' },
-    kidsChores: { name: 'Kids Chores', description: 'Fun chore tracker with rewards for kids', background: '#FFF9E6', primary: '#FFE5CC', accent: '#FF9500', border: '#FFD4A3', text: '#8B4513' }
-  };
+/* ─── STYLE HELPERS ──────────────────────────────────────────────────────── */
+const S = {
+  box:   (c,extra={}) => ({ background:c.primary, border:`2px solid ${c.border}`, borderRadius:12, padding:'14px 16px', marginBottom:14, ...extra }),
+  title: (c,sz=13)    => ({ color:c.accent, fontWeight:700, fontSize:sz, marginBottom:10, textTransform:'uppercase', letterSpacing:1 }),
+  label: (c)          => ({ fontSize:11, color:c.text, fontWeight:600, marginBottom:4, display:'block' }),
+  line:  (c,mb=8)     => ({ borderBottom:`1px solid ${c.border}`, marginBottom:mb, minHeight:22 }),
+  check: (c)          => ({ display:'flex', alignItems:'center', gap:8, marginBottom:8, fontSize:11, color:c.text }),
+  circle:(c,sz=28)    => ({ width:sz, height:sz, borderRadius:'50%', border:`2px solid ${c.accent}`, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }),
+};
 
-  const fontOptions = {
-    default: { name: 'Default', family: 'sans-serif' },
-    serif: { name: 'Serif', family: 'Georgia, serif' },
-    handwriting: { name: 'Handwriting', family: 'cursive' },
-    modern: { name: 'Modern', family: 'Arial, Helvetica, sans-serif' },
-    elegant: { name: 'Elegant Script', family: '"Times New Roman", serif' }
-  };
+/* ─── REUSABLE COMPONENTS ────────────────────────────────────────────────── */
+const Lines = ({c,n=5,label=''}) => (
+  <div>
+    {label && <div style={S.label(c)}>{label}</div>}
+    {Array.from({length:n}).map((_,i)=><div key={i} style={S.line(c)} />)}
+  </div>
+);
 
-  const templateSections = {
-    minimalist: [{ id: 'todo', name: 'To-Do List' }, { id: 'monthly', name: 'Monthly Overview' }, { id: 'habits', name: 'Habit Tracker' }, { id: 'reflections', name: 'Reflections' }],
-    boho: [{ id: 'gratitude', name: 'Gratitude' }, { id: 'selfcare', name: 'Self-Care' }, { id: 'mood', name: 'Mood Tracker' }, { id: 'affirmations', name: 'Affirmations' }],
-    funky: [{ id: 'creative', name: 'Creative Notes' }, { id: 'loving', name: 'Currently Loving' }, { id: 'mood', name: 'Mood Tracker' }, { id: 'highlights', name: 'Weekly Highlights' }],
-    zen: [{ id: 'breathing', name: 'Breathing Exercise' }, { id: 'intentions', name: 'Intentions' }, { id: 'gratitude', name: 'Gratitude' }, { id: 'mood', name: 'Mood Reflection' }],
-    prayer: [{ id: 'requests', name: 'Prayer Requests' }, { id: 'scripture', name: 'Scripture' }, { id: 'answered', name: 'Answered Prayers' }, { id: 'timelog', name: 'Prayer Time Log' }, { id: 'reflections', name: 'Reflections' }],
-    parenting: [{ id: 'schedule', name: 'Kids Schedule' }, { id: 'meals', name: 'Meal Planning' }, { id: 'shopping', name: 'Shopping List' }, { id: 'activities', name: 'Activities' }, { id: 'gratitude', name: 'Gratitude' }],
-    money: [{ id: 'income', name: 'Income' }, { id: 'expenses', name: 'Expenses' }, { id: 'savings', name: 'Savings Goals' }, { id: 'budget', name: 'Budget Breakdown' }, { id: 'notes', name: 'Financial Notes' }],
-    professional: [{ id: 'schedule', name: 'Schedule' }, { id: 'priorities', name: 'Priority Tasks' }, { id: 'goals', name: 'Goals' }, { id: 'meetings', name: 'Meetings' }, { id: 'actions', name: 'Action Items' }],
-    cozy: [{ id: 'morning', name: 'Morning Routine' }, { id: 'activities', name: 'Cozy Activities' }, { id: 'comfort', name: 'Comfort Check-In' }, { id: 'nourishment', name: 'Nourishment Tracker' }, { id: 'evening', name: 'Evening Wind Down' }],
-    selfWellness: [{ id: 'mind', name: 'Mind' }, { id: 'body', name: 'Body' }, { id: 'spirit', name: 'Spirit' }, { id: 'energy', name: 'Energy Levels' }, { id: 'selfcare', name: 'Self-Care Activities' }, { id: 'reflections', name: 'Reflections' }],
-    artistic: [{ id: 'prompts', name: 'Creative Prompts' }, { id: 'inspiration', name: 'Inspiration Board' }, { id: 'sketch', name: 'Sketch Space' }, { id: 'colormood', name: 'Color Mood' }, { id: 'notes', name: 'Creative Notes' }],
-    whimsical: [{ id: 'dreams', name: 'Dreams' }, { id: 'wishes', name: 'Wishes' }, { id: 'magic', name: 'Magic Moments' }, { id: 'story', name: 'Story' }, { id: 'rainbow', name: 'Mood Rainbow' }],
-    luxury: [{ id: 'priorities', name: 'Priorities' }, { id: 'schedule', name: 'Schedule' }, { id: 'notes', name: 'Notes' }],
-    elegant: [{ id: 'morning', name: 'Morning' }, { id: 'afternoon', name: 'Afternoon' }, { id: 'evening', name: 'Evening' }, { id: 'tasks', name: 'Important Tasks' }, { id: 'notes', name: 'Notes' }, { id: 'reflection', name: 'Reflection' }],
-    journal: [{ id: 'lines', name: 'Writing Lines' }, { id: 'margin', name: 'Margin Line' }],
-    dreamJournal: [{ id: 'sleepinfo', name: 'Sleep Info' }, { id: 'description', name: 'Dream Description' }, { id: 'elements', name: 'Key Elements' }, { id: 'mood', name: 'Dream Mood' }, { id: 'symbols', name: 'Symbols' }, { id: 'interpretation', name: 'Interpretation' }, { id: 'recurring', name: 'Recurring Theme' }],
-    kidsChores: [{ id: 'header', name: 'Header' }, { id: 'petcare', name: 'Pet Care' }, { id: 'homework', name: 'Homework' }, { id: 'hygiene', name: 'Hygiene' }, { id: 'cleaning', name: 'Cleaning' }, { id: 'tracker', name: 'Weekly Tracker' }, { id: 'rewards', name: 'Rewards Section' }]
-  };
-
-  const optionalSections = {
-    monthlyReset: {
-      name: 'Monthly Reset', height: 200,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">MONTHLY RESET</text>
-          <text x="120" y={yPos + 60} fontSize="12" fill={colors.text} fontWeight="600">What worked this month:</text>
-          <line x1="120" y1={yPos + 75} x2="710" y2={yPos + 75} stroke={colors.border} strokeWidth="1" />
-          <text x="120" y={yPos + 100} fontSize="12" fill={colors.text} fontWeight="600">What to improve:</text>
-          <line x1="120" y1={yPos + 115} x2="710" y2={yPos + 115} stroke={colors.border} strokeWidth="1" />
-          <text x="120" y={yPos + 140} fontSize="12" fill={colors.text} fontWeight="600">Next month's focus:</text>
-          <line x1="120" y1={yPos + 155} x2="710" y2={yPos + 155} stroke={colors.border} strokeWidth="1" />
-        </g>
-      )
-    },
-    weeklyCheckin: {
-      name: 'Weekly Check-in', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">WEEKLY CHECK-IN</text>
-          {['Wins', 'Challenges', 'Lessons Learned'].map((item, i) => (
-            <g key={i}>
-              <text x="120" y={yPos + 60 + i * 35} fontSize="11" fill={colors.text} fontWeight="600">{item}:</text>
-              <line x1="120" y1={yPos + 70 + i * 35} x2="710" y2={yPos + 70 + i * 35} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </g>
-      )
-    },
-    lifeBalance: {
-      name: 'Life Balance Wheel', height: 220,
-      render: (colors, yPos) => (
-        <g>
-          <text x="425" y={yPos + 20} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">LIFE BALANCE WHEEL</text>
-          <circle cx="425" cy={yPos + 120} r="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-          {[0,1,2,3,4,5,6,7].map(i => {
-            const angle = (i * 45 - 90) * Math.PI / 180;
-            return <line key={i} x1={425 + 30 * Math.cos(angle)} y1={yPos + 120 + 30 * Math.sin(angle)} x2={425 + 80 * Math.cos(angle)} y2={yPos + 120 + 80 * Math.sin(angle)} stroke={colors.accent} strokeWidth="1" />;
-          })}
-          {['Health', 'Career', 'Finance', 'Relations', 'Growth', 'Fun', 'Spirit', 'Home'].map((area, i) => {
-            const angle = (i * 45 - 90) * Math.PI / 180;
-            return <text key={i} x={425 + 100 * Math.cos(angle)} y={yPos + 120 + 100 * Math.sin(angle)} fontSize="9" fill={colors.text} textAnchor="middle">{area}</text>;
-          })}
-        </g>
-      )
-    },
-    energyTracker: {
-      name: 'Energy Tracker', height: 160,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">ENERGY TRACKER</text>
-          <line x1="150" y1={yPos + 100} x2="700" y2={yPos + 100} stroke={colors.border} strokeWidth="1" />
-          {[0,1,2,3,4,5,6].map(i => (
-            <circle key={i} cx={200 + i * 75} cy={yPos + 80} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
-          ))}
-        </g>
-      )
-    },
-    winsLessons: {
-      name: 'Wins & Lessons', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="300" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="250" y={yPos + 30} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">WINS 🎉</text>
-          {[0,1,2,3].map(i => <line key={i} x1="120" y1={yPos + 55 + i * 25} x2="380" y2={yPos + 55 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-          <rect x="430" y={yPos} width="300" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="580" y={yPos + 30} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">LESSONS 📚</text>
-          {[0,1,2,3].map(i => <line key={i} x1="450" y1={yPos + 55 + i * 25} x2="710" y2={yPos + 55 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-        </g>
-      )
-    },
-    quotesAffirmations: {
-      name: 'Quotes & Affirmations', height: 160,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ DAILY AFFIRMATIONS</text>
-          {[0,1,2,3].map(i => <line key={i} x1="150" y1={yPos + 60 + i * 25} x2="700" y2={yPos + 60 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-        </g>
-      )
-    },
-    notesDoodle: {
-      name: 'Notes & Doodles', height: 200,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">NOTES & DOODLES</text>
-          <rect x="120" y={yPos + 50} width="590" height="110" fill="white" stroke={colors.border} strokeWidth="1" strokeDasharray="5,5" />
-        </g>
-      )
-    },
-    lettingGo: {
-      name: 'Letting Go', height: 160,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">THINGS I'M LETTING GO 🍃</text>
-          {[0,1,2,3].map(i => (
-            <g key={i}>
-              <circle cx="130" cy={yPos + 60 + i * 25} r="5" fill="none" stroke={colors.accent} strokeWidth="1" />
-              <line x1="150" y1={yPos + 60 + i * 25} x2="710" y2={yPos + 60 + i * 25} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </g>
-      )
-    },
-    excitedAbout: {
-      name: 'Excited About', height: 160,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">THINGS I'M EXCITED ABOUT ✨</text>
-          {[0,1,2,3].map(i => (
-            <g key={i}>
-              <text x="130" y={yPos + 63 + i * 25} fontSize="14" fill={colors.accent}>★</text>
-              <line x1="150" y1={yPos + 60 + i * 25} x2="710" y2={yPos + 60 + i * 25} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </g>
-      )
-    },
-    dailyJournal: {
-      name: 'Daily Journal', height: 220,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">DAILY JOURNAL</text>
-          <text x="120" y={yPos + 55} fontSize="11" fill={colors.text}>Date: _________   Mood: _________</text>
-          {[0,1,2,3,4,5,6,7,8,9].map(i => <line key={i} x1="120" y1={yPos + 75 + i * 12} x2="710" y2={yPos + 75 + i * 12} stroke={colors.border} strokeWidth="0.5" />)}
-        </g>
-      )
-    },
-    dreamJournal: {
-      name: 'Dream Journal', height: 220,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 DREAM JOURNAL</text>
-          <text x="120" y={yPos + 55} fontSize="11" fill={colors.text}>Date: _________   Sleep: _________   Wake: _________</text>
-          {[0,1,2,3,4,5,6,7].map(i => <line key={i} x1="120" y1={yPos + 90 + i * 13} x2="710" y2={yPos + 90 + i * 13} stroke={colors.border} strokeWidth="0.5" />)}
-        </g>
-      )
-    },
-    plainJournal: {
-      name: 'Plain Journal', height: 220,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 25} fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">JOURNAL</text>
-          {[0,1,2,3,4,5,6,7,8,9,10,11].map(i => <line key={i} x1="120" y1={yPos + 45 + i * 13} x2="710" y2={yPos + 45 + i * 13} stroke={colors.border} strokeWidth="0.5" />)}
-        </g>
-      )
-    },
-    moodTracker: {
-      name: 'Mood Tracker', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">MOOD TRACKER</text>
-          {['😊', '😌', '😐', '😔', '😢'].map((emoji, i) => (
-            <g key={i}>
-              <circle cx={180 + i * 110} cy={yPos + 90} r="25" fill="white" stroke={colors.accent} strokeWidth="2" />
-              <text x={180 + i * 110} y={yPos + 98} fontSize="24" textAnchor="middle">{emoji}</text>
-              <text x={180 + i * 110} y={yPos + 125} fontSize="9" fill={colors.text} textAnchor="middle">Day __</text>
-            </g>
-          ))}
-        </g>
-      )
-    },
-    habitStreaks: {
-      name: 'Habit Streaks', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🔥 HABIT STREAKS</text>
-          {['Habit 1', 'Habit 2', 'Habit 3'].map((habit, i) => (
-            <g key={i}>
-              <text x="120" y={yPos + 63 + i * 35} fontSize="11" fill={colors.text} fontWeight="600">{habit}:</text>
-              {[0,1,2,3,4,5,6].map(j => (
-                <rect key={j} x={530 + j * 25} y={yPos + 48 + i * 35} width="20" height="20" fill="none" stroke={colors.accent} strokeWidth="1.5" rx="3" />
-              ))}
-            </g>
-          ))}
-        </g>
-      )
-    },
-    progressBars: {
-      name: 'Progress Bars', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">📊 PROGRESS TRACKER</text>
-          {['Goal 1', 'Goal 2', 'Goal 3', 'Goal 4'].map((goal, i) => (
-            <g key={i}>
-              <text x="120" y={yPos + 58 + i * 30} fontSize="11" fill={colors.text} fontWeight="600">{goal}:</text>
-              <rect x="200" y={yPos + 45 + i * 30} width="490" height="16" fill="white" stroke={colors.border} strokeWidth="1" rx="8" />
-            </g>
-          ))}
-        </g>
-      )
-    },
-    gentleReminders: {
-      name: 'Gentle Reminders', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">💝 GENTLE REMINDERS</text>
-          {['✨ You are doing your best', '🌸 Progress, not perfection', '💫 Rest is productive too', '🌟 Small steps count'].map((reminder, i) => (
-            <g key={i}>
-              <rect x="130" y={yPos + 50 + i * 28} width="570" height="22" fill="white" stroke={colors.accent} strokeWidth="1" rx="11" />
-              <text x="425" y={yPos + 66 + i * 28} fontSize="11" fill={colors.text} textAnchor="middle">{reminder}</text>
-            </g>
-          ))}
-        </g>
-      )
-    },
-    visionBoard: {
-      name: 'Vision Board', height: 220,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ VISION BOARD</text>
-          {[0,1,2,3,4,5].map(i => (
-            <rect key={i} x={130 + (i % 3) * 200} y={yPos + 50 + Math.floor(i / 3) * 75} width="180" height="65" fill="white" stroke={colors.accent} strokeWidth="2" strokeDasharray="5,5" rx="8" />
-          ))}
-        </g>
-      )
-    },
-    stickerElements: {
-      name: 'Sticker Elements', height: 180,
-      render: (colors, yPos) => (
-        <g>
-          <rect x="100" y={yPos} width="630" height="160" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="12" />
-          <text x="425" y={yPos + 30} fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ DECORATIVE ELEMENTS</text>
-          {['⭐', '💫', '🌸', '🌙', '☀️', '💖', '🦋', '🌈', '✨', '🎀'].map((sticker, i) => (
-            <g key={i}>
-              <circle cx={180 + (i % 5) * 110} cy={yPos + 75 + Math.floor(i / 5) * 55} r="25" fill="white" stroke={colors.accent} strokeWidth="2" />
-              <text x={180 + (i % 5) * 110} y={yPos + 85 + Math.floor(i / 5) * 55} fontSize="28" textAnchor="middle">{sticker}</text>
-            </g>
-          ))}
-        </g>
-      )
-    }
-  };
-
-  const renderSectionOrReplacement = (sectionId, hiddenSections, colors, originalContent) => {
-    if (!hiddenSections.includes(sectionId)) return originalContent;
-    return null;
-  };
-
-  const renderMinimalistLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="100" y="80" fontSize="28" fontWeight="300" fill={colors.text}>Daily Notes</text>
-      <line x1="100" y1="100" x2="750" y2="100" stroke={colors.border} strokeWidth="0.5" />
-      {renderSectionOrReplacement('todo', hiddenSections, colors, (
-        <>
-          <text x="100" y="140" fontSize="14" fill={colors.accent}>TO-DO LIST</text>
-          {[0,1,2,3,4,5,6,7,8].map(i => (
-            <g key={i}>
-              <rect x="100" y={165 + i * 35} width="12" height="12" fill="none" stroke={colors.border} strokeWidth="1" />
-              <line x1="125" y1={172 + i * 35} x2="400" y2={172 + i * 35} stroke={colors.border} strokeWidth="0.5" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('monthly', hiddenSections, colors, (
-        <>
-          <text x="450" y="140" fontSize="14" fill={colors.accent}>MONTHLY OVERVIEW</text>
-          <rect x="450" y="160" width="280" height="320" fill={colors.primary} stroke={colors.border} strokeWidth="0.5" rx="4" />
-          {[0,1,2,3].map(i => <line key={i} x1="470" y1={200 + i * 40} x2="710" y2={200 + i * 40} stroke={colors.border} strokeWidth="0.3" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('habits', hiddenSections, colors, (
-        <>
-          <text x="100" y="530" fontSize="14" fill={colors.accent}>HABIT TRACKER</text>
-          <rect x="100" y="550" width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="0.5" rx="4" />
-          {[0,1,2,3,4,5,6].map(i => <rect key={i} x={120 + i * 85} y="580" width="70" height="20" fill="white" stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('reflections', hiddenSections, colors, (
-        <>
-          <text x="100" y="770" fontSize="14" fill={colors.accent}>REFLECTIONS</text>
-          {[0,1,2,3].map(i => <line key={i} x1="100" y1={800 + i * 30} x2="730" y2={800 + i * 30} stroke={colors.border} strokeWidth="0.3" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderBohoLayout = (colors, hiddenSections = []) => (
-    <g>
-      <path d="M 100 50 Q 425 80 750 50" fill={colors.primary} opacity="0.6" />
-      <text x="425" y="100" fontSize="32" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Monthly Intentions</text>
-      {renderSectionOrReplacement('gratitude', hiddenSections, colors, (
-        <>
-          <ellipse cx="250" cy="240" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
-          <text x="250" y="225" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Gratitude</text>
-          {[0,1,2,3].map(i => <text key={i} x="250" y={250 + i * 20} fontSize="10" fill={colors.text} textAnchor="middle">___________</text>)}
-        </>
-      ))}
-      {renderSectionOrReplacement('selfcare', hiddenSections, colors, (
-        <>
-          <ellipse cx="600" cy="240" rx="140" ry="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
-          <text x="600" y="225" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Self-Care</text>
-          {[0,1,2,3].map(i => <text key={i} x="600" y={250 + i * 20} fontSize="10" fill={colors.text} textAnchor="middle">___________</text>)}
-        </>
-      ))}
-      {renderSectionOrReplacement('mood', hiddenSections, colors, (
-        <>
-          <text x="425" y="380" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">Mood Tracker</text>
-          {[0,1,2,3,4,5,6].map(i => <circle key={i} cx={200 + i * 75} cy="420" r="25" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('affirmations', hiddenSections, colors, (
-        <>
-          <path d="M 120 550 Q 425 520 730 550 L 730 720 Q 425 750 120 720 Z" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
-          <text x="425" y="590" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">Daily Affirmations</text>
-          {[0,1,2,3,4].map(i => <text key={i} x="425" y={625 + i * 25} fontSize="11" fill={colors.text} textAnchor="middle">_________________________________</text>)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderFunkyLayout = (colors, hiddenSections = []) => (
-    <g>
-      <path d="M 80 50 Q 200 30 320 50 T 560 50 T 800 50 L 800 120 Q 680 140 560 120 T 320 120 T 80 120 Z" fill={colors.accent} opacity="0.8" />
-      <text x="425" y="95" fontSize="34" fontWeight="900" fill="white" textAnchor="middle">BRAIN DUMP</text>
-      {renderSectionOrReplacement('creative', hiddenSections, colors, (
-        <>
-          <ellipse cx="220" cy="250" rx="160" ry="140" fill={colors.primary} stroke={colors.accent} strokeWidth="4" transform="rotate(-15 220 250)" />
-          <text x="220" y="230" fontSize="16" fill={colors.text} textAnchor="middle" fontWeight="700">Creative Notes</text>
-          {[0,1,2,3,4].map(i => <line key={i} x1="130" y1={250 + i * 25} x2="310" y2={250 + i * 25} stroke={colors.accent} strokeWidth="2" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('loving', hiddenSections, colors, (
-        <>
-          <rect x="450" y="150" width="280" height="240" fill={colors.primary} stroke={colors.accent} strokeWidth="4" rx="25" transform="rotate(5 590 270)" />
-          <text x="590" y="200" fontSize="16" fill={colors.text} textAnchor="middle" fontWeight="700">Currently Loving</text>
-          {[0,1,2,3,4,5].map(i => <text key={i} x="590" y={230 + i * 30} fontSize="13" fill={colors.text} textAnchor="middle" fontWeight="600">♥ __________</text>)}
-        </>
-      ))}
-      {renderSectionOrReplacement('mood', hiddenSections, colors, (
-        <>
-          <text x="100" y="480" fontSize="18" fill={colors.accent} fontWeight="900">MOOD TRACKER</text>
-          {[0,1,2,3,4,5,6].map(i => <rect key={i} x={100 + i * 95} y="510" width="80" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="15" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('highlights', hiddenSections, colors, (
-        <>
-          <path d="M 100 650 L 730 650 L 720 850 L 110 850 Z" fill={colors.primary} stroke={colors.accent} strokeWidth="4" />
-          <text x="425" y="690" fontSize="18" fill={colors.text} textAnchor="middle" fontWeight="900">WEEKLY HIGHLIGHTS</text>
-          {[0,1,2,3].map(i => <line key={i} x1="130" y1={720 + i * 30} x2="700" y2={720 + i * 30} stroke={colors.accent} strokeWidth="2" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderZenLayout = (colors, hiddenSections = []) => (
-    <g>
-      <circle cx="425" cy="100" r="60" fill="none" stroke={colors.accent} strokeWidth="0.5" opacity="0.5" />
-      <text x="425" y="110" fontSize="24" fontWeight="300" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Daily Mindfulness</text>
-      {renderSectionOrReplacement('breathing', hiddenSections, colors, (
-        <>
-          <text x="425" y="200" fontSize="12" fill={colors.accent} textAnchor="middle">Breathing Exercise</text>
-          <circle cx="425" cy="260" r="80" fill={colors.primary} stroke={colors.border} strokeWidth="1" />
-          <text x="425" y="255" fontSize="10" fill={colors.text} textAnchor="middle">Inhale / Hold / Exhale</text>
-        </>
-      ))}
-      {renderSectionOrReplacement('intentions', hiddenSections, colors, (
-        <>
-          <text x="425" y="390" fontSize="12" fill={colors.accent} textAnchor="middle">Today's Intentions</text>
-          {[0,1,2].map(i => <line key={i} x1="200" y1={420 + i * 40} x2="650" y2={420 + i * 40} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('gratitude', hiddenSections, colors, (
-        <>
-          <text x="425" y="570" fontSize="12" fill={colors.accent} textAnchor="middle">Gratitude</text>
-          <rect x="180" y="590" width="490" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="0.5" rx="10" />
-          {[0,1,2].map(i => <line key={i} x1="200" y1={620 + i * 30} x2="650" y2={620 + i * 30} stroke={colors.border} strokeWidth="0.3" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('mood', hiddenSections, colors, (
-        <>
-          <text x="425" y="760" fontSize="12" fill={colors.accent} textAnchor="middle">Mood Reflection</text>
-          {[0,1,2,3,4].map(i => <circle key={i} cx={275 + i * 70} cy="810" r="22" fill="none" stroke={colors.accent} strokeWidth="1" opacity="0.6" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderPrayerLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="80" fontSize="30" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Prayer Journal</text>
-      {renderSectionOrReplacement('requests', hiddenSections, colors, (
-        <>
-          <rect x="100" y="120" width="630" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="12" />
-          <text x="425" y="150" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">Prayer Requests & Praise</text>
-          {[0,1,2,3,4].map(i => <line key={i} x1="120" y1={175 + i * 25} x2="710" y2={175 + i * 25} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('scripture', hiddenSections, colors, (
-        <>
-          <rect x="100" y="340" width="310" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="12" />
-          <text x="255" y="370" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Scripture of the Day</text>
-          {[0,1,2,3,4].map(i => <line key={i} x1="120" y1={395 + i * 25} x2="390" y2={395 + i * 25} stroke={colors.border} strokeWidth="0.3" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('answered', hiddenSections, colors, (
-        <>
-          <rect x="430" y="340" width="300" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="12" />
-          <text x="580" y="370" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="600">Answered Prayers</text>
-          {[0,1,2,3,4,5,6].map(i => (
-            <g key={i}>
-              <circle cx="450" cy={390 + i * 20} r="4" fill={colors.accent} />
-              <line x1="465" y1={390 + i * 20} x2="710" y2={390 + i * 20} stroke={colors.border} strokeWidth="0.5" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('timelog', hiddenSections, colors, (
-        <>
-          <text x="425" y="580" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">Prayer Time Log</text>
-          {[0,1,2,3,4,5,6].map(i => <rect key={i} x={135 + i * 85} y="600" width="70" height="35" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="6" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('reflections', hiddenSections, colors, (
-        <>
-          <text x="100" y="690" fontSize="15" fill={colors.accent} fontWeight="600">Today's Reflections</text>
-          {[0,1,2,3].map(i => <line key={i} x1="100" y1={720 + i * 30} x2="730" y2={720 + i * 30} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderParentingLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="80" fontSize="32" fontWeight="600" fill={colors.text} textAnchor="middle">Family Planner</text>
-      {renderSectionOrReplacement('schedule', hiddenSections, colors, (
-        <>
-          <rect x="100" y="120" width="300" height="250" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="250" y="150" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Kids' Schedule</text>
-          {['Morning', 'Afternoon', 'Evening', 'Bedtime'].map((time, i) => (
-            <g key={i}>
-              <text x="120" y={185 + i * 45} fontSize="12" fill={colors.text} fontWeight="600">{time}</text>
-              <line x1="120" y1={195 + i * 45} x2="380" y2={195 + i * 45} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('meals', hiddenSections, colors, (
-        <>
-          <rect x="450" y="120" width="280" height="250" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="590" y="150" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Meal Planning</text>
-          {['Breakfast', 'Lunch', 'Dinner', 'Snacks'].map((meal, i) => (
-            <g key={i}>
-              <circle cx="470" cy={182 + i * 50} r="6" fill={colors.accent} />
-              <line x1="490" y1={195 + i * 50} x2="710" y2={195 + i * 50} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('shopping', hiddenSections, colors, (
-        <>
-          <rect x="100" y="440" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="425" y="470" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Shopping List</text>
-          {[0,1,2,3,4,5].map(i => (
-            <g key={i}>
-              <rect x={120 + (i % 3) * 210} y={485 + Math.floor(i / 3) * 45} width="15" height="15" fill="none" stroke={colors.accent} strokeWidth="2" />
-              <line x1={145 + (i % 3) * 210} y1={493 + Math.floor(i / 3) * 45} x2={310 + (i % 3) * 210} y2={493 + Math.floor(i / 3) * 45} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('activities', hiddenSections, colors, (
-        <>
-          <rect x="100" y="620" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="425" y="650" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Activities & Appointments</text>
-          {[0,1,2].map(i => <line key={i} x1="120" y1={670 + i * 30} x2="710" y2={670 + i * 30} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('gratitude', hiddenSections, colors, (
-        <>
-          <text x="425" y="780" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">Today I'm Grateful For...</text>
-          {[0,1].map(i => <line key={i} x1="150" y1={810 + i * 35} x2="700" y2={810 + i * 35} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderMoneyLayout = (colors, hiddenSections = []) => (
-    <g>
-      <rect x="100" y="50" width="630" height="60" fill={colors.accent} rx="8" />
-      <text x="425" y="90" fontSize="28" fontWeight="700" fill="white" textAnchor="middle">Financial Tracker</text>
-      {renderSectionOrReplacement('income', hiddenSections, colors, (
-        <>
-          <rect x="100" y="140" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="250" y="170" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">INCOME</text>
-          {['Salary', 'Side Hustle', 'Other', 'TOTAL'].map((item, i) => (
-            <g key={i}>
-              <text x="120" y={200 + i * 30} fontSize="11" fill={colors.text}>{item}</text>
-              <line x1="220" y1={203 + i * 30} x2="380" y2={203 + i * 30} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('expenses', hiddenSections, colors, (
-        <>
-          <rect x="430" y="140" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="580" y="170" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">EXPENSES</text>
-          {['Housing', 'Food', 'Transport', 'Other', 'TOTAL'].map((item, i) => (
-            <g key={i}>
-              <text x="450" y={200 + i * 28} fontSize="11" fill={colors.text}>{item}</text>
-              <line x1="560" y1={203 + i * 28} x2="710" y2={203 + i * 28} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('savings', hiddenSections, colors, (
-        <>
-          <text x="425" y="360" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">SAVINGS GOALS</text>
-          {[0,1,2].map(i => (
-            <g key={i}>
-              <rect x={130 + i * 230} y="380" width="200" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="8" />
-              <text x={230 + i * 230} y="410" fontSize="12" fill={colors.text} textAnchor="middle" fontWeight="600">Goal {i + 1}</text>
-              <line x1={150 + i * 230} y1="430" x2={310 + i * 230} y2="430" stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('budget', hiddenSections, colors, (
-        <>
-          <rect x="100" y="530" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="425" y="560" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">BUDGET BREAKDOWN</text>
-          {['Needs (50%)', 'Wants (30%)', 'Savings (20%)'].map((cat, i) => (
-            <g key={i}>
-              <rect x={140 + i * 210} y="575" width="180" height="35" fill="white" stroke={colors.accent} strokeWidth="2" rx="6" />
-              <text x={230 + i * 210} y="598" fontSize="11" fill={colors.text} textAnchor="middle" fontWeight="600">{cat}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('notes', hiddenSections, colors, (
-        <>
-          <text x="100" y="720" fontSize="16" fill={colors.accent} fontWeight="700">FINANCIAL NOTES</text>
-          {[0,1,2,3].map(i => <line key={i} x1="100" y1={750 + i * 30} x2="730" y2={750 + i * 30} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderProfessionalLayout = (colors, hiddenSections = []) => (
-    <g>
-      <rect x="80" y="50" width="690" height="70" fill={colors.accent} />
-      <text x="425" y="95" fontSize="30" fontWeight="700" fill="white" textAnchor="middle">DAILY PLANNER</text>
-      {renderSectionOrReplacement('schedule', hiddenSections, colors, (
-        <>
-          <text x="100" y="160" fontSize="14" fill={colors.accent} fontWeight="700">SCHEDULE</text>
-          {['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM', '6:00 PM'].map((time, i) => (
-            <g key={i}>
-              <rect x="100" y={180 + i * 70} width="300" height="60" fill={colors.primary} stroke={colors.border} strokeWidth="1" />
-              <text x="115" y={205 + i * 70} fontSize="12" fill={colors.text} fontWeight="600">{time}</text>
-              <line x1="115" y1={215 + i * 70} x2="380" y2={215 + i * 70} stroke={colors.border} strokeWidth="0.5" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('priorities', hiddenSections, colors, (
-        <>
-          <rect x="430" y="140" width="300" height="280" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
-          <text x="580" y="170" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">PRIORITY TASKS</text>
-          {[1,2,3,4,5,6,7].map(i => (
-            <g key={i}>
-              <rect x="450" y={185 + i * 35} width="20" height="20" fill="none" stroke={colors.accent} strokeWidth="2" />
-              <line x1="480" y1={196 + i * 35} x2="710" y2={196 + i * 35} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('goals', hiddenSections, colors, (
-        <>
-          <rect x="430" y="440" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
-          <text x="580" y="470" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">GOALS</text>
-          {['Today', 'This Week', 'This Month'].map((period, i) => (
-            <g key={i}>
-              <text x="450" y={500 + i * 30} fontSize="11" fill={colors.text} fontWeight="600">{period}:</text>
-              <line x1="520" y1={502 + i * 30} x2="710" y2={502 + i * 30} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('meetings', hiddenSections, colors, (
-        <>
-          <rect x="100" y="620" width="630" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" />
-          <text x="425" y="650" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">MEETINGS</text>
-          {[0,1,2].map(i => (
-            <g key={i}>
-              <text x="120" y={675 + i * 35} fontSize="11" fill={colors.text}>Time:</text>
-              <line x1="165" y1={677 + i * 35} x2="260" y2={677 + i * 35} stroke={colors.border} strokeWidth="1" />
-              <text x="280" y={675 + i * 35} fontSize="11" fill={colors.text}>Topic:</text>
-              <line x1="330" y1={677 + i * 35} x2="710" y2={677 + i * 35} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('actions', hiddenSections, colors, (
-        <>
-          <text x="425" y="790" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">ACTION ITEMS</text>
-          {[0,1].map(i => <line key={i} x1="120" y1={820 + i * 30} x2="710" y2={820 + i * 30} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderCozyLayout = (colors, hiddenSections = []) => (
-    <g>
-      <ellipse cx="425" cy="80" rx="250" ry="50" fill={colors.primary} opacity="0.7" />
-      <text x="425" y="90" fontSize="32" fontWeight="500" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Cozy Day Planner</text>
-      {renderSectionOrReplacement('morning', hiddenSections, colors, (
-        <>
-          <rect x="100" y="150" width="280" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
-          <text x="240" y="185" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">☀ Morning Routine</text>
-          {['Wake up', 'Breakfast', 'Self-care', 'Start work'].map((item, i) => (
-            <g key={i}>
-              <circle cx="125" cy={212 + i * 35} r="5" fill={colors.accent} />
-              <line x1="140" y1={215 + i * 35} x2="360" y2={215 + i * 35} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('activities', hiddenSections, colors, (
-        <>
-          <rect x="420" y="150" width="310" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
-          <text x="575" y="185" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">✨ Cozy Activities</text>
-          {['Reading time', 'Tea/Coffee break', 'Creative project', 'Relaxation'].map((item, i) => (
-            <g key={i}>
-              <rect x="440" y={200 + i * 40} width="270" height="30" fill="white" stroke={colors.border} strokeWidth="1" rx="15" />
-              <text x="575" y={220 + i * 40} fontSize="11" fill={colors.text} textAnchor="middle">{item}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('comfort', hiddenSections, colors, (
-        <>
-          <text x="425" y="400" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="600">🏠 Comfort Check-In</text>
-          {['Physical', 'Mental', 'Emotional', 'Environmental'].map((type, i) => (
-            <rect key={i} x={115 + i * 150} y="420" width="130" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="20" />
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('nourishment', hiddenSections, colors, (
-        <>
-          <rect x="100" y="560" width="630" height="130" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
-          <text x="425" y="590" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">☕ Nourishment Tracker</text>
-          <text x="150" y="625" fontSize="12" fill={colors.text} fontWeight="600">Water:</text>
-          {[0,1,2,3,4,5,6,7].map(i => <circle key={i} cx={230 + i * 25} cy="620" r="8" fill="none" stroke={colors.accent} strokeWidth="2" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('evening', hiddenSections, colors, (
-        <>
-          <rect x="100" y="730" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="25" />
-          <text x="425" y="765" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="600">🌙 Evening Wind Down</text>
-          {[0,1,2,3].map(i => <line key={i} x1="150" y1={790 + i * 25} x2="700" y2={790 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderSelfWellnessLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="90" fontSize="30" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Wellness Journey</text>
-      {renderSectionOrReplacement('mind', hiddenSections, colors, (
-        <>
-          <rect x="100" y="130" width="200" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="200" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🧠 MIND</text>
-          {['Meditation', 'Journaling', 'Learning', 'Mindfulness'].map((item, i) => (
-            <g key={i}>
-              <circle cx="120" cy={187 + i * 45} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
-              <text x="140" y={192 + i * 45} fontSize="11" fill={colors.text}>{item}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('body', hiddenSections, colors, (
-        <>
-          <rect x="325" y="130" width="200" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="425" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">💪 BODY</text>
-          {['Movement', 'Nutrition', 'Hydration', 'Rest'].map((item, i) => (
-            <g key={i}>
-              <circle cx="345" cy={187 + i * 45} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
-              <text x="365" y={192 + i * 45} fontSize="11" fill={colors.text}>{item}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('spirit', hiddenSections, colors, (
-        <>
-          <rect x="550" y="130" width="180" height="240" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          <text x="640" y="160" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ SPIRIT</text>
-          {['Gratitude', 'Connection', 'Joy', 'Purpose'].map((item, i) => (
-            <g key={i}>
-              <circle cx="570" cy={187 + i * 45} r="8" fill="none" stroke={colors.accent} strokeWidth="2" />
-              <text x="590" y={192 + i * 45} fontSize="11" fill={colors.text}>{item}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('energy', hiddenSections, colors, (
-        <>
-          <text x="425" y="420" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">ENERGY LEVELS</text>
-          <line x1="100" y1="500" x2="750" y2="500" stroke={colors.border} strokeWidth="1" />
-        </>
-      ))}
-      {renderSectionOrReplacement('selfcare', hiddenSections, colors, (
-        <>
-          <text x="425" y="560" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">SELF-CARE ACTIVITIES</text>
-          <rect x="100" y="580" width="630" height="120" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="15" />
-          {[0,1,2,3,4,5].map(i => (
-            <rect key={i} x={120 + (i % 3) * 210} y={605 + Math.floor(i / 3) * 50} width="180" height="35" fill="white" stroke={colors.accent} strokeWidth="1" rx="8" />
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('reflections', hiddenSections, colors, (
-        <>
-          <text x="100" y="750" fontSize="15" fill={colors.accent} fontWeight="700">TODAY'S REFLECTIONS</text>
-          {[0,1,2,3].map(i => <line key={i} x1="100" y1={780 + i * 28} x2="730" y2={780 + i * 28} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderArtisticLayout = (colors, hiddenSections = []) => (
-    <g>
-      <ellipse cx="425" cy="80" rx="280" ry="60" fill={colors.primary} opacity="0.5" transform="rotate(-5 425 80)" />
-      <text x="425" y="90" fontSize="34" fontWeight="700" fill={colors.text} textAnchor="middle" fontStyle="italic">Creative Journal</text>
-      {renderSectionOrReplacement('prompts', hiddenSections, colors, (
-        <>
-          <text x="100" y="150" fontSize="16" fill={colors.accent} fontWeight="700">CREATIVE PROMPTS</text>
-          {[0,1,2,3,4].map(i => {
-            const angle = (i * 72 - 90) * Math.PI / 180;
-            const cx = 250 + 100 * Math.cos(angle);
-            const cy = 280 + 100 * Math.sin(angle);
-            return <circle key={i} cx={cx} cy={cy} r="45" fill={colors.primary} stroke={colors.accent} strokeWidth="3" />;
-          })}
-        </>
-      ))}
-      {renderSectionOrReplacement('sketch', hiddenSections, colors, (
-        <>
-          <rect x="100" y="450" width="630" height="220" fill={colors.primary} stroke={colors.accent} strokeWidth="3" rx="8" />
-          <text x="425" y="485" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">DAILY SKETCH SPACE</text>
-        </>
-      ))}
-      {renderSectionOrReplacement('colormood', hiddenSections, colors, (
-        <>
-          <text x="425" y="730" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">COLOR MOOD</text>
-          {['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Pink'].map((color, i) => (
-            <circle key={i} cx={165 + i * 85} cy="770" r="25" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('notes', hiddenSections, colors, (
-        <>
-          <text x="100" y="860" fontSize="16" fill={colors.accent} fontWeight="700">CREATIVE NOTES</text>
-          <line x1="100" y1="870" x2="730" y2="875" stroke={colors.accent} strokeWidth="2" opacity="0.6" />
-        </>
-      ))}
-    </g>
-  );
-
-  const renderWhimsicalLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="90" fontSize="36" fontWeight="600" fill={colors.text} textAnchor="middle" fontFamily="cursive">Dream Diary</text>
-      {renderSectionOrReplacement('dreams', hiddenSections, colors, (
-        <>
-          <ellipse cx="250" cy="200" rx="170" ry="110" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-          <text x="250" y="190" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ Dreams</text>
-          {[0,1,2].map(i => <line key={i} x1="150" y1={210 + i * 25} x2="350" y2={210 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('wishes', hiddenSections, colors, (
-        <>
-          <ellipse cx="600" cy="200" rx="170" ry="110" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-          <text x="600" y="190" fontSize="15" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 Wishes</text>
-          {[0,1,2].map(i => <line key={i} x1="500" y1={210 + i * 25} x2="700" y2={210 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('magic', hiddenSections, colors, (
-        <>
-          <text x="425" y="370" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">✨ Daily Magic Moments</text>
-          {[0,1,2,3,4,5,6].map(i => <circle key={i} cx={150 + i * 85} cy="425" r="20" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('story', hiddenSections, colors, (
-        <>
-          <rect x="120" y="500" width="610" height="220" fill={colors.primary} stroke={colors.accent} strokeWidth="2" rx="15" />
-          <text x="425" y="535" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🦋 Today's Story</text>
-          {[0,1,2,3,4,5].map(i => <line key={i} x1="150" y1={565 + i * 25} x2="700" y2={565 + i * 25} stroke={colors.border} strokeWidth="1" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('rainbow', hiddenSections, colors, (
-        <>
-          <text x="425" y="780" fontSize="16" fill={colors.accent} textAnchor="middle" fontWeight="700">🌈 Mood Rainbow</text>
-          {[0,1,2,3,4,5,6].map(i => <circle key={i} cx={240 + i * 65} cy="840" r="15" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderLuxuryLayout = (colors, hiddenSections = []) => (
-    <g>
-      <rect x="80" y="40" width="690" height="820" fill="none" stroke={colors.accent} strokeWidth="4" />
-      <rect x="90" y="50" width="670" height="800" fill="none" stroke={colors.accent} strokeWidth="1" />
-      <text x="425" y="110" fontSize="40" fontWeight="700" fill={colors.accent} textAnchor="middle" fontFamily="serif">PLANNER</text>
-      <line x1="200" y1="130" x2="650" y2="130" stroke={colors.accent} strokeWidth="2" />
-      {renderSectionOrReplacement('priorities', hiddenSections, colors, (
-        <>
-          <text x="120" y="180" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">PRIORITIES</text>
-          {[1,2,3,4,5].map(i => (
-            <g key={i}>
-              <rect x="120" y={195 + i * 45} width="610" height="35" fill={colors.primary} stroke={colors.accent} strokeWidth="1" />
-              <text x="140" y={218 + i * 45} fontSize="18" fill={colors.accent} fontWeight="700">{i}</text>
-              <line x1="170" y1={213 + i * 45} x2="710" y2={213 + i * 45} stroke={colors.border} strokeWidth="1" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('schedule', hiddenSections, colors, (
-        <>
-          <text x="120" y="480" fontSize="14" fill={colors.accent} fontWeight="700" letterSpacing="2">SCHEDULE</text>
-          {['MORNING', 'AFTERNOON', 'EVENING'].map((period, i) => (
-            <g key={i}>
-              <rect x="120" y={500 + i * 90} width="610" height="80" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-              <text x="425" y={530 + i * 90} fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">{period}</text>
-              <line x1="140" y1={545 + i * 90} x2="710" y2={545 + i * 90} stroke={colors.border} strokeWidth="0.5" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('notes', hiddenSections, colors, (
-        <>
-          <rect x="120" y="780" width="610" height="70" fill={colors.primary} stroke={colors.accent} strokeWidth="2" />
-          <text x="425" y="805" fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700" letterSpacing="3">NOTES</text>
-          {[0,1].map(i => <line key={i} x1="140" y1={820 + i * 15} x2="710" y2={820 + i * 15} stroke={colors.accent} strokeWidth="0.5" />)}
-        </>
-      ))}
-    </g>
-  );
-
-  const renderElegantLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="80" fontSize="32" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Daily Planner</text>
-      <line x1="250" y1="95" x2="600" y2="95" stroke={colors.accent} strokeWidth="1" />
-      {renderSectionOrReplacement('morning', hiddenSections, colors, (
-        <>
-          <rect x="100" y="140" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
-          <text x="425" y="165" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Morning</text>
-          {[0,1,2,3].map(i => <line key={i} x1="120" y1={195 + i * 25} x2="710" y2={195 + i * 25} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('afternoon', hiddenSections, colors, (
-        <>
-          <rect x="100" y="310" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
-          <text x="425" y="335" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Afternoon</text>
-          {[0,1,2,3].map(i => <line key={i} x1="120" y1={365 + i * 25} x2="710" y2={365 + i * 25} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('evening', hiddenSections, colors, (
-        <>
-          <rect x="100" y="480" width="630" height="150" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
-          <text x="425" y="505" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Evening</text>
-          {[0,1,2,3].map(i => <line key={i} x1="120" y1={535 + i * 25} x2="710" y2={535 + i * 25} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('tasks', hiddenSections, colors, (
-        <>
-          <rect x="100" y="650" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
-          <text x="250" y="675" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Important Tasks</text>
-          {[0,1,2,3,4,5].map(i => (
-            <g key={i}>
-              <circle cx="120" cy={700 + i * 22} r="4" fill="none" stroke={colors.accent} strokeWidth="1" />
-              <line x1="135" y1={700 + i * 22} x2="380" y2={700 + i * 22} stroke={colors.border} strokeWidth="0.5" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('notes', hiddenSections, colors, (
-        <>
-          <rect x="420" y="650" width="310" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="1" rx="3" />
-          <text x="575" y="675" fontSize="14" fill={colors.accent} textAnchor="middle" fontFamily="Georgia">Notes</text>
-          {[0,1,2,3,4,5,6].map(i => <line key={i} x1="440" y1={700 + i * 20} x2="710" y2={700 + i * 20} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('reflection', hiddenSections, colors, (
-        <text x="425" y="840" fontSize="13" fill={colors.accent} textAnchor="middle" fontFamily="Georgia" fontStyle="italic">"Today's Reflection"</text>
-      ))}
-    </g>
-  );
-
-  const renderJournalLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="70" fontSize="28" fontWeight="400" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Journal</text>
-      <line x1="300" y1="85" x2="550" y2="85" stroke={colors.accent} strokeWidth="1" />
-      {renderSectionOrReplacement('lines', hiddenSections, colors, (
-        <>
-          {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map(i => (
-            <line key={i} x1="100" y1={160 + i * 24} x2="750" y2={160 + i * 24} stroke={colors.border} strokeWidth="1" opacity="0.6" />
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('margin', hiddenSections, colors, (
-        <line x1="130" y1="160" x2="130" y2="880" stroke={colors.accent} strokeWidth="1" opacity="0.3" />
-      ))}
-    </g>
-  );
-
-  const renderDreamJournalLayout = (colors, hiddenSections = []) => (
-    <g>
-      <text x="425" y="70" fontSize="32" fontWeight="500" fill={colors.text} textAnchor="middle" fontFamily="Georgia">Dream Journal</text>
-      {renderSectionOrReplacement('sleepinfo', hiddenSections, colors, (
-        <>
-          <rect x="100" y="110" width="630" height="50" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="120" y="135" fontSize="12" fill={colors.text}>Date: ___________</text>
-          <text x="300" y="135" fontSize="12" fill={colors.text}>Bedtime: ___________</text>
-          <text x="500" y="135" fontSize="12" fill={colors.text}>Wake: ___________</text>
-        </>
-      ))}
-      {renderSectionOrReplacement('description', hiddenSections, colors, (
-        <>
-          <rect x="100" y="180" width="630" height="200" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="425" y="205" fontSize="14" fill={colors.accent} textAnchor="middle" fontWeight="700">🌙 DREAM DESCRIPTION</text>
-          {[0,1,2,3,4,5,6,7,8,9].map(i => <line key={i} x1="120" y1={225 + i * 15} x2="710" y2={225 + i * 15} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('elements', hiddenSections, colors, (
-        <>
-          <rect x="100" y="400" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="250" y="425" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">KEY ELEMENTS</text>
-          {['People', 'Places', 'Objects', 'Emotions'].map((item, i) => (
-            <g key={i}>
-              <text x="120" y={450 + i * 22} fontSize="10" fill={colors.text} fontWeight="600">{item}:</text>
-              <line x1="180" y1={452 + i * 22} x2="380" y2={452 + i * 22} stroke={colors.border} strokeWidth="0.5" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('mood', hiddenSections, colors, (
-        <>
-          <rect x="430" y="400" width="300" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="580" y="425" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">DREAM MOOD</text>
-          {['Happy', 'Calm', 'Confused', 'Scary', 'Exciting'].map((mood, i) => (
-            <g key={i}>
-              <circle cx="460" cy={447 + i * 20} r="6" fill="none" stroke={colors.accent} strokeWidth="1.5" />
-              <text x="480" y={452 + i * 20} fontSize="10" fill={colors.text}>{mood}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('symbols', hiddenSections, colors, (
-        <>
-          <rect x="100" y="560" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="425" y="585" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">SYMBOLS & MEANINGS</text>
-          {[0,1,2].map(i => <line key={i} x1="120" y1={600 + i * 20} x2="710" y2={600 + i * 20} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('interpretation', hiddenSections, colors, (
-        <>
-          <rect x="100" y="680" width="630" height="100" fill={colors.primary} stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="425" y="705" fontSize="13" fill={colors.accent} textAnchor="middle" fontWeight="700">MY INTERPRETATION</text>
-          {[0,1,2,3].map(i => <line key={i} x1="120" y1={720 + i * 18} x2="710" y2={720 + i * 18} stroke={colors.border} strokeWidth="0.5" />)}
-        </>
-      ))}
-      {renderSectionOrReplacement('recurring', hiddenSections, colors, (
-        <text x="425" y="815" fontSize="12" fill={colors.accent} textAnchor="middle" fontWeight="700">Recurring theme? ☐ Yes  ☐ No</text>
-      ))}
-    </g>
-  );
-
-  const renderKidsChoresLayout = (colors, hiddenSections = []) => (
-    <g>
-      {renderSectionOrReplacement('header', hiddenSections, colors, (
-        <>
-          <rect x="80" y="40" width="690" height="80" fill={colors.accent} rx="15" />
-          <text x="425" y="75" fontSize="36" fontWeight="700" fill="white" textAnchor="middle">⭐ MY CHORE CHART ⭐</text>
-          <text x="425" y="105" fontSize="16" fontWeight="600" fill="white" textAnchor="middle">Name: _______________</text>
-        </>
-      ))}
-      {renderSectionOrReplacement('petcare', hiddenSections, colors, (
-        <>
-          <rect x="100" y="150" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="3" rx="15" />
-          <text x="250" y="180" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">🐾 PET CARE</text>
-          {['Feed pets', 'Water bowl', 'Walk dog', 'Clean cage'].map((task, i) => (
-            <g key={i}>
-              <circle cx="120" cy={207 + i * 35} r="10" fill="none" stroke={colors.accent} strokeWidth="3" />
-              <text x="145" y={213 + i * 35} fontSize="14" fill={colors.text} fontWeight="600">{task}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('homework', hiddenSections, colors, (
-        <>
-          <rect x="430" y="150" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="3" rx="15" />
-          <text x="580" y="180" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">📚 HOMEWORK</text>
-          {['Reading', 'Math', 'Writing', 'Study time'].map((task, i) => (
-            <g key={i}>
-              <circle cx="450" cy={207 + i * 35} r="10" fill="none" stroke={colors.accent} strokeWidth="3" />
-              <text x="475" y={213 + i * 35} fontSize="14" fill={colors.text} fontWeight="600">{task}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('hygiene', hiddenSections, colors, (
-        <>
-          <rect x="100" y="360" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="3" rx="15" />
-          <text x="250" y="390" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">🛁 HYGIENE</text>
-          {['Brush teeth AM', 'Brush teeth PM', 'Shower/Bath', 'Wash hands'].map((task, i) => (
-            <g key={i}>
-              <circle cx="120" cy={417 + i * 35} r="10" fill="none" stroke={colors.accent} strokeWidth="3" />
-              <text x="145" y={423 + i * 35} fontSize="14" fill={colors.text} fontWeight="600">{task}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('cleaning', hiddenSections, colors, (
-        <>
-          <rect x="430" y="360" width="300" height="180" fill={colors.primary} stroke={colors.border} strokeWidth="3" rx="15" />
-          <text x="580" y="390" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">🧹 CLEANING</text>
-          {['Make bed', 'Clean room', 'Put away toys', 'Help dishes'].map((task, i) => (
-            <g key={i}>
-              <circle cx="450" cy={417 + i * 35} r="10" fill="none" stroke={colors.accent} strokeWidth="3" />
-              <text x="475" y={423 + i * 35} fontSize="14" fill={colors.text} fontWeight="600">{task}</text>
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('tracker', hiddenSections, colors, (
-        <>
-          <rect x="100" y="570" width="630" height="140" fill={colors.primary} stroke={colors.border} strokeWidth="3" rx="15" />
-          <text x="425" y="600" fontSize="18" fill={colors.accent} textAnchor="middle" fontWeight="700">📅 WEEKLY TRACKER</text>
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-            <g key={i}>
-              <rect x={120 + i * 85} y="620" width="75" height="70" fill="white" stroke={colors.accent} strokeWidth="2" rx="10" />
-              <text x={157.5 + i * 85} y="645" fontSize="14" fill={colors.text} textAnchor="middle" fontWeight="700">{day}</text>
-              <line x1={135 + i * 85} y1="665" x2={180 + i * 85} y2="665" stroke={colors.border} strokeWidth="2" />
-            </g>
-          ))}
-        </>
-      ))}
-      {renderSectionOrReplacement('rewards', hiddenSections, colors, (
-        <>
-          <rect x="100" y="740" width="630" height="140" fill={colors.accent} stroke={colors.border} strokeWidth="3" rx="15" />
-          <text x="425" y="770" fontSize="20" fill="white" textAnchor="middle" fontWeight="700">🎁 REWARDS & GOALS 🎁</text>
-          <rect x="120" y="785" width="280" height="75" fill="white" stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="260" y="810" fontSize="14" fill={colors.text} textAnchor="middle" fontWeight="600">Goal for this week:</text>
-          <line x1="140" y1="830" x2="380" y2="830" stroke={colors.border} strokeWidth="2" />
-          <rect x="430" y="785" width="280" height="75" fill="white" stroke={colors.border} strokeWidth="2" rx="10" />
-          <text x="570" y="810" fontSize="14" fill={colors.text} textAnchor="middle" fontWeight="600">Reward when done:</text>
-          <line x1="450" y1="830" x2="690" y2="830" stroke={colors.border} strokeWidth="2" />
-        </>
-      ))}
-    </g>
-  );
-
-  const renderPattern = (patternType, colors) => {
-    if (patternType === 'none') return null;
-    return (
-      <defs>
-        {patternType === 'zebra' && (
-          <pattern id="zebraPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <rect width="40" height="40" fill={colors.background} />
-            <path d="M0,0 Q10,20 0,40" fill="none" stroke="#000" strokeWidth="8" opacity="0.1" />
-            <path d="M20,0 Q30,20 20,40" fill="none" stroke="#000" strokeWidth="8" opacity="0.1" />
-          </pattern>
+const CheckList = ({c,items,days=false}) => (
+  <div>
+    {items.map((item,i)=>(
+      <div key={i} style={S.check(c)}>
+        <div style={{width:14,height:14,border:`2px solid ${c.accent}`,borderRadius:3,flexShrink:0}} />
+        <span style={{flex:1}}>{item}</span>
+        {days && (
+          <div style={{display:'flex',gap:3}}>
+            {['M','T','W','T','F','S','S'].map((d,j)=>(
+              <div key={j} style={{width:14,height:14,border:`1.5px solid ${c.accent}`,borderRadius:2,fontSize:8,display:'flex',alignItems:'center',justifyContent:'center',color:c.accent}}>{d}</div>
+            ))}
+          </div>
         )}
-        {patternType === 'leopard' && (
-          <pattern id="leopardPattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-            <rect width="60" height="60" fill={colors.background} />
-            <ellipse cx="15" cy="15" rx="8" ry="6" fill="none" stroke="#000" strokeWidth="2" opacity="0.15" />
-            <ellipse cx="45" cy="40" rx="7" ry="5" fill="none" stroke="#000" strokeWidth="2" opacity="0.15" />
-          </pattern>
-        )}
-        {patternType === 'stars' && (
-          <pattern id="starsPattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
-            <rect width="50" height="50" fill={colors.background} />
-            <polygon points="25,10 27,18 35,18 29,23 31,31 25,26 19,31 21,23 15,18 23,18" fill={colors.accent} opacity="0.12" />
-          </pattern>
-        )}
-        {patternType === 'hearts' && (
-          <pattern id="heartsPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <rect width="40" height="40" fill={colors.background} />
-            <path d="M20,12 C20,10 18,8 16,8 C14,8 13,9 13,11 C13,9 12,8 10,8 C8,8 6,10 6,12 C6,16 13,20 13,20 C13,20 20,16 20,12" fill={colors.accent} opacity="0.15" />
-          </pattern>
-        )}
-        {patternType === 'polkadot' && (
-          <pattern id="polkadotPattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-            <rect width="30" height="30" fill={colors.background} />
-            <circle cx="15" cy="15" r="4" fill="#000" opacity="0.1" />
-          </pattern>
-        )}
-      </defs>
-    );
-  };
+      </div>
+    ))}
+  </div>
+);
 
-  const getPatternFill = (patternType) => {
-    const map = { zebra: 'url(#zebraPattern)', leopard: 'url(#leopardPattern)', stars: 'url(#starsPattern)', hearts: 'url(#heartsPattern)', polkadot: 'url(#polkadotPattern)' };
-    return map[patternType] || null;
-  };
+const ProgressBar = ({c,label}) => (
+  <div style={{marginBottom:10}}>
+    <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+      <span style={{fontSize:11,color:c.text,fontWeight:600}}>{label}</span>
+      <span style={{fontSize:10,color:c.accent}}>___%</span>
+    </div>
+    <div style={{height:10,background:'white',borderRadius:5,border:`1px solid ${c.border}`}} />
+  </div>
+);
 
-  const getActiveColors = () => {
-    const baseColors = templates[selectedTemplate];
-    if (!customColors) return baseColors;
-    return { ...baseColors, accent: customColors.accent || baseColors.accent, border: customColors.border || baseColors.border, text: customColors.text || baseColors.text };
-  };
+const MoodRow = ({c,moods=['😊','😌','😐','😔','😢']}) => (
+  <div style={{display:'flex',justifyContent:'space-around',padding:'6px 0'}}>
+    {moods.map((m,i)=>(
+      <div key={i} style={{textAlign:'center'}}>
+        <div style={{...S.circle(c,34),fontSize:20,marginBottom:3}}>{m}</div>
+        <div style={{fontSize:9,color:c.text}}>Day __</div>
+      </div>
+    ))}
+  </div>
+);
 
-  const handleLogin = () => {
-    if (accessCode === 'PLAN2024') setIsAuthenticated(true);
-    else alert('Invalid code');
-  };
+const WeekBoxes = ({c}) => (
+  <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:4}}>
+    {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>(
+      <div key={i} style={{background:'white',border:`1.5px solid ${c.accent}`,borderRadius:8,padding:'6px 2px',textAlign:'center'}}>
+        <div style={{fontSize:10,fontWeight:700,color:c.text,marginBottom:4}}>{d}</div>
+        <div style={{borderBottom:`1px solid ${c.border}`,marginBottom:4}} />
+        <div style={{fontSize:9,color:c.text}}>Score:</div>
+        <div style={{borderBottom:`1px solid ${c.border}`,marginTop:4}} />
+      </div>
+    ))}
+  </div>
+);
 
-  const downloadSVG = () => {
-    try {
-      const svg = document.getElementById('template-svg');
-      if (!svg) return alert('Not found');
-      const clone = svg.cloneNode(true);
-      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      const content = new XMLSerializer().serializeToString(clone);
-      const blob = new Blob([content], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${selectedTemplate}-planner.svg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      alert('SVG download failed');
-    }
-  };
+const Grid2 = ({children,gap=14}) => <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap,marginBottom:14}}>{children}</div>;
 
-  const downloadPNG = () => {
-    try {
-      const svg = document.getElementById('template-svg');
-      if (!svg) return alert('Not found');
-      const svgData = new XMLSerializer().serializeToString(svg);
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      const scale = 3;
-      canvas.width = 850 * scale;
-      canvas.height = parseInt(svg.getAttribute('height')) * scale;
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-      img.onload = () => {
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(url);
-        canvas.toBlob((blob) => {
-          const pngUrl = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = pngUrl;
-          link.download = `${selectedTemplate}-planner.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(pngUrl);
-        });
-      };
-      img.src = url;
-    } catch (e) {
-      alert('PNG download failed');
-    }
-  };
+/* ─── TEMPLATE LAYOUTS ───────────────────────────────────────────────────── */
+const LAYOUTS = {
+  minimalist: (c) => (
+    <>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>✓ To-Do List</div>
+          {Array.from({length:10}).map((_,i)=>(
+            <div key={i} style={S.check(c)}>
+              <div style={{width:12,height:12,border:`1.5px solid ${c.border}`,borderRadius:2,flexShrink:0}} />
+              <div style={{flex:1,...S.line(c,0)}} />
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={S.box(c)}>
+            <div style={S.title(c)}>📅 Monthly Overview</div>
+            <Lines c={c} n={5} />
+          </div>
+          <div style={S.box(c,{marginBottom:0})}>
+            <div style={S.title(c)}>🔁 Habit Tracker</div>
+            <CheckList c={c} items={['Habit 1','Habit 2','Habit 3','Habit 4']} days={true} />
+          </div>
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>💭 Reflections</div>
+        <Lines c={c} n={4} />
+      </div>
+    </>
+  ),
 
-  const downloadA4 = () => {
-    try {
-      const svg = document.getElementById('template-svg');
-      if (!svg) return alert('Not found');
-      const svgData = new XMLSerializer().serializeToString(svg);
-      const svgHeight = parseInt(svg.getAttribute('height'));
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      const pdfWidth = 2480;
-      const pdfHeight = 3508;
-      canvas.width = pdfWidth;
-      canvas.height = pdfHeight;
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-      img.onload = () => {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, pdfWidth, pdfHeight);
-        const scale = Math.min(pdfWidth / 850, pdfHeight / svgHeight);
-        const offsetX = (pdfWidth - 850 * scale) / 2;
-        const offsetY = (pdfHeight - svgHeight * scale) / 2;
-        ctx.save();
-        ctx.translate(offsetX, offsetY);
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, 0, 0);
-        ctx.restore();
-        URL.revokeObjectURL(url);
-        canvas.toBlob((blob) => {
-          const pngUrl = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = pngUrl;
-          link.download = `${selectedTemplate}-planner-A4.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(pngUrl);
-          alert('✅ Downloaded! In Canva: New design → A4 → Upload → drag to fit page.');
-        }, 'image/png');
-      };
-      img.src = url;
-    } catch (e) {
-      alert('A4 download failed');
-    }
-  };
+  boho: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:16}}>
+        <div style={{fontSize:22,fontWeight:400,color:c.text,fontFamily:'Georgia',marginBottom:4}}>Monthly Intentions</div>
+        <div style={{borderBottom:`2px solid ${c.accent}`,width:120,margin:'0 auto'}} />
+      </div>
+      <Grid2>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:40,textAlign:'center'}}>
+          <div style={S.title(c)}>🌿 Gratitude</div>
+          <Lines c={c} n={4} />
+        </div>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:40,textAlign:'center'}}>
+          <div style={S.title(c)}>✨ Self-Care</div>
+          <Lines c={c} n={4} />
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🌙 Mood Tracker</div>
+        <MoodRow c={c} moods={['🌞','🌤','⛅','🌧','⛈']} />
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🌸 Daily Affirmations</div>
+        <Lines c={c} n={5} />
+      </div>
+    </>
+  ),
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-          <div className="flex justify-center mb-6">
-            <div className="bg-pink-100 p-4 rounded-full">
-              <Lock className="w-8 h-8 text-pink-600" />
+  funky: (c) => (
+    <>
+      <div style={{background:c.accent,borderRadius:20,padding:'12px 20px',marginBottom:14,textAlign:'center'}}>
+        <div style={{fontSize:22,fontWeight:900,color:'white',letterSpacing:2}}>BRAIN DUMP 🧠</div>
+      </div>
+      <Grid2>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:28,transform:'rotate(-1deg)'}}>
+          <div style={S.title(c)}>💡 Creative Notes</div>
+          <Lines c={c} n={5} />
+        </div>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:28,transform:'rotate(1deg)'}}>
+          <div style={S.title(c)}>💖 Currently Loving</div>
+          {['⭐ ___________','⭐ ___________','⭐ ___________','⭐ ___________','⭐ ___________'].map((t,i)=><div key={i} style={{fontSize:12,color:c.text,marginBottom:8}}>{t}</div>)}
+        </div>
+      </Grid2>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🎨 Mood Tracker</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+            {['😍','🤩','😊','😐','😤','😭','🤯'].map((m,i)=><div key={i} style={{...S.circle(c,32),fontSize:18}}>{m}</div>)}
+          </div>
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🌟 Weekly Highlights</div>
+          <Lines c={c} n={5} />
+        </div>
+      </Grid2>
+    </>
+  ),
+
+  zen: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:16}}>
+        <div style={{fontSize:20,fontWeight:300,color:c.text,fontFamily:'Georgia'}}>Daily Mindfulness 🕊</div>
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🌬 Breathing</div>
+          <div style={{display:'flex',justifyContent:'center',padding:'8px 0'}}>
+            <div style={{...S.circle(c,80),flexDirection:'column',gap:3,fontSize:10,color:c.accent}}>
+              <span>Inhale</span><span>Hold</span><span>Exhale</span>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-center mb-2">Planner Generator</h1>
-          <p className="text-center text-gray-600 mb-6">Enter your access code</p>
-          <input
-            type="text"
-            value={accessCode}
-            onChange={(e) => setAccessCode(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-            placeholder="Access Code"
-            className="w-full px-4 py-3 border-2 rounded-lg mb-4"
-          />
-          <button onClick={handleLogin} className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-lg font-semibold">
-            Enter
-          </button>
-          <p className="text-xs text-center text-gray-500 mt-4">Code: PLAN2024</p>
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🎯 Intentions</div>
+          <Lines c={c} n={4} />
+        </div>
+      </Grid2>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🙏 Gratitude</div>
+          <Lines c={c} n={4} />
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🌊 Mood Reflection</div>
+          <MoodRow c={c} moods={['😌','🙂','😐','😔','😤']} />
+          <Lines c={c} n={2} />
+        </div>
+      </Grid2>
+    </>
+  ),
+
+  prayer: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:22,fontWeight:400,fontFamily:'Georgia',color:c.text}}>✝ Prayer Journal</div>
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🙏 Prayer Requests & Praise</div>
+        <Lines c={c} n={5} />
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>📖 Scripture of the Day</div>
+          <div style={{fontSize:10,color:c.text,fontStyle:'italic',marginBottom:8}}>Verse: _________________</div>
+          <Lines c={c} n={4} />
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>✅ Answered Prayers</div>
+          {Array.from({length:6}).map((_,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:c.accent,flexShrink:0}} />
+              <div style={{flex:1,borderBottom:`1px solid ${c.border}`}} />
+            </div>
+          ))}
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>⏰ Prayer Time Log</div>
+        <WeekBoxes c={c} />
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>💭 Today's Reflections</div>
+        <Lines c={c} n={3} />
+      </div>
+    </>
+  ),
+
+  parenting: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:22,fontWeight:600,color:c.text}}>👨‍👩‍👧‍👦 Family Planner</div>
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>📅 Kids' Schedule</div>
+          {['☀️ Morning','🌤 Afternoon','🌙 Evening','🛏 Bedtime'].map((t,i)=>(
+            <div key={i} style={{marginBottom:10}}>
+              <div style={{fontSize:11,fontWeight:600,color:c.text,marginBottom:3}}>{t}</div>
+              <div style={S.line(c,0)} />
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🍽 Meal Planning</div>
+          {['Breakfast','Lunch','Dinner','Snacks'].map((t,i)=>(
+            <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:c.accent,flexShrink:0}} />
+              <span style={{fontSize:11,fontWeight:600,color:c.text,width:65}}>{t}</span>
+              <div style={{flex:1,borderBottom:`1px solid ${c.border}`}} />
+            </div>
+          ))}
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🛒 Shopping List</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+          {Array.from({length:9}).map((_,i)=>(
+            <div key={i} style={S.check(c)}>
+              <div style={{width:12,height:12,border:`1.5px solid ${c.border}`,borderRadius:2,flexShrink:0}} />
+              <div style={{flex:1,borderBottom:`1px solid ${c.border}`,minHeight:16}} />
+            </div>
+          ))}
         </div>
       </div>
-    );
-  }
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>❤️ Grateful For...</div>
+        <Lines c={c} n={3} />
+      </div>
+    </>
+  ),
 
-  const template = templates[selectedTemplate];
-  const totalHeight = 900 + selectedSections.reduce((total, key) => total + (optionalSections[key]?.height || 0), 0);
+  money: (c) => (
+    <>
+      <div style={{background:c.accent,borderRadius:10,padding:'12px 18px',marginBottom:14,textAlign:'center'}}>
+        <div style={{fontSize:20,fontWeight:700,color:'white'}}>💰 Financial Tracker</div>
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>📈 Income</div>
+          {['Salary','Side Hustle','Other','─── TOTAL'].map((t,i)=>(
+            <div key={i} style={{display:'flex',justifyContent:'space-between',marginBottom:8,borderBottom:`1px solid ${i===3?c.accent:c.border}`,paddingBottom:4}}>
+              <span style={{fontSize:11,color:c.text,fontWeight:i===3?700:400}}>{t}</span>
+              <span style={{fontSize:11,color:c.accent}}>$_______</span>
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>📉 Expenses</div>
+          {['Housing','Food','Transport','Other','─── TOTAL'].map((t,i)=>(
+            <div key={i} style={{display:'flex',justifyContent:'space-between',marginBottom:8,borderBottom:`1px solid ${i===4?c.accent:c.border}`,paddingBottom:4}}>
+              <span style={{fontSize:11,color:c.text,fontWeight:i===4?700:400}}>{t}</span>
+              <span style={{fontSize:11,color:c.accent}}>$_______</span>
+            </div>
+          ))}
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🎯 Savings Goals</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
+          {['Goal 1','Goal 2','Goal 3'].map((g,i)=>(
+            <div key={i} style={{background:'white',border:`1.5px solid ${c.border}`,borderRadius:8,padding:10}}>
+              <div style={{fontSize:12,fontWeight:600,color:c.text,marginBottom:6}}>{g}</div>
+              <div style={{fontSize:10,color:c.text}}>Target: $</div>
+              <div style={S.line(c,6)} />
+              <div style={{fontSize:10,color:c.text}}>Saved: $</div>
+              <div style={S.line(c,0)} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>📋 Budget — 50/30/20</div>
+        <ProgressBar c={c} label="Needs (50%)" />
+        <ProgressBar c={c} label="Wants (30%)" />
+        <ProgressBar c={c} label="Savings (20%)" />
+      </div>
+    </>
+  ),
+
+  professional: (c) => (
+    <>
+      <div style={{background:c.accent,padding:'12px 18px',borderRadius:8,marginBottom:14}}>
+        <div style={{fontSize:20,fontWeight:700,color:'white',letterSpacing:2,textAlign:'center'}}>DAILY PLANNER</div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1.2fr 0.8fr',gap:14}}>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🕐 Schedule</div>
+          {['8:00','9:00','10:00','11:00','12:00','1:00','2:00','3:00','4:00','5:00'].map((t,i)=>(
+            <div key={i} style={{display:'flex',gap:10,marginBottom:7,alignItems:'center'}}>
+              <span style={{fontSize:10,color:c.accent,fontWeight:600,width:42,flexShrink:0}}>{t}</span>
+              <div style={{flex:1,background:'white',border:`1px solid ${c.border}`,borderRadius:4,height:20}} />
+            </div>
+          ))}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <div style={S.box(c,{marginBottom:0})}>
+            <div style={S.title(c)}>⚡ Priority Tasks</div>
+            {[1,2,3,4,5,6,7].map(i=>(
+              <div key={i} style={S.check(c)}>
+                <div style={{...S.circle(c,14),marginRight:0,flexShrink:0,fontSize:9,fontWeight:700,color:c.accent}}>{i}</div>
+                <div style={{flex:1,borderBottom:`1px solid ${c.border}`,minHeight:16}} />
+              </div>
+            ))}
+          </div>
+          <div style={S.box(c,{marginBottom:0})}>
+            <div style={S.title(c)}>🎯 Goals</div>
+            {['Today','This Week','This Month'].map((p,i)=>(
+              <div key={i} style={{marginBottom:8}}>
+                <div style={{fontSize:10,fontWeight:600,color:c.accent}}>{p}</div>
+                <div style={S.line(c,0)} />
+              </div>
+            ))}
+          </div>
+          <div style={S.box(c,{marginBottom:0})}>
+            <div style={S.title(c)}>📞 Meetings</div>
+            {Array.from({length:3}).map((_,i)=>(
+              <div key={i} style={{marginBottom:8,fontSize:10,color:c.text}}>
+                <div><span style={{fontWeight:600}}>Time:</span> <span style={{borderBottom:`1px solid ${c.border}`,display:'inline-block',width:80}} /></div>
+                <div style={{marginTop:4}}><span style={{fontWeight:600}}>Topic:</span> <span style={{borderBottom:`1px solid ${c.border}`,display:'inline-block',width:70}} /></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  ),
+
+  cozy: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:22,fontWeight:500,fontFamily:'Georgia',color:c.text}}>☕ Cozy Day Planner</div>
+      </div>
+      <Grid2>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:24}}>
+          <div style={S.title(c)}>☀️ Morning Routine</div>
+          {['Wake up','Breakfast','Self-care','Start work'].map((t,i)=>(
+            <div key={i} style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:c.accent,flexShrink:0}} />
+              <span style={{fontSize:11,color:c.text}}>{t}</span>
+              <div style={{flex:1,borderBottom:`1px solid ${c.border}`}} />
+            </div>
+          ))}
+        </div>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:24}}>
+          <div style={S.title(c)}>✨ Cozy Activities</div>
+          {['Reading','Tea break','Creative','Relax'].map((t,i)=>(
+            <div key={i} style={{background:'white',border:`1px solid ${c.border}`,borderRadius:14,padding:'5px 10px',marginBottom:6,fontSize:11,color:c.text,textAlign:'center'}}>{t}</div>
+          ))}
+        </div>
+      </Grid2>
+      <div style={{...S.box(c),borderRadius:24}}>
+        <div style={S.title(c)}>💧 Nourishment</div>
+        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <span style={{fontSize:11,fontWeight:600,color:c.text}}>Water:</span>
+          {Array.from({length:8}).map((_,i)=><div key={i} style={{...S.circle(c,22),fontSize:12}}>💧</div>)}
+        </div>
+      </div>
+      <div style={{...S.box(c),borderRadius:24}}>
+        <div style={S.title(c)}>🌙 Evening Wind Down</div>
+        <Lines c={c} n={4} />
+      </div>
+    </>
+  ),
+
+  selfWellness: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:20,fontWeight:400,fontFamily:'Georgia',color:c.text}}>🌿 Wellness Journey</div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:14}}>
+        {[
+          {icon:'🧠',title:'MIND',items:['Meditation','Journaling','Learning','Mindfulness']},
+          {icon:'💪',title:'BODY',items:['Movement','Nutrition','Hydration','Rest']},
+          {icon:'✨',title:'SPIRIT',items:['Gratitude','Connection','Joy','Purpose']}
+        ].map((col,i)=>(
+          <div key={i} style={S.box(c,{marginBottom:0})}>
+            <div style={S.title(c)}>{col.icon} {col.title}</div>
+            {col.items.map((item,j)=>(
+              <div key={j} style={S.check(c)}>
+                <div style={{...S.circle(c,14),marginRight:0,flexShrink:0}} />
+                <span style={{fontSize:10}}>{item}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>⚡ Energy Levels</div>
+        <WeekBoxes c={c} />
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>💆 Self-Care Activities</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+          {Array.from({length:6}).map((_,i)=>(
+            <div key={i} style={{background:'white',border:`1.5px solid ${c.accent}`,borderRadius:8,padding:8,minHeight:40}} />
+          ))}
+        </div>
+      </div>
+    </>
+  ),
+
+  artistic: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14,fontStyle:'italic'}}>
+        <div style={{fontSize:24,fontWeight:700,color:c.text,fontFamily:'Georgia'}}>Creative Journal 🎨</div>
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>💡 Creative Prompts</div>
+          {[1,2,3,4,5].map(i=>(
+            <div key={i} style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
+              <div style={{...S.circle(c,20),fontSize:10,color:c.accent,flexShrink:0}}>{i}</div>
+              <div style={{flex:1,borderBottom:`1px solid ${c.border}`}} />
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🖼 Inspiration Board</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+            {Array.from({length:4}).map((_,i)=>(
+              <div key={i} style={{background:'white',border:`2px dashed ${c.accent}`,borderRadius:8,height:55}} />
+            ))}
+          </div>
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>✏️ Daily Sketch Space</div>
+        <div style={{background:'white',border:`2px dashed ${c.border}`,borderRadius:8,height:100}} />
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🌈 Color Mood</div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {['Red','Orange','Yellow','Green','Blue','Purple'].map((col,i)=>(
+              <div key={i} style={{textAlign:'center'}}>
+                <div style={{...S.circle(c,26),marginBottom:2}} />
+                <div style={{fontSize:8,color:c.text}}>{col}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>📝 Creative Notes</div>
+          <Lines c={c} n={5} />
+        </div>
+      </Grid2>
+    </>
+  ),
+
+  whimsical: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:24,fontWeight:600,fontFamily:'cursive',color:c.text}}>🦋 Dream Diary ✨</div>
+      </div>
+      <Grid2>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:40}}>
+          <div style={S.title(c)}>✨ Dreams</div>
+          <Lines c={c} n={4} />
+        </div>
+        <div style={{...S.box(c,{marginBottom:0}),borderRadius:40}}>
+          <div style={S.title(c)}>🌙 Wishes</div>
+          <Lines c={c} n={4} />
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>✨ Daily Magic Moments</div>
+        <div style={{display:'flex',gap:8,justifyContent:'space-around',padding:'4px 0'}}>
+          {Array.from({length:7}).map((_,i)=>(
+            <div key={i} style={{...S.circle(c,34),fontSize:18}}>⭐</div>
+          ))}
+        </div>
+      </div>
+      <div style={{...S.box(c),borderRadius:30}}>
+        <div style={S.title(c)}>🦋 Today's Story</div>
+        <Lines c={c} n={5} />
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🌈 Mood Rainbow</div>
+        <MoodRow c={c} moods={['🌞','🌤','🌈','⭐','🌙']} />
+      </div>
+    </>
+  ),
+
+  luxury: (c) => (
+    <div style={{border:`3px solid ${c.accent}`,borderRadius:4,padding:4}}>
+      <div style={{border:`1px solid ${c.accent}`,borderRadius:2,padding:16}}>
+        <div style={{textAlign:'center',marginBottom:16}}>
+          <div style={{fontSize:26,fontWeight:700,color:c.accent,fontFamily:'serif',letterSpacing:4}}>PLANNER</div>
+          <div style={{borderBottom:`2px solid ${c.accent}`,margin:'8px auto',width:200}} />
+        </div>
+        <div style={S.box(c)}>
+          <div style={{...S.title(c),letterSpacing:3}}>PRIORITIES</div>
+          {[1,2,3,4,5].map(i=>(
+            <div key={i} style={{display:'flex',gap:12,alignItems:'center',padding:'8px 0',borderBottom:`1px solid ${c.border}`}}>
+              <span style={{fontSize:18,fontWeight:700,color:c.accent,width:20}}>{i}</span>
+              <div style={{flex:1,minHeight:18}} />
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c)}>
+          <div style={{...S.title(c),letterSpacing:3}}>SCHEDULE</div>
+          {['MORNING','AFTERNOON','EVENING'].map((p,i)=>(
+            <div key={i} style={{...S.box(c,{marginBottom:10})}}>
+              <div style={{fontSize:11,color:c.accent,fontWeight:700,letterSpacing:3,marginBottom:6}}>{p}</div>
+              <Lines c={c} n={2} />
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={{...S.title(c),letterSpacing:3}}>NOTES</div>
+          <Lines c={c} n={3} />
+        </div>
+      </div>
+    </div>
+  ),
+
+  elegant: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:24,fontWeight:400,fontFamily:'Georgia',color:c.text}}>Daily Planner</div>
+        <div style={{borderBottom:`1px solid ${c.accent}`,margin:'6px auto',width:180}} />
+        <div style={{borderBottom:'0.5px solid '+c.accent,margin:'2px auto',width:150}} />
+      </div>
+      {['Morning','Afternoon','Evening'].map((period,i)=>(
+        <div key={i} style={S.box(c)}>
+          <div style={{fontFamily:'Georgia',fontSize:13,color:c.accent,marginBottom:8,fontStyle:'italic'}}>{period}</div>
+          <Lines c={c} n={3} />
+        </div>
+      ))}
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={{fontFamily:'Georgia',fontSize:13,color:c.accent,marginBottom:8}}>Important Tasks</div>
+          {Array.from({length:5}).map((_,i)=>(
+            <div key={i} style={S.check(c)}>
+              <div style={{...S.circle(c,12),flexShrink:0}} />
+              <div style={{flex:1,borderBottom:`0.5px solid ${c.border}`,minHeight:16}} />
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={{fontFamily:'Georgia',fontSize:13,color:c.accent,marginBottom:8}}>Notes</div>
+          <Lines c={c} n={6} />
+        </div>
+      </Grid2>
+    </>
+  ),
+
+  journal: (c) => (
+    <div style={{padding:'0 10px'}}>
+      <div style={{textAlign:'center',marginBottom:16}}>
+        <div style={{fontSize:26,fontWeight:400,fontFamily:'Georgia',color:c.text}}>Journal</div>
+        <div style={{borderBottom:`1px solid ${c.accent}`,margin:'6px auto',width:100}} />
+      </div>
+      <div style={{display:'flex',gap:20,marginBottom:12}}>
+        <span style={{fontSize:11,color:c.text}}>Date: _______________</span>
+        <span style={{fontSize:11,color:c.text}}>Day: _______________</span>
+      </div>
+      <div style={{position:'relative'}}>
+        <div style={{position:'absolute',left:28,top:0,bottom:0,borderLeft:`1px solid ${c.accent}`,opacity:0.3}} />
+        {Array.from({length:28}).map((_,i)=>(
+          <div key={i} style={{borderBottom:`1px solid ${c.border}`,height:24,opacity:0.7}} />
+        ))}
+      </div>
+    </div>
+  ),
+
+  dreamJournal: (c) => (
+    <>
+      <div style={{textAlign:'center',marginBottom:14}}>
+        <div style={{fontSize:22,fontWeight:500,fontFamily:'Georgia',color:c.text}}>🌙 Dream Journal</div>
+      </div>
+      <div style={S.box(c)}>
+        <div style={{display:'flex',gap:20,flexWrap:'wrap',fontSize:11,color:c.text}}>
+          <span>Date: ___________</span>
+          <span>Bedtime: ___________</span>
+          <span>Wake: ___________</span>
+        </div>
+      </div>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🌙 Dream Description</div>
+        <Lines c={c} n={6} />
+      </div>
+      <Grid2>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>🔑 Key Elements</div>
+          {['People','Places','Objects','Emotions'].map((t,i)=>(
+            <div key={i} style={{marginBottom:8}}>
+              <span style={{fontSize:10,fontWeight:600,color:c.text}}>{t}: </span>
+              <div style={S.line(c,0)} />
+            </div>
+          ))}
+        </div>
+        <div style={S.box(c,{marginBottom:0})}>
+          <div style={S.title(c)}>💫 Dream Mood</div>
+          {['Happy','Calm','Confused','Scary','Exciting'].map((m,i)=>(
+            <div key={i} style={S.check(c)}>
+              <div style={{...S.circle(c,12),flexShrink:0}} />
+              <span style={{fontSize:11}}>{m}</span>
+            </div>
+          ))}
+        </div>
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>🔮 Symbols & Meanings</div>
+        <Lines c={c} n={3} />
+      </div>
+      <div style={S.box(c,{marginBottom:0})}>
+        <div style={S.title(c)}>💭 My Interpretation</div>
+        <Lines c={c} n={3} />
+      </div>
+    </>
+  ),
+
+  kidsChores: (c) => (
+    <>
+      <div style={{background:c.accent,borderRadius:16,padding:'14px 20px',marginBottom:14,textAlign:'center'}}>
+        <div style={{fontSize:22,fontWeight:700,color:'white'}}>⭐ MY CHORE CHART ⭐</div>
+        <div style={{fontSize:13,color:'white',marginTop:4}}>Name: _______________</div>
+      </div>
+      <Grid2>
+        {[
+          {icon:'🐾',title:'PET CARE',  items:['Feed pets','Water bowl','Walk dog','Clean cage']},
+          {icon:'📚',title:'HOMEWORK',  items:['Reading','Math','Writing','Study time']},
+          {icon:'🛁',title:'HYGIENE',   items:['Brush teeth AM','Brush teeth PM','Shower/Bath','Wash hands']},
+          {icon:'🧹',title:'CLEANING',  items:['Make bed','Clean room','Put away toys','Help dishes']}
+        ].map((sec,i)=>(
+          <div key={i} style={{...S.box(c,{marginBottom:0}),borderRadius:16,border:`3px solid ${c.border}`}}>
+            <div style={S.title(c,12)}>{sec.icon} {sec.title}</div>
+            <CheckList c={c} items={sec.items} days={true} />
+          </div>
+        ))}
+      </Grid2>
+      <div style={S.box(c)}>
+        <div style={S.title(c)}>📅 Weekly Tracker</div>
+        <WeekBoxes c={c} />
+      </div>
+      <div style={{background:c.accent,borderRadius:16,padding:16}}>
+        <div style={{fontSize:15,fontWeight:700,color:'white',textAlign:'center',marginBottom:12}}>🎁 REWARDS & GOALS 🎁</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+          <div style={{background:'white',borderRadius:10,padding:12}}>
+            <div style={{fontSize:12,fontWeight:600,color:c.text,marginBottom:8}}>Goal for this week:</div>
+            <Lines c={c} n={2} />
+          </div>
+          <div style={{background:'white',borderRadius:10,padding:12}}>
+            <div style={{fontSize:12,fontWeight:600,color:c.text,marginBottom:8}}>Reward when done:</div>
+            <Lines c={c} n={2} />
+          </div>
+        </div>
+      </div>
+    </>
+  ),
+};
+
+/* ─── OPTIONAL SECTIONS ──────────────────────────────────────────────────── */
+const OPTIONAL = {
+  monthlyReset:    { name:'Monthly Reset',       render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>🔄 Monthly Reset</div><Lines c={c} n={2} label="What worked:"/><Lines c={c} n={2} label="To improve:"/><Lines c={c} n={2} label="Next focus:"/></div>) },
+  weeklyCheckin:   { name:'Weekly Check-in',      render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>✅ Weekly Check-in</div>{['Wins','Challenges','Lessons'].map((t,i)=><div key={i}><Lines c={c} n={2} label={t+':'}/></div>)}</div>) },
+  moodTracker:     { name:'Mood Tracker',         render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>😊 Mood Tracker</div><MoodRow c={c}/></div>) },
+  habitStreaks:    { name:'Habit Streaks',        render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>🔥 Habit Streaks</div><CheckList c={c} items={['Habit 1','Habit 2','Habit 3']} days={true}/></div>) },
+  progressBars:    { name:'Progress Bars',        render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>📊 Progress Tracker</div>{['Goal 1','Goal 2','Goal 3','Goal 4'].map((g,i)=><ProgressBar key={i} c={c} label={g}/>)}</div>) },
+  winsLessons:     { name:'Wins & Lessons',       render:(c)=>(<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}><div style={S.box(c,{marginBottom:0})}><div style={S.title(c)}>🎉 Wins</div><Lines c={c} n={4}/></div><div style={S.box(c,{marginBottom:0})}><div style={S.title(c)}>📚 Lessons</div><Lines c={c} n={4}/></div></div>) },
+  affirmations:    { name:'Affirmations',         render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>✨ Affirmations</div><Lines c={c} n={5}/></div>) },
+  gratitude:       { name:'Gratitude',            render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>🙏 Gratitude</div><Lines c={c} n={5}/></div>) },
+  notesDoodle:     { name:'Notes & Doodles',      render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>📝 Notes & Doodles</div><div style={{background:'white',border:`2px dashed ${c.border}`,borderRadius:8,height:120}}/></div>) },
+  lettingGo:       { name:'Letting Go',           render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>🍃 Letting Go</div>{Array.from({length:4}).map((_,i)=><div key={i} style={{display:'flex',gap:8,alignItems:'center',marginBottom:10}}><div style={{width:8,height:8,borderRadius:'50%',border:`2px solid ${c.accent}`,flexShrink:0}}/><div style={{flex:1,borderBottom:`1px solid ${c.border}`}}/></div>)}</div>) },
+  excitedAbout:    { name:'Excited About',        render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>⭐ Excited About</div>{Array.from({length:4}).map((_,i)=><div key={i} style={{display:'flex',gap:8,alignItems:'center',marginBottom:10}}><span style={{color:c.accent,fontSize:14}}>★</span><div style={{flex:1,borderBottom:`1px solid ${c.border}`}}/></div>)}</div>) },
+  dailyJournal:    { name:'Daily Journal',        render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>📓 Daily Journal</div><div style={{fontSize:10,color:c.text,marginBottom:8}}>Date: _______  Mood: _______</div><Lines c={c} n={8}/></div>) },
+  visionBoard:     { name:'Vision Board',         render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>✨ Vision Board</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>{Array.from({length:6}).map((_,i)=><div key={i} style={{background:'white',border:`2px dashed ${c.accent}`,borderRadius:8,height:70}}/>)}</div></div>) },
+  gentleReminders: { name:'Gentle Reminders',     render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>💝 Gentle Reminders</div>{['✨ You are doing your best','🌸 Progress, not perfection','💫 Rest is productive too','🌟 Small steps count'].map((r,i)=><div key={i} style={{background:'white',border:`1px solid ${c.accent}`,borderRadius:20,padding:'5px 14px',marginBottom:6,fontSize:11,color:c.text,textAlign:'center'}}>{r}</div>)}</div>) },
+  sleepLog:        { name:'Sleep Log',            render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>💤 Sleep Log</div><WeekBoxes c={c}/></div>) },
+  stressScale:     { name:'Stress Scale',         render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>🌊 Stress Scale</div><div style={{display:'flex',justifyContent:'space-between',padding:'6px 0'}}>{[1,2,3,4,5,6,7,8,9,10].map(n=><div key={n} style={{textAlign:'center'}}><div style={{...S.circle(c,22),fontSize:10}}>{n}</div></div>)}</div></div>) },
+  doodleSpace:     { name:'Doodle Space',         render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>✏️ Doodle Space</div><div style={{background:'white',border:`2px dashed ${c.border}`,borderRadius:8,height:160}}/></div>) },
+  weeklyReview:    { name:'Weekly Goal Review',   render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>🎯 Weekly Review</div><Lines c={c} n={3} label="Accomplished:"/><Lines c={c} n={2} label="Next week:"/></div>) },
+  stickerElements: { name:'Sticker Elements',     render:(c)=>(<div style={S.box(c)}><div style={S.title(c)}>✨ Stickers</div><div style={{display:'flex',flexWrap:'wrap',gap:6}}>{'⭐💫🌸🌙☀️💖🦋🌈✨🎀🌺🍀'.split('').filter(x=>x.trim()).map((st,i)=><div key={i} style={{...S.circle(c,36),fontSize:20}}>{st}</div>)}</div></div>) },
+};
+
+/* ─── MAIN COMPONENT ─────────────────────────────────────────────────────── */
+export default function PlannerGenerator() {
+  const [auth, setAuth] = useState(false);
+  const [code, setCode] = useState('');
+  const [tmpl, setTmpl] = useState('minimalist');
+  const [optionals, setOptionals] = useState([]);
+  const [customColors, setCustomColors] = useState(null);
+  const [font, setFont] = useState("'Segoe UI', sans-serif");
+  const [exporting, setExporting] = useState(false);
+  const previewRef = useRef(null);
+
+  const c = { ...TEMPLATES[tmpl], ...(customColors || {}) };
+
+  const login = () => { if (code === 'PLAN2024') setAuth(true); else alert('Invalid code'); };
+
+  const toggleOptional = (key) => setOptionals(prev => prev.includes(key) ? prev.filter(k=>k!==key) : [...prev, key]);
+
+  const loadScript = (src) => new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+
+  const exportPNG = async () => {
+    setExporting(true);
+    try {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+      const canvas = await window.html2canvas(previewRef.current, { scale: 3, useCORS: true, backgroundColor: c.bg, logging: false });
+      const link = document.createElement('a');
+      link.download = `${tmpl}-planner.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch(e) { alert('PNG export failed: ' + e.message); }
+    setExporting(false);
+  };
+
+  const exportPDF = async () => {
+    setExporting(true);
+    try {
+      await Promise.all([
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
+      ]);
+      const canvas = await window.html2canvas(previewRef.current, { scale: 2, useCORS: true, backgroundColor: c.bg, logging: false });
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const imgData = canvas.toDataURL('image/png');
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+      pdf.save(`${tmpl}-planner.pdf`);
+      alert('✅ PDF saved! To edit in Canva:\n1. canva.com → Upload\n2. Upload the PDF\n3. Each section becomes editable!');
+    } catch(e) { alert('PDF export failed: ' + e.message); }
+    setExporting(false);
+  };
+
+  if (!auth) return (
+    <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#fce4ec,#e3f2fd)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif'}}>
+      <div style={{background:'white',borderRadius:24,boxShadow:'0 20px 60px rgba(0,0,0,0.15)',padding:40,width:360,textAlign:'center'}}>
+        <div style={{fontSize:40,marginBottom:16}}>🔒</div>
+        <h1 style={{fontSize:24,fontWeight:700,marginBottom:8,margin:'0 0 8px'}}>Planner Generator</h1>
+        <p style={{color:'#666',marginBottom:24,fontSize:14}}>Enter your access code</p>
+        <input value={code} onChange={e=>setCode(e.target.value)} onKeyPress={e=>e.key==='Enter'&&login()} placeholder="Access Code" style={{width:'100%',padding:'12px 16px',border:'2px solid #eee',borderRadius:12,fontSize:14,marginBottom:16,boxSizing:'border-box',outline:'none'}} />
+        <button onClick={login} style={{width:'100%',padding:13,background:'linear-gradient(135deg,#f06292,#ab47bc)',color:'white',border:'none',borderRadius:12,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enter →</button>
+        <p style={{color:'#aaa',fontSize:11,marginTop:16}}>Code: PLAN2024</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">Planner Generator</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div style={{minHeight:'100vh',background:'#f1f3f5',fontFamily:'sans-serif'}}>
+      {/* Header */}
+      <div style={{background:'white',borderBottom:'1px solid #e9ecef',padding:'12px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
+        <h1 style={{fontSize:18,fontWeight:700,margin:0}}>✨ Planner Generator</h1>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={exportPNG} disabled={exporting} style={{padding:'8px 14px',background:'linear-gradient(135deg,#43a047,#26c6da)',color:'white',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer'}}>
+            ↓ PNG
+          </button>
+          <button onClick={exportPDF} disabled={exporting} style={{padding:'8px 14px',background:'linear-gradient(135deg,#7c3aed,#db2777)',color:'white',border:'none',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer'}}>
+            ↓ {exporting ? 'Exporting…' : 'PDF for Canva'}
+          </button>
+        </div>
+      </div>
 
-          {/* Controls Panel */}
-          <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
-            <h2 className="text-xl font-bold mb-4">Choose Template</h2>
+      <div style={{display:'grid',gridTemplateColumns:'280px 1fr',height:'calc(100vh - 53px)'}}>
+        {/* Sidebar */}
+        <div style={{background:'white',borderRight:'1px solid #e9ecef',overflowY:'auto',padding:16}}>
 
-            <div>
-              <label className="block text-sm font-semibold mb-2">Template Style</label>
-              <select value={selectedTemplate} onChange={(e) => { setSelectedTemplate(e.target.value); setHiddenSections([]); }} className="w-full p-2 border-2 rounded-lg">
-                {Object.entries(templates).map(([key, tmpl]) => (
-                  <option key={key} value={key}>{tmpl.name}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-600 mt-2">{template.description}</p>
-            </div>
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#6c757d',marginBottom:6,textTransform:'uppercase',letterSpacing:1}}>Template</div>
+            <select value={tmpl} onChange={e=>{setTmpl(e.target.value);setCustomColors(null);}} style={{width:'100%',padding:'8px 10px',border:'2px solid #e9ecef',borderRadius:8,fontSize:13,outline:'none'}}>
+              {Object.entries(TEMPLATES).map(([k,t])=><option key={k} value={k}>{t.name}</option>)}
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold mb-2">Background Pattern</label>
-              <select value={pattern} onChange={(e) => setPattern(e.target.value)} className="w-full p-2 border-2 rounded-lg">
-                <option value="none">None</option>
-                <option value="zebra">Zebra</option>
-                <option value="leopard">Leopard</option>
-                <option value="polkadot">Polka Dots</option>
-                <option value="hearts">Hearts</option>
-                <option value="stars">Stars</option>
-              </select>
-            </div>
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#6c757d',marginBottom:6,textTransform:'uppercase',letterSpacing:1}}>Font</div>
+            <select value={font} onChange={e=>setFont(e.target.value)} style={{width:'100%',padding:'8px 10px',border:'2px solid #e9ecef',borderRadius:8,fontSize:13,outline:'none'}}>
+              <option value="'Segoe UI',sans-serif">Default</option>
+              <option value="Georgia,serif">Serif</option>
+              <option value="cursive">Handwriting</option>
+              <option value="'Courier New',monospace">Typewriter</option>
+            </select>
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold mb-2">Font Style</label>
-              <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} className="w-full p-2 border-2 rounded-lg">
-                {Object.entries(fontOptions).map(([key, font]) => (
-                  <option key={key} value={key}>{font.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Custom Colors</label>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <label className="text-xs w-20">Accent:</label>
-                  <input type="color" value={customColors?.accent || template.accent} onChange={(e) => setCustomColors({...customColors, accent: e.target.value})} className="w-12 h-8 border-2 rounded cursor-pointer" />
-                  <button onClick={() => setCustomColors(null)} className="text-xs text-gray-500 hover:text-gray-700">Reset</button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs w-20">Border:</label>
-                  <input type="color" value={customColors?.border || template.border} onChange={(e) => setCustomColors({...customColors, border: e.target.value})} className="w-12 h-8 border-2 rounded cursor-pointer" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs w-20">Text:</label>
-                  <input type="color" value={customColors?.text || template.text} onChange={(e) => setCustomColors({...customColors, text: e.target.value})} className="w-12 h-8 border-2 rounded cursor-pointer" />
-                </div>
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#6c757d',marginBottom:6,textTransform:'uppercase',letterSpacing:1}}>Colors</div>
+            {[['accent','Accent'],['border','Border'],['text','Text'],['bg','Background'],['primary','Fill']].map(([key,label])=>(
+              <div key={key} style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+                <span style={{fontSize:11,color:'#666',width:72}}>{label}</span>
+                <input type="color" value={(customColors?.[key])||c[key]} onChange={e=>setCustomColors(prev=>({...(prev||{}),[key]:e.target.value}))} style={{width:32,height:24,border:'2px solid #e9ecef',borderRadius:4,cursor:'pointer',padding:2}} />
               </div>
-            </div>
+            ))}
+            <button onClick={()=>setCustomColors(null)} style={{fontSize:11,color:'#888',background:'none',border:'1px solid #ddd',borderRadius:6,padding:'3px 8px',cursor:'pointer',marginTop:4}}>Reset</button>
+          </div>
 
-            {templateSections[selectedTemplate] && (
-              <div>
-                <label className="block text-sm font-semibold mb-2">Toggle Sections</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border-2 rounded-lg p-3">
-                  {templateSections[selectedTemplate].map((section) => (
-                    <label key={section.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!hiddenSections.includes(section.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setHiddenSections(hiddenSections.filter(s => s !== section.id));
-                          } else {
-                            setHiddenSections([...hiddenSections, section.id]);
-                          }
-                        }}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm">{section.name}</span>
-                    </label>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:'#6c757d',marginBottom:6,textTransform:'uppercase',letterSpacing:1}}>Optional Sections</div>
+            {Object.entries(OPTIONAL).map(([key,sec])=>(
+              <label key={key} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 8px',borderRadius:7,cursor:'pointer',marginBottom:3,background:optionals.includes(key)?c.primary:'transparent',border:`1px solid ${optionals.includes(key)?c.accent:'#e9ecef'}`}}>
+                <input type="checkbox" checked={optionals.includes(key)} onChange={()=>toggleOptional(key)} style={{accentColor:c.accent}} />
+                <span style={{fontSize:11,color:'#333'}}>{sec.name}</span>
+              </label>
+            ))}
+          </div>
+
+        </div>
+
+        {/* Preview */}
+        <div style={{overflowY:'auto',background:'#e9ecef',padding:24}}>
+          <div style={{background:'white',borderRadius:4,boxShadow:'0 4px 24px rgba(0,0,0,0.12)',maxWidth:794,margin:'0 auto'}}>
+            <div ref={previewRef} style={{background:c.bg,fontFamily:font,padding:36,minHeight:1000}}>
+              {/* Page top */}
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,paddingBottom:12,borderBottom:`2px solid ${c.border}`}}>
+                <div style={{fontSize:11,color:c.accent,fontWeight:600,letterSpacing:2,textTransform:'uppercase'}}>{TEMPLATES[tmpl].name}</div>
+                <div style={{fontSize:11,color:c.text}}>Date: _______________</div>
+              </div>
+
+              {/* Template */}
+              {LAYOUTS[tmpl] ? LAYOUTS[tmpl](c) : <div>Template not found</div>}
+
+              {/* Optional sections */}
+              {optionals.length > 0 && (
+                <div style={{marginTop:20,paddingTop:16,borderTop:`2px solid ${c.border}`}}>
+                  {optionals.map(key=>(
+                    <div key={key} style={{marginBottom:14}}>
+                      {OPTIONAL[key].render(c)}
+                    </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Uncheck to hide sections.</p>
+              )}
+
+              {/* Footer */}
+              <div style={{marginTop:20,paddingTop:10,borderTop:`1px solid ${c.border}`,textAlign:'center',fontSize:9,color:c.border}}>
+                Made with Planner Generator
               </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Optional Sections</label>
-              <div className="space-y-2 max-h-64 overflow-y-auto border-2 rounded-lg p-3">
-                {Object.entries(optionalSections).map(([key, section]) => (
-                  <label key={key} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedSections.includes(key)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedSections([...selectedSections, key]);
-                        } else {
-                          setSelectedSections(selectedSections.filter(s => s !== key));
-                        }
-                      }}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">{section.name}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">Sections appear at the bottom of your template.</p>
-            </div>
-
-            <div className="space-y-2">
-              <button onClick={downloadSVG} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <Download className="w-5 h-5" /> Download SVG
-              </button>
-              <button onClick={downloadPNG} className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <Download className="w-5 h-5" /> Download PNG
-              </button>
-              <button onClick={downloadA4} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <Download className="w-5 h-5" /> Download A4 for Canva
-              </button>
-            </div>
-
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded text-xs">
-              <p className="font-semibold mb-1 text-yellow-800">📌 Canva Instructions:</p>
-              <ol className="text-yellow-700 space-y-1 list-decimal list-inside">
-                <li>Download A4 PNG</li>
-                <li>Open Canva → New design → A4</li>
-                <li>Upload the PNG → drag to page</li>
-                <li>Add text boxes on top to fill in!</li>
-              </ol>
             </div>
           </div>
-
-          {/* Preview Panel */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 overflow-auto">
-            <h2 className="text-xl font-bold mb-4">Preview</h2>
-            <svg id="template-svg" width="850" height={totalHeight} viewBox={`0 0 850 ${totalHeight}`}>
-              {renderPattern(pattern, template)}
-              <rect width="850" height={totalHeight} fill={getPatternFill(pattern) || template.background} />
-              <text x="750" y="30" fontSize="11" fill="#888">Date: _____</text>
-
-              <g fontFamily={fontOptions[fontFamily].family}>
-                {selectedTemplate === 'minimalist' && renderMinimalistLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'boho' && renderBohoLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'funky' && renderFunkyLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'zen' && renderZenLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'prayer' && renderPrayerLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'parenting' && renderParentingLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'money' && renderMoneyLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'professional' && renderProfessionalLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'cozy' && renderCozyLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'selfWellness' && renderSelfWellnessLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'artistic' && renderArtisticLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'whimsical' && renderWhimsicalLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'luxury' && renderLuxuryLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'elegant' && renderElegantLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'journal' && renderJournalLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'dreamJournal' && renderDreamJournalLayout(getActiveColors(), hiddenSections)}
-                {selectedTemplate === 'kidsChores' && renderKidsChoresLayout(getActiveColors(), hiddenSections)}
-              </g>
-
-              {selectedSections.map((sectionKey, index) => {
-                const yOffset = 900 + selectedSections.slice(0, index).reduce((total, key) => total + (optionalSections[key]?.height || 0), 0);
-                return <g key={sectionKey}>{optionalSections[sectionKey].render(getActiveColors(), yOffset)}</g>;
-              })}
-            </svg>
-          </div>
-
         </div>
       </div>
     </div>
   );
-};
-
-export default PlannerGenerator;
+}
