@@ -243,12 +243,16 @@ const ECheck = ({ id, vals, onChange, c, defaultLabel = "" }) => (
   </div>
 );
 
-// Section title box
+// Section title box — marked with data-section so the page-break nudger can find it
 const SBox = ({ c, title, children, style = {} }) => (
-  <div style={{
-    background: c.primary, border: `2px solid ${c.border}`,
-    borderRadius: 12, padding: "14px 16px", marginBottom: 14, ...style
-  }}>
+  <div
+    data-section="true"
+    style={{
+      background: c.primary, border: `2px solid ${c.border}`,
+      borderRadius: 12, padding: "14px 16px", marginBottom: 14,
+      breakInside: "avoid", pageBreakInside: "avoid", ...style
+    }}
+  >
     <div style={{ color: c.accent, fontWeight: 700, fontSize: 13, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>
       {title}
     </div>
@@ -904,6 +908,54 @@ const OPTIONAL = {
 // We calculate how many A4 pages the content spans and show dashed lines.
 const A4_HEIGHT_PX = 1122;
 
+// Watches the preview and adds paddingTop to any section that straddles a page boundary,
+// nudging it cleanly onto the next page instead of getting cut.
+const usePageBreakNudge = (previewRef, deps = []) => {
+  useEffect(() => {
+    const container = previewRef?.current;
+    if (!container) return;
+
+    const nudge = () => {
+      // First reset all nudges so we measure from a clean state
+      container.querySelectorAll("[data-section]").forEach(el => {
+        el.style.marginTop = "";
+      });
+
+      // Give DOM a tick to reflow after reset
+      requestAnimationFrame(() => {
+        container.querySelectorAll("[data-section]").forEach(el => {
+          const rect    = el.getBoundingClientRect();
+          const contRect = container.getBoundingClientRect();
+          const elTop   = rect.top - contRect.top;   // px from top of preview
+          const elBot   = elTop + rect.height;
+
+          // Which page does the top of this section land on?
+          const pageOfTop = Math.floor(elTop / A4_HEIGHT_PX);
+          // Which page does the bottom land on?
+          const pageOfBot = Math.floor(elBot / A4_HEIGHT_PX);
+
+          if (pageOfTop !== pageOfBot) {
+            // Section straddles a boundary — push it down to the next page
+            const nextPageStart = (pageOfTop + 1) * A4_HEIGHT_PX;
+            const gap = nextPageStart - elTop;
+            // Only nudge if gap is reasonable (< 200px) to avoid huge whitespace
+            if (gap > 0 && gap < 200) {
+              el.style.marginTop = `${gap + 16}px`;
+            }
+          }
+        });
+      });
+    };
+
+    // Run on mount and whenever content changes size
+    nudge();
+    const obs = new ResizeObserver(nudge);
+    obs.observe(container);
+    return () => obs.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+};
+
 const PageBreakIndicator = ({ previewRef, c }) => {
   const [pageCount, setPageCount] = useState(1);
   const [breaks, setBreaks] = useState([]);
@@ -993,6 +1045,9 @@ export default function PlannerGenerator() {
 
   const c   = { ...TEMPLATES[tmpl], ...(customColors || {}) };
   const upd = (k, val) => setValues(prev => ({ ...prev, [k]: val }));
+
+  // Automatically nudge sections away from page-break boundaries
+  usePageBreakNudge(previewRef, [tmpl, optionals, values, font]);
 
   const login = async () => {
     const key = code.trim();
