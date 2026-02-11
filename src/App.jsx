@@ -918,7 +918,7 @@ export default function PlannerGenerator() {
   // ── YOUR GUMROAD PRODUCT PERMALINK ──────────────────────────────────────
   // Replace "your_product_permalink" with the permalink from your Gumroad product URL
   // e.g. if your product URL is gumroad.com/l/abcdef  →  put "abcdef" below
-  const GUMROAD_PRODUCT_ID = "your_product_permalink";
+  const GUMROAD_PRODUCT_ID = "9yyW-lDhr8Ti5sPV9T_dpg==";
   // ────────────────────────────────────────────────────────────────────────
 
   const c   = { ...TEMPLATES[tmpl], ...(customColors || {}) };
@@ -936,7 +936,7 @@ export default function PlannerGenerator() {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            product_permalink: GUMROAD_PRODUCT_ID,
+            product_id: GUMROAD_PRODUCT_ID,
             license_key: key,
             increment_uses_count: "false",
           }),
