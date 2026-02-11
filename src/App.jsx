@@ -243,22 +243,102 @@ const ECheck = ({ id, vals, onChange, c, defaultLabel = "" }) => (
   </div>
 );
 
-// Section title box — marked with data-section so the page-break nudger can find it
-const SBox = ({ c, title, children, style = {} }) => (
-  <div
-    data-section="true"
-    style={{
-      background: c.primary, border: `2px solid ${c.border}`,
-      borderRadius: 12, padding: "14px 16px", marginBottom: 14,
-      breakInside: "avoid", pageBreakInside: "avoid", ...style
-    }}
-  >
-    <div style={{ color: c.accent, fontWeight: 700, fontSize: 13, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>
-      {title}
+// Drag-resizable section box — drag the bar at the bottom to change height
+const SBox = ({ c, title, children, style = {}, minHeight = 80 }) => {
+  const [height, setHeight] = useState(null);
+  const dragRef = useRef({ active: false, startY: 0, startH: 0 });
+  const boxRef  = useRef(null);
+
+  const startDrag = (e) => {
+    e.preventDefault();
+    const currentH = boxRef.current ? boxRef.current.offsetHeight : minHeight;
+    dragRef.current = { active: true, startY: e.clientY, startH: currentH };
+    const onMove = (ev) => {
+      if (!dragRef.current.active) return;
+      setHeight(Math.max(minHeight, dragRef.current.startH + (ev.clientY - dragRef.current.startY)));
+    };
+    const onUp = () => {
+      dragRef.current.active = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  return (
+    <div
+      ref={boxRef}
+      data-section="true"
+      style={{
+        background: c.primary, border: `2px solid ${c.border}`,
+        borderRadius: 12, padding: "14px 16px 22px 16px", marginBottom: 14,
+        breakInside: "avoid", pageBreakInside: "avoid",
+        position: "relative", overflow: "hidden",
+        height: height ? `${height}px` : "auto",
+        minHeight, ...style,
+      }}
+    >
+      <div style={{ color: c.accent, fontWeight: 700, fontSize: 13, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>
+        {title}
+      </div>
+      {children}
+      <div
+        onMouseDown={startDrag}
+        title="Drag to resize height"
+        style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: 14,
+          cursor: "ns-resize", display: "flex", alignItems: "center",
+          justifyContent: "center", background: `${c.border}55`,
+          borderTop: `1px solid ${c.border}`, userSelect: "none",
+        }}
+      >
+        <div style={{ width: 28, height: 3, borderRadius: 2, background: c.accent, opacity: 0.5 }} />
+      </div>
     </div>
-    {children}
-  </div>
-);
+  );
+};
+
+// Two-column layout with draggable divider to resize columns
+const ResizableRow = ({ left, right, defaultSplit = 50, c, gap = 10 }) => {
+  const [split, setSplit] = useState(defaultSplit);
+  const dragging = useRef(false);
+  const rowRef   = useRef(null);
+
+  const startDrag = (e) => {
+    e.preventDefault();
+    dragging.current = true;
+    const onMove = (ev) => {
+      if (!dragging.current || !rowRef.current) return;
+      const rect = rowRef.current.getBoundingClientRect();
+      setSplit(Math.min(80, Math.max(20, ((ev.clientX - rect.left) / rect.width) * 100)));
+    };
+    const onUp = () => {
+      dragging.current = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  return (
+    <div ref={rowRef} style={{ display: "flex", alignItems: "stretch", marginBottom: 14 }}>
+      <div style={{ width: `${split}%`, minWidth: 0 }}>{left}</div>
+      <div
+        onMouseDown={startDrag}
+        title="Drag to resize columns"
+        style={{
+          width: 12, flexShrink: 0, cursor: "ew-resize",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}
+      >
+        <div style={{ width: 3, height: 36, borderRadius: 2, background: c ? `${c.accent}66` : "#aaa" }} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>{right}</div>
+    </div>
+  );
+};
 
 // Days-of-week tracker row
 const DayTracker = ({ id, vals, onChange, c }) => (
@@ -321,19 +401,23 @@ const LAYOUTS = {
 
   minimalist: (c, v, upd) => (
     <>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <SBox c={c} title="✓ To-Do List">
-          {Array.from({length:10}).map((_,i) => <ECheck key={i} id={`todo${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Task ${i+1}`} />)}
-        </SBox>
-        <div>
-          <SBox c={c} title="📅 Monthly Overview">
-            {Array.from({length:5}).map((_,i) => <ELine key={i} id={`mo${i}`} vals={v} onChange={upd} c={c} />)}
+      <ResizableRow c={c}
+        left={
+          <SBox c={c} title="✓ To-Do List" style={{marginBottom:0}}>
+            {Array.from({length:10}).map((_,i) => <ECheck key={i} id={`todo${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Task ${i+1}`} />)}
           </SBox>
-          <SBox c={c} title="🔁 Habit Tracker">
-            {Array.from({length:4}).map((_,i) => <HabitRow key={i} id={`hab${i}`} vals={v} onChange={upd} c={c} placeholder={`Habit ${i+1}`} />)}
-          </SBox>
-        </div>
-      </div>
+        }
+        right={
+          <div>
+            <SBox c={c} title="📅 Monthly Overview">
+              {Array.from({length:5}).map((_,i) => <ELine key={i} id={`mo${i}`} vals={v} onChange={upd} c={c} />)}
+            </SBox>
+            <SBox c={c} title="🔁 Habit Tracker" style={{marginBottom:0}}>
+              {Array.from({length:4}).map((_,i) => <HabitRow key={i} id={`hab${i}`} vals={v} onChange={upd} c={c} placeholder={`Habit ${i+1}`} />)}
+            </SBox>
+          </div>
+        }
+      />
       <SBox c={c} title="💭 Reflections">
         <EArea id="reflect" vals={v} onChange={upd} c={c} rows={4} />
       </SBox>
@@ -346,14 +430,14 @@ const LAYOUTS = {
         <div style={{ fontSize:20, fontWeight:400, color:c.text, fontFamily:"Georgia" }}>Monthly Intentions</div>
         <div style={{ borderBottom:`2px solid ${c.accent}`, width:120, margin:"6px auto 0" }} />
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="🌿 Gratitude" style={{ borderRadius:40 }}>
+      <ResizableRow c={c}
+        left={<SBox c={c} title="🌿 Gratitude" style={{ borderRadius:40, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`grat${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-        <SBox c={c} title="✨ Self-Care" style={{ borderRadius:40 }}>
+        </SBox>}
+        right={<SBox c={c} title="✨ Self-Care" style={{ borderRadius:40, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`sc${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="🌙 Mood Tracker">
         <MoodPicker id="mood" vals={v} onChange={upd} c={c} moods={["🌞","🌤","⛅","🌧","⛈"]} />
       </SBox>
@@ -368,20 +452,22 @@ const LAYOUTS = {
       <div style={{ background:c.accent, borderRadius:20, padding:"12px 20px", marginBottom:14, textAlign:"center" }}>
         <div style={{ fontSize:22, fontWeight:900, color:"white", letterSpacing:2 }}>BRAIN DUMP 🧠</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="💡 Creative Notes" style={{ borderRadius:28, transform:"rotate(-1deg)" }}>
+      <ResizableRow c={c}
+        left={<SBox c={c} title="💡 Creative Notes" style={{ borderRadius:28, transform:"rotate(-1deg)", marginBottom:0 }}>
           <EArea id="creative" vals={v} onChange={upd} c={c} rows={6} />
-        </SBox>
-        <SBox c={c} title="💖 Currently Loving" style={{ borderRadius:28, transform:"rotate(1deg)" }}>
+        </SBox>}
+        right={<SBox c={c} title="💖 Currently Loving" style={{ borderRadius:28, transform:"rotate(1deg)", marginBottom:0 }}>
           {Array.from({length:5}).map((_,i) => <ELine key={i} id={`love${i}`} vals={v} onChange={upd} c={c} placeholder={`⭐ Something I love…`} />)}
-        </SBox>
-        <SBox c={c} title="🎨 Mood Tracker">
+        </SBox>}
+      />
+      <ResizableRow c={c}
+        left={<SBox c={c} title="🎨 Mood Tracker" style={{marginBottom:0}}>
           <MoodPicker id="mood" vals={v} onChange={upd} c={c} moods={["😍","🤩","😊","😐","😤","😭","🤯"]} />
-        </SBox>
-        <SBox c={c} title="🌟 Weekly Highlights">
+        </SBox>}
+        right={<SBox c={c} title="🌟 Weekly Highlights" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => <ELine key={i} id={`hl${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-      </div>
+        </SBox>}
+      />
     </>
   ),
 
@@ -390,26 +476,28 @@ const LAYOUTS = {
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:20, fontWeight:300, color:c.text, fontFamily:"Georgia" }}>Daily Mindfulness 🕊</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="🌬 Breathing Exercise">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="🌬 Breathing Exercise" style={{marginBottom:0}}>
           <div style={{ textAlign:"center", padding:"10px 0" }}>
             <div style={{ width:80, height:80, borderRadius:"50%", border:`2px solid ${c.accent}`, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", fontSize:10, color:c.accent }}>
               <span>Inhale</span><span>Hold</span><span>Exhale</span>
             </div>
           </div>
           <ELine id="breath_note" vals={v} onChange={upd} c={c} placeholder="Notes…" />
-        </SBox>
-        <SBox c={c} title="🎯 Today's Intentions">
+        </SBox>}
+        right={<SBox c={c} title="🎯 Today's Intentions" style={{marginBottom:0}}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`int${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-        <SBox c={c} title="🙏 Gratitude">
+        </SBox>}
+      />
+      <ResizableRow c={c}
+        left={<SBox c={c} title="🙏 Gratitude" style={{marginBottom:0}}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`grat${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-        <SBox c={c} title="🌊 Mood Reflection">
+        </SBox>}
+        right={<SBox c={c} title="🌊 Mood Reflection" style={{marginBottom:0}}>
           <MoodPicker id="mood" vals={v} onChange={upd} c={c} />
           {Array.from({length:2}).map((_,i) => <ELine key={i} id={`mref${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-      </div>
+        </SBox>}
+      />
     </>
   ),
 
@@ -421,20 +509,20 @@ const LAYOUTS = {
       <SBox c={c} title="🙏 Prayer Requests & Praise">
         {Array.from({length:5}).map((_,i) => <ELine key={i} id={`pr${i}`} vals={v} onChange={upd} c={c} />)}
       </SBox>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="📖 Scripture of the Day">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="📖 Scripture of the Day" style={{marginBottom:0}}>
           <ELine id="verse_ref" vals={v} onChange={upd} c={c} placeholder="Verse reference…" />
           <EArea id="verse_text" vals={v} onChange={upd} c={c} rows={4} placeholder="Write the verse…" />
-        </SBox>
-        <SBox c={c} title="✅ Answered Prayers">
+        </SBox>}
+        right={<SBox c={c} title="✅ Answered Prayers" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:c.accent, flexShrink:0 }} />
               <ELine id={`ans${i}`} vals={v} onChange={upd} c={c} style={{ flex:1, marginBottom:0 }} />
             </div>
           ))}
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="⏰ Prayer Time Log">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
           {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i) => (
@@ -456,16 +544,16 @@ const LAYOUTS = {
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:22, fontWeight:600, color:c.text }}>👨‍👩‍👧‍👦 Family Planner</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="📅 Kids' Schedule">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="📅 Kids's Schedule" style={{marginBottom:0}}>
           {["☀️ Morning","🌤 Afternoon","🌙 Evening","🛏 Bedtime"].map((t,i) => (
             <div key={i} style={{ marginBottom:10 }}>
               <div style={{ fontSize:11, fontWeight:600, color:c.text, marginBottom:3 }}>{t}</div>
               <ELine id={`sch${i}`} vals={v} onChange={upd} c={c} style={{ marginBottom:0 }} />
             </div>
           ))}
-        </SBox>
-        <SBox c={c} title="🍽 Meal Planning">
+        </SBox>}
+        right={<SBox c={c} title="🍽 Meal Planning" style={{marginBottom:0}}>
           {["Breakfast","Lunch","Dinner","Snacks"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:8, marginBottom:8, alignItems:"center" }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:c.accent, flexShrink:0 }} />
@@ -473,8 +561,8 @@ const LAYOUTS = {
               <ELine id={`meal${i}`} vals={v} onChange={upd} c={c} style={{ flex:1, marginBottom:0 }} />
             </div>
           ))}
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="🛒 Shopping List">
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
           {Array.from({length:9}).map((_,i) => <ECheck key={i} id={`shop${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Item ${i+1}`} />)}
@@ -494,8 +582,8 @@ const LAYOUTS = {
       <div style={{ background:c.accent, borderRadius:10, padding:"12px 18px", marginBottom:14, textAlign:"center" }}>
         <div style={{ fontSize:20, fontWeight:700, color:"white" }}>💰 Financial Tracker</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="📈 Income">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="📈 Income" style={{marginBottom:0}}>
           {["Salary","Side Hustle","Other"].map((t,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8, borderBottom:`1px solid ${c.border}`, paddingBottom:4 }}>
               <span style={{ fontSize:11, color:c.text, width:80, flexShrink:0 }}>{t}</span>
@@ -505,8 +593,8 @@ const LAYOUTS = {
           <div style={{ display:"flex", justifyContent:"space-between", fontWeight:700, fontSize:12, color:c.accent }}>
             <span>TOTAL</span><span>${(["inc0","inc1","inc2"].reduce((s,k)=>s+(parseFloat(v[k])||0),0)).toFixed(2)}</span>
           </div>
-        </SBox>
-        <SBox c={c} title="📉 Expenses">
+        </SBox>}
+        right={<SBox c={c} title="📉 Expenses" style={{marginBottom:0}}>
           {["Housing","Food","Transport","Other"].map((t,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8, borderBottom:`1px solid ${c.border}`, paddingBottom:4 }}>
               <span style={{ fontSize:11, color:c.text, width:80, flexShrink:0 }}>{t}</span>
@@ -516,8 +604,8 @@ const LAYOUTS = {
           <div style={{ display:"flex", justifyContent:"space-between", fontWeight:700, fontSize:12, color:c.accent }}>
             <span>TOTAL</span><span>${(["exp0","exp1","exp2","exp3"].reduce((s,k)=>s+(parseFloat(v[k])||0),0)).toFixed(2)}</span>
           </div>
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="🎯 Savings Goals">
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
           {[0,1,2].map(i => (
@@ -592,19 +680,19 @@ const LAYOUTS = {
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:22, fontWeight:500, fontFamily:"Georgia", color:c.text }}>☕ Cozy Day Planner</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="☀️ Morning Routine" style={{ borderRadius:24 }}>
+      <ResizableRow c={c}
+        left={<SBox c={c} title="☀️ Morning Routine" style={{ borderRadius:24, marginBottom:0 }}>
           {["Wake up time","Breakfast","Self-care","Start work"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:8 }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:c.accent, flexShrink:0 }} />
               <ELine id={`morn${i}`} vals={v} onChange={upd} c={c} placeholder={t} style={{ flex:1, marginBottom:0 }} />
             </div>
           ))}
-        </SBox>
-        <SBox c={c} title="✨ Cozy Activities" style={{ borderRadius:24 }}>
+        </SBox>}
+        right={<SBox c={c} title="✨ Cozy Activities" style={{ borderRadius:24, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`cact${i}`} vals={v} onChange={upd} c={c} />)}
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="💧 Nourishment Tracker" style={{ borderRadius:24 }}>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
           <span style={{ fontSize:11, fontWeight:600, color:c.text }}>Water glasses:</span>
@@ -661,21 +749,21 @@ const LAYOUTS = {
       <div style={{ textAlign:"center", marginBottom:14, fontStyle:"italic" }}>
         <div style={{ fontSize:24, fontWeight:700, color:c.text, fontFamily:"Georgia" }}>Creative Journal 🎨</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="💡 Creative Prompts">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="💡 Creative Prompts" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => (
             <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:8 }}>
               <div style={{ width:20, height:20, borderRadius:"50%", border:`2px solid ${c.accent}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:c.accent, flexShrink:0 }}>{i+1}</div>
               <ELine id={`cp${i}`} vals={v} onChange={upd} c={c} style={{ flex:1, marginBottom:0 }} />
             </div>
           ))}
-        </SBox>
-        <SBox c={c} title="🖼 Sketch / Inspiration">
+        </SBox>}
+        right={<SBox c={c} title="🖼 Sketch / Inspiration" style={{marginBottom:0}}>
           <div style={{ background:"white", border:`2px dashed ${c.accent}`, borderRadius:8, height:120, display:"flex", alignItems:"center", justifyContent:"center", color:c.border, fontSize:12 }}>
             Sketch / paste inspiration here
           </div>
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="🌈 Color Mood of the Day">
         <MoodPicker id="artmood" vals={v} onChange={upd} c={c} moods={["🔴","🟠","🟡","🟢","🔵","🟣","🩷"]} />
         <ELine id="artmood_note" vals={v} onChange={upd} c={c} placeholder="How does this color make you feel?" />
@@ -691,14 +779,14 @@ const LAYOUTS = {
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:24, fontWeight:600, fontFamily:"cursive", color:c.text }}>🦋 Dream Diary ✨</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
-        <SBox c={c} title="✨ Dreams" style={{ borderRadius:40 }}>
+      <ResizableRow c={c}
+        left={<SBox c={c} title="✨ Dreams" style={{ borderRadius:40, marginBottom:0 }}>
           <EArea id="dreams" vals={v} onChange={upd} c={c} rows={4} />
-        </SBox>
-        <SBox c={c} title="🌙 Wishes" style={{ borderRadius:40 }}>
+        </SBox>}
+        right={<SBox c={c} title="🌙 Wishes" style={{ borderRadius:40, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`wish${i}`} vals={v} onChange={upd} c={c} placeholder="🌟 I wish…" />)}
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="✨ Daily Magic Moments">
         <div style={{ display:"flex", gap:8, justifyContent:"space-around", padding:"4px 0", flexWrap:"wrap" }}>
           {Array.from({length:7}).map((_,i) => (
@@ -759,14 +847,14 @@ const LAYOUTS = {
           <EArea id={`eleg${i}`} vals={v} onChange={upd} c={c} rows={3} />
         </SBox>
       ))}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-        <SBox c={c} title="Important Tasks">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="Important Tasks" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => <ECheck key={i} id={`etask${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Task ${i+1}`} />)}
-        </SBox>
-        <SBox c={c} title="Notes" style={{ marginBottom:0 }}>
+        </SBox>}
+        right={<SBox c={c} title="Notes" style={{marginBottom:0}}>
           <EArea id="elegnotes" vals={v} onChange={upd} c={c} rows={6} />
-        </SBox>
-      </div>
+        </SBox>}
+      />
     </>
   ),
 
@@ -808,19 +896,19 @@ const LAYOUTS = {
       <SBox c={c} title="🌙 Dream Description">
         <EArea id="djdesc" vals={v} onChange={upd} c={c} rows={5} placeholder="Describe your dream in detail…" />
       </SBox>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-        <SBox c={c} title="🔑 Key Elements">
+      <ResizableRow c={c}
+        left={<SBox c={c} title="🔑 Key Elements" style={{marginBottom:0}}>
           {["People","Places","Objects","Emotions"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:6, alignItems:"center", marginBottom:8 }}>
               <span style={{ fontSize:10, fontWeight:600, color:c.text, width:55, flexShrink:0 }}>{t}:</span>
               <ELine id={`djel${i}`} vals={v} onChange={upd} c={c} style={{ flex:1, marginBottom:0 }} />
             </div>
           ))}
-        </SBox>
-        <SBox c={c} title="💫 Dream Mood">
+        </SBox>}
+        right={<SBox c={c} title="💫 Dream Mood" style={{marginBottom:0}}>
           <MoodPicker id="djmood" vals={v} onChange={upd} c={c} moods={["😊","😌","😐","😨","🤩"]} />
-        </SBox>
-      </div>
+        </SBox>}
+      />
       <SBox c={c} title="🔮 Symbols & Meanings">
         <EArea id="djsymbols" vals={v} onChange={upd} c={c} rows={3} />
       </SBox>
