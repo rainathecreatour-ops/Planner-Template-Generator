@@ -243,9 +243,14 @@ const ECheck = ({ id, vals, onChange, c, defaultLabel = "" }) => (
   </div>
 );
 
-// Drag-resizable section box — drag the bar at the bottom to change height
-const SBox = ({ c, title, children, style = {}, minHeight = 80 }) => {
-  const [height, setHeight] = useState(null);
+// Drag-resizable + swappable section box
+// slotId   — unique id for this slot (e.g. "minimalist_0"), used to track swaps
+// swaps    — { [slotId]: optionalKey } state from parent
+// onSwap   — (slotId, optionalKey | null) callback
+const SBox = ({ c, title, children, style = {}, minHeight = 80, slotId, swaps = {}, onSwap, vals, upd }) => {
+  const [height,  setHeight]  = useState(null);
+  const [picking, setPicking] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const dragRef = useRef({ active: false, startY: 0, startH: 0 });
   const boxRef  = useRef(null);
 
@@ -266,10 +271,15 @@ const SBox = ({ c, title, children, style = {}, minHeight = 80 }) => {
     window.addEventListener("mouseup", onUp);
   };
 
+  const swappedKey = slotId ? swaps[slotId] : null;
+  const swappedSec = swappedKey ? OPTIONAL[swappedKey] : null;
+
   return (
     <div
       ref={boxRef}
       data-section="true"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setPicking(false); }}
       style={{
         background: c.primary, border: `2px solid ${c.border}`,
         borderRadius: 12, padding: "14px 16px 22px 16px", marginBottom: 14,
@@ -279,10 +289,76 @@ const SBox = ({ c, title, children, style = {}, minHeight = 80 }) => {
         minHeight, ...style,
       }}
     >
-      <div style={{ color: c.accent, fontWeight: 700, fontSize: 13, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>
-        {title}
+      {/* Title row */}
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 10, gap: 6 }}>
+        <div style={{ color: c.accent, fontWeight: 700, fontSize: 13, textTransform: "uppercase", letterSpacing: 1, flex: 1 }}>
+          {swappedSec ? swappedSec.name : title}
+        </div>
+
+        {/* Swap button — shows on hover if slotId provided */}
+        {slotId && onSwap && hovered && (
+          <div style={{ display: "flex", gap: 4 }}>
+            <button
+              onClick={() => setPicking(p => !p)}
+              title="Swap this section"
+              style={{
+                background: c.accent, color: "white", border: "none",
+                borderRadius: 6, padding: "2px 7px", fontSize: 10,
+                fontWeight: 700, cursor: "pointer", lineHeight: 1.6,
+              }}
+            >⇄ Swap</button>
+            {swappedKey && (
+              <button
+                onClick={() => { onSwap(slotId, null); setPicking(false); }}
+                title="Restore original"
+                style={{
+                  background: "#888", color: "white", border: "none",
+                  borderRadius: 6, padding: "2px 7px", fontSize: 10,
+                  fontWeight: 700, cursor: "pointer", lineHeight: 1.6,
+                }}
+              >↺</button>
+            )}
+          </div>
+        )}
       </div>
-      {children}
+
+      {/* Section picker dropdown */}
+      {picking && (
+        <div style={{
+          position: "absolute", top: 36, right: 8, zIndex: 100,
+          background: "white", border: `2px solid ${c.accent}`,
+          borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          padding: 8, width: 200, maxHeight: 280, overflowY: "auto",
+        }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#888", marginBottom: 6, padding: "0 4px", textTransform: "uppercase", letterSpacing: 1 }}>
+            Replace with…
+          </div>
+          {Object.entries(OPTIONAL).map(([key, sec]) => (
+            <div
+              key={key}
+              onClick={() => { onSwap(slotId, key); setPicking(false); }}
+              style={{
+                padding: "6px 10px", borderRadius: 7, cursor: "pointer", fontSize: 12,
+                background: swappedKey === key ? c.primary : "transparent",
+                color: c.text, fontWeight: swappedKey === key ? 700 : 400,
+                transition: "background 0.1s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = c.primary}
+              onMouseLeave={e => e.currentTarget.style.background = swappedKey === key ? c.primary : "transparent"}
+            >
+              {sec.name}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Content — swapped or original */}
+      {swappedSec
+        ? swappedSec.render(c, vals || {}, upd || (() => {}))
+        : children
+      }
+
+      {/* Height drag handle */}
       <div
         onMouseDown={startDrag}
         title="Drag to resize height"
@@ -399,85 +475,85 @@ const MoodPicker = ({ id, vals, onChange, c, moods = ["😊","😌","😐","😔
 /* ── TEMPLATE LAYOUTS ───────────────────────────────────────────────────── */
 const LAYOUTS = {
 
-  minimalist: (c, v, upd) => (
+  minimalist: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <ResizableRow c={c}
         left={
-          <SBox c={c} title="✓ To-Do List" style={{marginBottom:0}}>
+          <SBox c={c} slotId="minimalist_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="✓ To-Do List" style={{marginBottom:0}}>
             {Array.from({length:10}).map((_,i) => <ECheck key={i} id={`todo${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Task ${i+1}`} />)}
           </SBox>
         }
         right={
           <div>
-            <SBox c={c} title="📅 Monthly Overview">
+            <SBox c={c} slotId="minimalist_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="📅 Monthly Overview">
               {Array.from({length:5}).map((_,i) => <ELine key={i} id={`mo${i}`} vals={v} onChange={upd} c={c} />)}
             </SBox>
-            <SBox c={c} title="🔁 Habit Tracker" style={{marginBottom:0}}>
+            <SBox c={c} slotId="minimalist_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🔁 Habit Tracker" style={{marginBottom:0}}>
               {Array.from({length:4}).map((_,i) => <HabitRow key={i} id={`hab${i}`} vals={v} onChange={upd} c={c} placeholder={`Habit ${i+1}`} />)}
             </SBox>
           </div>
         }
       />
-      <SBox c={c} title="💭 Reflections">
+      <SBox c={c} slotId="minimalist_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="💭 Reflections">
         <EArea id="reflect" vals={v} onChange={upd} c={c} rows={4} />
       </SBox>
     </>
   ),
 
-  boho: (c, v, upd) => (
+  boho: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:20, fontWeight:400, color:c.text, fontFamily:"Georgia" }}>Monthly Intentions</div>
         <div style={{ borderBottom:`2px solid ${c.accent}`, width:120, margin:"6px auto 0" }} />
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="🌿 Gratitude" style={{ borderRadius:40, marginBottom:0 }}>
+        left={<SBox c={c} slotId="boho_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌿 Gratitude" style={{ borderRadius:40, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`grat${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
-        right={<SBox c={c} title="✨ Self-Care" style={{ borderRadius:40, marginBottom:0 }}>
+        right={<SBox c={c} slotId="boho_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="✨ Self-Care" style={{ borderRadius:40, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`sc${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
       />
-      <SBox c={c} title="🌙 Mood Tracker">
+      <SBox c={c} slotId="boho_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌙 Mood Tracker">
         <MoodPicker id="mood" vals={v} onChange={upd} c={c} moods={["🌞","🌤","⛅","🌧","⛈"]} />
       </SBox>
-      <SBox c={c} title="🌸 Daily Affirmations">
+      <SBox c={c} slotId="boho_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌸 Daily Affirmations">
         {Array.from({length:5}).map((_,i) => <ELine key={i} id={`aff${i}`} vals={v} onChange={upd} c={c} />)}
       </SBox>
     </>
   ),
 
-  funky: (c, v, upd) => (
+  funky: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ background:c.accent, borderRadius:20, padding:"12px 20px", marginBottom:14, textAlign:"center" }}>
         <div style={{ fontSize:22, fontWeight:900, color:"white", letterSpacing:2 }}>BRAIN DUMP 🧠</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="💡 Creative Notes" style={{ borderRadius:28, transform:"rotate(-1deg)", marginBottom:0 }}>
+        left={<SBox c={c} slotId="funky_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="💡 Creative Notes" style={{ borderRadius:28, transform:"rotate(-1deg)", marginBottom:0 }}>
           <EArea id="creative" vals={v} onChange={upd} c={c} rows={6} />
         </SBox>}
-        right={<SBox c={c} title="💖 Currently Loving" style={{ borderRadius:28, transform:"rotate(1deg)", marginBottom:0 }}>
+        right={<SBox c={c} slotId="funky_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="💖 Currently Loving" style={{ borderRadius:28, transform:"rotate(1deg)", marginBottom:0 }}>
           {Array.from({length:5}).map((_,i) => <ELine key={i} id={`love${i}`} vals={v} onChange={upd} c={c} placeholder={`⭐ Something I love…`} />)}
         </SBox>}
       />
       <ResizableRow c={c}
-        left={<SBox c={c} title="🎨 Mood Tracker" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="funky_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🎨 Mood Tracker" style={{marginBottom:0}}>
           <MoodPicker id="mood" vals={v} onChange={upd} c={c} moods={["😍","🤩","😊","😐","😤","😭","🤯"]} />
         </SBox>}
-        right={<SBox c={c} title="🌟 Weekly Highlights" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="funky_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌟 Weekly Highlights" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => <ELine key={i} id={`hl${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
       />
     </>
   ),
 
-  zen: (c, v, upd) => (
+  zen: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:20, fontWeight:300, color:c.text, fontFamily:"Georgia" }}>Daily Mindfulness 🕊</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="🌬 Breathing Exercise" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="zen_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌬 Breathing Exercise" style={{marginBottom:0}}>
           <div style={{ textAlign:"center", padding:"10px 0" }}>
             <div style={{ width:80, height:80, borderRadius:"50%", border:`2px solid ${c.accent}`, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", fontSize:10, color:c.accent }}>
               <span>Inhale</span><span>Hold</span><span>Exhale</span>
@@ -485,15 +561,15 @@ const LAYOUTS = {
           </div>
           <ELine id="breath_note" vals={v} onChange={upd} c={c} placeholder="Notes…" />
         </SBox>}
-        right={<SBox c={c} title="🎯 Today's Intentions" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="zen_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="🎯 Today's Intentions" style={{marginBottom:0}}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`int${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
       />
       <ResizableRow c={c}
-        left={<SBox c={c} title="🙏 Gratitude" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="zen_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🙏 Gratitude" style={{marginBottom:0}}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`grat${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
-        right={<SBox c={c} title="🌊 Mood Reflection" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="zen_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌊 Mood Reflection" style={{marginBottom:0}}>
           <MoodPicker id="mood" vals={v} onChange={upd} c={c} />
           {Array.from({length:2}).map((_,i) => <ELine key={i} id={`mref${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
@@ -501,20 +577,20 @@ const LAYOUTS = {
     </>
   ),
 
-  prayer: (c, v, upd) => (
+  prayer: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:22, fontWeight:400, fontFamily:"Georgia", color:c.text }}>✝ Prayer Journal</div>
       </div>
-      <SBox c={c} title="🙏 Prayer Requests & Praise">
+      <SBox c={c} slotId="prayer_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="🙏 Prayer Requests & Praise">
         {Array.from({length:5}).map((_,i) => <ELine key={i} id={`pr${i}`} vals={v} onChange={upd} c={c} />)}
       </SBox>
       <ResizableRow c={c}
-        left={<SBox c={c} title="📖 Scripture of the Day" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="prayer_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="📖 Scripture of the Day" style={{marginBottom:0}}>
           <ELine id="verse_ref" vals={v} onChange={upd} c={c} placeholder="Verse reference…" />
           <EArea id="verse_text" vals={v} onChange={upd} c={c} rows={4} placeholder="Write the verse…" />
         </SBox>}
-        right={<SBox c={c} title="✅ Answered Prayers" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="prayer_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="✅ Answered Prayers" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:c.accent, flexShrink:0 }} />
@@ -523,7 +599,7 @@ const LAYOUTS = {
           ))}
         </SBox>}
       />
-      <SBox c={c} title="⏰ Prayer Time Log">
+      <SBox c={c} slotId="prayer_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="⏰ Prayer Time Log">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
           {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i) => (
             <div key={i} style={{ background:"white", border:`1.5px solid ${c.accent}`, borderRadius:8, padding:"6px 4px", textAlign:"center" }}>
@@ -533,19 +609,19 @@ const LAYOUTS = {
           ))}
         </div>
       </SBox>
-      <SBox c={c} title="💭 Today's Reflections">
+      <SBox c={c} slotId="prayer_4" swaps={sw} onSwap={os} vals={v} upd={upd} title="💭 Today's Reflections">
         <EArea id="pray_reflect" vals={v} onChange={upd} c={c} rows={3} />
       </SBox>
     </>
   ),
 
-  parenting: (c, v, upd) => (
+  parenting: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:22, fontWeight:600, color:c.text }}>👨‍👩‍👧‍👦 Family Planner</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="📅 Kids's Schedule" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="parenting_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="📅 Kids's Schedule" style={{marginBottom:0}}>
           {["☀️ Morning","🌤 Afternoon","🌙 Evening","🛏 Bedtime"].map((t,i) => (
             <div key={i} style={{ marginBottom:10 }}>
               <div style={{ fontSize:11, fontWeight:600, color:c.text, marginBottom:3 }}>{t}</div>
@@ -553,7 +629,7 @@ const LAYOUTS = {
             </div>
           ))}
         </SBox>}
-        right={<SBox c={c} title="🍽 Meal Planning" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="parenting_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="🍽 Meal Planning" style={{marginBottom:0}}>
           {["Breakfast","Lunch","Dinner","Snacks"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:8, marginBottom:8, alignItems:"center" }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:c.accent, flexShrink:0 }} />
@@ -563,27 +639,27 @@ const LAYOUTS = {
           ))}
         </SBox>}
       />
-      <SBox c={c} title="🛒 Shopping List">
+      <SBox c={c} slotId="parenting_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🛒 Shopping List">
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
           {Array.from({length:9}).map((_,i) => <ECheck key={i} id={`shop${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Item ${i+1}`} />)}
         </div>
       </SBox>
-      <SBox c={c} title="🎉 Activities & Appointments">
+      <SBox c={c} slotId="parenting_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="🎉 Activities & Appointments">
         {Array.from({length:3}).map((_,i) => <ELine key={i} id={`act${i}`} vals={v} onChange={upd} c={c} />)}
       </SBox>
-      <SBox c={c} title="❤️ Grateful For…">
+      <SBox c={c} slotId="parenting_4" swaps={sw} onSwap={os} vals={v} upd={upd} title="❤️ Grateful For…">
         {Array.from({length:3}).map((_,i) => <ELine key={i} id={`pgrat${i}`} vals={v} onChange={upd} c={c} />)}
       </SBox>
     </>
   ),
 
-  money: (c, v, upd) => (
+  money: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ background:c.accent, borderRadius:10, padding:"12px 18px", marginBottom:14, textAlign:"center" }}>
         <div style={{ fontSize:20, fontWeight:700, color:"white" }}>💰 Financial Tracker</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="📈 Income" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="money_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="📈 Income" style={{marginBottom:0}}>
           {["Salary","Side Hustle","Other"].map((t,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8, borderBottom:`1px solid ${c.border}`, paddingBottom:4 }}>
               <span style={{ fontSize:11, color:c.text, width:80, flexShrink:0 }}>{t}</span>
@@ -594,7 +670,7 @@ const LAYOUTS = {
             <span>TOTAL</span><span>${(["inc0","inc1","inc2"].reduce((s,k)=>s+(parseFloat(v[k])||0),0)).toFixed(2)}</span>
           </div>
         </SBox>}
-        right={<SBox c={c} title="📉 Expenses" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="money_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="📉 Expenses" style={{marginBottom:0}}>
           {["Housing","Food","Transport","Other"].map((t,i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8, borderBottom:`1px solid ${c.border}`, paddingBottom:4 }}>
               <span style={{ fontSize:11, color:c.text, width:80, flexShrink:0 }}>{t}</span>
@@ -606,7 +682,7 @@ const LAYOUTS = {
           </div>
         </SBox>}
       />
-      <SBox c={c} title="🎯 Savings Goals">
+      <SBox c={c} slotId="money_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🎯 Savings Goals">
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
           {[0,1,2].map(i => (
             <div key={i} style={{ background:"white", border:`1.5px solid ${c.border}`, borderRadius:8, padding:10 }}>
@@ -619,19 +695,19 @@ const LAYOUTS = {
           ))}
         </div>
       </SBox>
-      <SBox c={c} title="📝 Financial Notes">
+      <SBox c={c} slotId="money_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="📝 Financial Notes">
         <EArea id="moneynotes" vals={v} onChange={upd} c={c} rows={3} />
       </SBox>
     </>
   ),
 
-  professional: (c, v, upd) => (
+  professional: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ background:c.accent, padding:"12px 18px", borderRadius:8, marginBottom:14 }}>
         <div style={{ fontSize:20, fontWeight:700, color:"white", letterSpacing:2, textAlign:"center" }}>DAILY PLANNER</div>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1.2fr 0.8fr", gap:14 }}>
-        <SBox c={c} title="🕐 Schedule">
+        <SBox c={c} slotId="professional_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="🕐 Schedule">
           {["8:00","9:00","10:00","11:00","12:00","1:00","2:00","3:00","4:00","5:00"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:10, marginBottom:7, alignItems:"center" }}>
               <span style={{ fontSize:10, color:c.accent, fontWeight:600, width:42, flexShrink:0 }}>{t}</span>
@@ -640,7 +716,7 @@ const LAYOUTS = {
           ))}
         </SBox>
         <div>
-          <SBox c={c} title="⚡ Priority Tasks">
+          <SBox c={c} slotId="professional_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="⚡ Priority Tasks">
             {Array.from({length:7}).map((_,i) => (
               <div key={i} style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
                 <div style={{ width:16, height:16, borderRadius:"50%", border:`2px solid ${c.accent}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:9, fontWeight:700, color:c.accent, flexShrink:0 }}>{i+1}</div>
@@ -648,7 +724,7 @@ const LAYOUTS = {
               </div>
             ))}
           </SBox>
-          <SBox c={c} title="🎯 Goals">
+          <SBox c={c} slotId="professional_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🎯 Goals">
             {["Today","This Week","This Month"].map((p,i) => (
               <div key={i} style={{ marginBottom:8 }}>
                 <div style={{ fontSize:10, fontWeight:600, color:c.accent }}>{p}</div>
@@ -656,7 +732,7 @@ const LAYOUTS = {
               </div>
             ))}
           </SBox>
-          <SBox c={c} title="📞 Meetings">
+          <SBox c={c} slotId="professional_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="📞 Meetings">
             {Array.from({length:3}).map((_,i) => (
               <div key={i} style={{ marginBottom:10 }}>
                 <div style={{ display:"flex", gap:6, marginBottom:4 }}>
@@ -675,13 +751,13 @@ const LAYOUTS = {
     </>
   ),
 
-  cozy: (c, v, upd) => (
+  cozy: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:22, fontWeight:500, fontFamily:"Georgia", color:c.text }}>☕ Cozy Day Planner</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="☀️ Morning Routine" style={{ borderRadius:24, marginBottom:0 }}>
+        left={<SBox c={c} slotId="cozy_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="☀️ Morning Routine" style={{ borderRadius:24, marginBottom:0 }}>
           {["Wake up time","Breakfast","Self-care","Start work"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:8 }}>
               <div style={{ width:8, height:8, borderRadius:"50%", background:c.accent, flexShrink:0 }} />
@@ -689,11 +765,11 @@ const LAYOUTS = {
             </div>
           ))}
         </SBox>}
-        right={<SBox c={c} title="✨ Cozy Activities" style={{ borderRadius:24, marginBottom:0 }}>
+        right={<SBox c={c} slotId="cozy_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="✨ Cozy Activities" style={{ borderRadius:24, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`cact${i}`} vals={v} onChange={upd} c={c} />)}
         </SBox>}
       />
-      <SBox c={c} title="💧 Nourishment Tracker" style={{ borderRadius:24 }}>
+      <SBox c={c} slotId="cozy_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="💧 Nourishment Tracker" style={{ borderRadius:24 }}>
         <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
           <span style={{ fontSize:11, fontWeight:600, color:c.text }}>Water glasses:</span>
           {Array.from({length:8}).map((_,i) => (
@@ -703,13 +779,13 @@ const LAYOUTS = {
           ))}
         </div>
       </SBox>
-      <SBox c={c} title="🌙 Evening Wind Down" style={{ borderRadius:24 }}>
+      <SBox c={c} slotId="cozy_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌙 Evening Wind Down" style={{ borderRadius:24 }}>
         <EArea id="evening" vals={v} onChange={upd} c={c} rows={4} />
       </SBox>
     </>
   ),
 
-  selfWellness: (c, v, upd) => (
+  selfWellness: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:20, fontWeight:400, fontFamily:"Georgia", color:c.text }}>🌿 Wellness Journey</div>
@@ -728,7 +804,7 @@ const LAYOUTS = {
           </SBox>
         ))}
       </div>
-      <SBox c={c} title="⚡ Energy Levels">
+      <SBox c={c} slotId="selfWellness_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="⚡ Energy Levels">
         <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
           {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i) => (
             <div key={i} style={{ background:"white", border:`1.5px solid ${c.accent}`, borderRadius:8, padding:"6px 4px", textAlign:"center" }}>
@@ -738,19 +814,19 @@ const LAYOUTS = {
           ))}
         </div>
       </SBox>
-      <SBox c={c} title="💭 Reflections">
+      <SBox c={c} slotId="selfWellness_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="💭 Reflections">
         <EArea id="wellreflect" vals={v} onChange={upd} c={c} rows={3} />
       </SBox>
     </>
   ),
 
-  artistic: (c, v, upd) => (
+  artistic: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14, fontStyle:"italic" }}>
         <div style={{ fontSize:24, fontWeight:700, color:c.text, fontFamily:"Georgia" }}>Creative Journal 🎨</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="💡 Creative Prompts" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="artistic_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="💡 Creative Prompts" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => (
             <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:8 }}>
               <div style={{ width:20, height:20, borderRadius:"50%", border:`2px solid ${c.accent}`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, color:c.accent, flexShrink:0 }}>{i+1}</div>
@@ -758,36 +834,36 @@ const LAYOUTS = {
             </div>
           ))}
         </SBox>}
-        right={<SBox c={c} title="🖼 Sketch / Inspiration" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="artistic_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="🖼 Sketch / Inspiration" style={{marginBottom:0}}>
           <div style={{ background:"white", border:`2px dashed ${c.accent}`, borderRadius:8, height:120, display:"flex", alignItems:"center", justifyContent:"center", color:c.border, fontSize:12 }}>
             Sketch / paste inspiration here
           </div>
         </SBox>}
       />
-      <SBox c={c} title="🌈 Color Mood of the Day">
+      <SBox c={c} slotId="artistic_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌈 Color Mood of the Day">
         <MoodPicker id="artmood" vals={v} onChange={upd} c={c} moods={["🔴","🟠","🟡","🟢","🔵","🟣","🩷"]} />
         <ELine id="artmood_note" vals={v} onChange={upd} c={c} placeholder="How does this color make you feel?" />
       </SBox>
-      <SBox c={c} title="📝 Creative Notes">
+      <SBox c={c} slotId="artistic_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="📝 Creative Notes">
         <EArea id="artnotes" vals={v} onChange={upd} c={c} rows={4} />
       </SBox>
     </>
   ),
 
-  whimsical: (c, v, upd) => (
+  whimsical: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:24, fontWeight:600, fontFamily:"cursive", color:c.text }}>🦋 Dream Diary ✨</div>
       </div>
       <ResizableRow c={c}
-        left={<SBox c={c} title="✨ Dreams" style={{ borderRadius:40, marginBottom:0 }}>
+        left={<SBox c={c} slotId="whimsical_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="✨ Dreams" style={{ borderRadius:40, marginBottom:0 }}>
           <EArea id="dreams" vals={v} onChange={upd} c={c} rows={4} />
         </SBox>}
-        right={<SBox c={c} title="🌙 Wishes" style={{ borderRadius:40, marginBottom:0 }}>
+        right={<SBox c={c} slotId="whimsical_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌙 Wishes" style={{ borderRadius:40, marginBottom:0 }}>
           {Array.from({length:4}).map((_,i) => <ELine key={i} id={`wish${i}`} vals={v} onChange={upd} c={c} placeholder="🌟 I wish…" />)}
         </SBox>}
       />
-      <SBox c={c} title="✨ Daily Magic Moments">
+      <SBox c={c} slotId="whimsical_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="✨ Daily Magic Moments">
         <div style={{ display:"flex", gap:8, justifyContent:"space-around", padding:"4px 0", flexWrap:"wrap" }}>
           {Array.from({length:7}).map((_,i) => (
             <div key={i} style={{ textAlign:"center" }}>
@@ -797,23 +873,23 @@ const LAYOUTS = {
           ))}
         </div>
       </SBox>
-      <SBox c={c} title="🦋 Today's Story" style={{ borderRadius:30 }}>
+      <SBox c={c} slotId="whimsical_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="🦋 Today's Story" style={{ borderRadius:30 }}>
         <EArea id="wstory" vals={v} onChange={upd} c={c} rows={4} />
       </SBox>
-      <SBox c={c} title="🌈 Mood Rainbow">
+      <SBox c={c} slotId="whimsical_4" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌈 Mood Rainbow">
         <MoodPicker id="wmood" vals={v} onChange={upd} c={c} moods={["🌞","🌤","🌈","⭐","🌙"]} />
       </SBox>
     </>
   ),
 
-  luxury: (c, v, upd) => (
+  luxury: (c, v, upd, sw={}, os=()=>{}) => (
     <div style={{ border:`3px solid ${c.accent}`, borderRadius:4, padding:4 }}>
       <div style={{ border:`1px solid ${c.accent}`, borderRadius:2, padding:16 }}>
         <div style={{ textAlign:"center", marginBottom:16 }}>
           <div style={{ fontSize:26, fontWeight:700, color:c.accent, fontFamily:"serif", letterSpacing:4 }}>PLANNER</div>
           <div style={{ borderBottom:`2px solid ${c.accent}`, margin:"8px auto", width:200 }} />
         </div>
-        <SBox c={c} title="PRIORITIES" style={{ letterSpacing:2 }}>
+        <SBox c={c} slotId="luxury_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="PRIORITIES" style={{ letterSpacing:2 }}>
           {[1,2,3,4,5].map(i => (
             <div key={i} style={{ display:"flex", gap:12, alignItems:"center", padding:"6px 0", borderBottom:`1px solid ${c.border}` }}>
               <span style={{ fontSize:18, fontWeight:700, color:c.accent, width:20 }}>{i}</span>
@@ -821,7 +897,7 @@ const LAYOUTS = {
             </div>
           ))}
         </SBox>
-        <SBox c={c} title="SCHEDULE" style={{ letterSpacing:2 }}>
+        <SBox c={c} slotId="luxury_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="SCHEDULE" style={{ letterSpacing:2 }}>
           {["MORNING","AFTERNOON","EVENING"].map((p,i) => (
             <div key={i} style={{ marginBottom:12 }}>
               <div style={{ fontSize:11, color:c.accent, fontWeight:700, letterSpacing:3, marginBottom:6 }}>{p}</div>
@@ -829,14 +905,14 @@ const LAYOUTS = {
             </div>
           ))}
         </SBox>
-        <SBox c={c} title="NOTES" style={{ letterSpacing:2, marginBottom:0 }}>
+        <SBox c={c} slotId="luxury_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="NOTES" style={{ letterSpacing:2, marginBottom:0 }}>
           <EArea id="luxnotes" vals={v} onChange={upd} c={c} rows={3} />
         </SBox>
       </div>
     </div>
   ),
 
-  elegant: (c, v, upd) => (
+  elegant: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:24, fontWeight:400, fontFamily:"Georgia", color:c.text }}>Daily Planner</div>
@@ -848,17 +924,17 @@ const LAYOUTS = {
         </SBox>
       ))}
       <ResizableRow c={c}
-        left={<SBox c={c} title="Important Tasks" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="elegant_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="Important Tasks" style={{marginBottom:0}}>
           {Array.from({length:5}).map((_,i) => <ECheck key={i} id={`etask${i}`} vals={v} onChange={upd} c={c} defaultLabel={`Task ${i+1}`} />)}
         </SBox>}
-        right={<SBox c={c} title="Notes" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="elegant_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="Notes" style={{marginBottom:0}}>
           <EArea id="elegnotes" vals={v} onChange={upd} c={c} rows={6} />
         </SBox>}
       />
     </>
   ),
 
-  journal: (c, v, upd) => (
+  journal: (c, v, upd, sw={}, os=()=>{}) => (
     <div style={{ padding:"0 10px" }}>
       <div style={{ textAlign:"center", marginBottom:16 }}>
         <div style={{ fontSize:26, fontWeight:400, fontFamily:"Georgia", color:c.text }}>Journal</div>
@@ -878,12 +954,12 @@ const LAYOUTS = {
     </div>
   ),
 
-  dreamJournal: (c, v, upd) => (
+  dreamJournal: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ textAlign:"center", marginBottom:14 }}>
         <div style={{ fontSize:22, fontWeight:500, fontFamily:"Georgia", color:c.text }}>🌙 Dream Journal</div>
       </div>
-      <SBox c={c} title="Sleep Info">
+      <SBox c={c} slotId="dreamJournal_0" swaps={sw} onSwap={os} vals={v} upd={upd} title="Sleep Info">
         <div style={{ display:"flex", gap:16, flexWrap:"wrap" }}>
           {["Date","Bedtime","Wake time","Sleep quality (1-10)"].map((lbl,i) => (
             <div key={i} style={{ display:"flex", gap:6, alignItems:"center" }}>
@@ -893,11 +969,11 @@ const LAYOUTS = {
           ))}
         </div>
       </SBox>
-      <SBox c={c} title="🌙 Dream Description">
+      <SBox c={c} slotId="dreamJournal_1" swaps={sw} onSwap={os} vals={v} upd={upd} title="🌙 Dream Description">
         <EArea id="djdesc" vals={v} onChange={upd} c={c} rows={5} placeholder="Describe your dream in detail…" />
       </SBox>
       <ResizableRow c={c}
-        left={<SBox c={c} title="🔑 Key Elements" style={{marginBottom:0}}>
+        left={<SBox c={c} slotId="dreamJournal_2" swaps={sw} onSwap={os} vals={v} upd={upd} title="🔑 Key Elements" style={{marginBottom:0}}>
           {["People","Places","Objects","Emotions"].map((t,i) => (
             <div key={i} style={{ display:"flex", gap:6, alignItems:"center", marginBottom:8 }}>
               <span style={{ fontSize:10, fontWeight:600, color:c.text, width:55, flexShrink:0 }}>{t}:</span>
@@ -905,20 +981,20 @@ const LAYOUTS = {
             </div>
           ))}
         </SBox>}
-        right={<SBox c={c} title="💫 Dream Mood" style={{marginBottom:0}}>
+        right={<SBox c={c} slotId="dreamJournal_3" swaps={sw} onSwap={os} vals={v} upd={upd} title="💫 Dream Mood" style={{marginBottom:0}}>
           <MoodPicker id="djmood" vals={v} onChange={upd} c={c} moods={["😊","😌","😐","😨","🤩"]} />
         </SBox>}
       />
-      <SBox c={c} title="🔮 Symbols & Meanings">
+      <SBox c={c} slotId="dreamJournal_4" swaps={sw} onSwap={os} vals={v} upd={upd} title="🔮 Symbols & Meanings">
         <EArea id="djsymbols" vals={v} onChange={upd} c={c} rows={3} />
       </SBox>
-      <SBox c={c} title="💭 My Interpretation">
+      <SBox c={c} slotId="dreamJournal_5" swaps={sw} onSwap={os} vals={v} upd={upd} title="💭 My Interpretation">
         <EArea id="djinterp" vals={v} onChange={upd} c={c} rows={3} />
       </SBox>
     </>
   ),
 
-  kidsChores: (c, v, upd) => (
+  kidsChores: (c, v, upd, sw={}, os=()=>{}) => (
     <>
       <div style={{ background:c.accent, borderRadius:16, padding:"14px 20px", marginBottom:14, textAlign:"center" }}>
         <div style={{ fontSize:22, fontWeight:700, color:"white" }}>⭐ MY CHORE CHART ⭐</div>
@@ -1131,11 +1207,21 @@ export default function PlannerGenerator() {
   const GUMROAD_PRODUCT_ID = "9yyW-lDhr8Ti5sPV9T_dpg==";
   // ────────────────────────────────────────────────────────────────────────
 
-  const c   = { ...TEMPLATES[tmpl], ...(customColors || {}) };
-  const upd = (k, val) => setValues(prev => ({ ...prev, [k]: val }));
+  const [swaps, setSwaps] = useState({});  // { [slotId]: optionalKey }
+
+  const c      = { ...TEMPLATES[tmpl], ...(customColors || {}) };
+  const upd    = (k, val) => setValues(prev => ({ ...prev, [k]: val }));
+  const onSwap = (slotId, optKey) => setSwaps(prev => {
+    const next = { ...prev };
+    if (optKey === null) delete next[slotId]; else next[slotId] = optKey;
+    return next;
+  });
+
+  // Reset swaps when template changes
+  useEffect(() => { setSwaps({}); }, [tmpl]);
 
   // Automatically nudge sections away from page-break boundaries
-  usePageBreakNudge(previewRef, [tmpl, optionals, values, font]);
+  usePageBreakNudge(previewRef, [tmpl, optionals, values, font, swaps]);
 
   const login = async () => {
     const key = code.trim();
@@ -1432,7 +1518,7 @@ export default function PlannerGenerator() {
               </div>
 
               {/* Template layout */}
-              {LAYOUTS[tmpl] ? LAYOUTS[tmpl](c, values, upd) : <div>Template not found</div>}
+              {LAYOUTS[tmpl] ? LAYOUTS[tmpl](c, values, upd, swaps, onSwap) : <div>Template not found</div>}
 
               {/* Optional sections */}
               {optionals.length > 0 && (
