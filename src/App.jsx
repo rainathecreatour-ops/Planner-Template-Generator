@@ -899,6 +899,76 @@ const OPTIONAL = {
   weeklyReview:    { name:"Weekly Review",        render:(c,v,u)=>(<SBox c={c} title="🎯 Weekly Review"><EArea id="opt_wr1" vals={v} onChange={u} c={c} rows={3} placeholder="What I accomplished…"/><EArea id="opt_wr2" vals={v} onChange={u} c={c} rows={2} placeholder="Next week's focus…"/></SBox>) },
 };
 
+/* ── PAGE BREAK INDICATOR ────────────────────────────────────────────────── */
+// A4 at 96dpi = 1122px tall. The preview is 794px wide (A4 width at 96dpi).
+// We calculate how many A4 pages the content spans and show dashed lines.
+const A4_HEIGHT_PX = 1122;
+
+const PageBreakIndicator = ({ previewRef, c }) => {
+  const [pageCount, setPageCount] = useState(1);
+  const [breaks, setBreaks] = useState([]);
+
+  useEffect(() => {
+    const el = previewRef?.current;
+    if (!el) return;
+    const obs = new ResizeObserver(() => {
+      const h = el.scrollHeight;
+      const pages = Math.ceil(h / A4_HEIGHT_PX);
+      setPageCount(pages);
+      setBreaks(Array.from({ length: pages - 1 }, (_, i) => (i + 1) * A4_HEIGHT_PX));
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [previewRef]);
+
+  if (pageCount <= 1) return null;
+
+  return (
+    <div style={{ maxWidth:794, margin:"0 auto 8px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+      <div style={{ fontSize:12, color:"#666", background:"white", borderRadius:6, padding:"4px 10px", boxShadow:"0 1px 4px rgba(0,0,0,0.1)" }}>
+        📄 <strong>{pageCount} pages</strong> — content will split across {pageCount} A4 pages when exported
+      </div>
+    </div>
+  );
+};
+
+// Draws dashed red lines at each A4 page boundary overlaid on the preview
+const PageBreakLines = ({ previewRef }) => {
+  const [breaks, setBreaks] = useState([]);
+
+  useEffect(() => {
+    const el = previewRef?.current;
+    if (!el) return;
+    const obs = new ResizeObserver(() => {
+      const h = el.scrollHeight;
+      const pages = Math.ceil(h / A4_HEIGHT_PX);
+      setBreaks(Array.from({ length: pages - 1 }, (_, i) => (i + 1) * A4_HEIGHT_PX));
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [previewRef]);
+
+  return (
+    <>
+      {breaks.map((y, i) => (
+        <div key={i} style={{
+          position:"absolute", left:0, right:0, top: y,
+          borderTop:"2px dashed #ff4444",
+          zIndex:10, pointerEvents:"none",
+          display:"flex", alignItems:"center", justifyContent:"center",
+        }}>
+          <span style={{
+            background:"#ff4444", color:"white", fontSize:9, fontWeight:700,
+            padding:"1px 8px", borderRadius:"0 0 4px 4px", letterSpacing:1,
+          }}>
+            PAGE {i + 2} STARTS HERE
+          </span>
+        </div>
+      ))}
+    </>
+  );
+};
+
 /* ── MAIN APP ────────────────────────────────────────────────────────────── */
 export default function PlannerGenerator() {
   const [auth, setAuth]               = useState(false);
@@ -974,19 +1044,64 @@ export default function PlannerGenerator() {
         loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
         loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"),
       ]);
+
       const el = previewRef.current;
-      const canvas = await window.html2canvas(el, { scale: 2, useCORS: true, backgroundColor: c.bg, logging: false, width: el.offsetWidth, height: el.offsetHeight });
+
+      // Render full content at 2x scale
+      const canvas = await window.html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: c.bg,
+        logging: false,
+        width: el.offsetWidth,
+        height: el.scrollHeight,   // full scrollable height, not just visible
+      });
+
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pw = pdf.internal.pageSize.getWidth();
-      const ph = pdf.internal.pageSize.getHeight();
-      const iw = canvas.width;
-      const ih = canvas.height;
-      const ratio = iw / ih;
-      let finalW = pw, finalH = pw / ratio;
-      if (finalH > ph) { finalH = ph; finalW = ph * ratio; }
-      const xOff = (pw - finalW) / 2;
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", xOff, 0, finalW, finalH);
+      const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: "a4" });
+
+      // A4 in px at 96dpi
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+
+      // Scale canvas width to fit A4 page width
+      const scale  = pageW / canvas.width;
+      const scaledH = canvas.height * scale;          // total height if scaled to fit width
+
+      // How many A4 pages do we need?
+      const totalPages = Math.ceil(scaledH / pageH);
+
+      // Slice canvas into A4-height strips and add each as a page
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) pdf.addPage();
+
+        // Source strip on the original canvas (unscaled)
+        const srcY      = (page * pageH) / scale;
+        const srcHeight = pageH / scale;
+
+        // Draw just this strip onto a temp canvas
+        const strip = document.createElement("canvas");
+        strip.width  = canvas.width;
+        strip.height = Math.min(srcHeight, canvas.height - srcY); // clamp last page
+        const ctx = strip.getContext("2d");
+
+        // Fill with background colour so last page isn't transparent
+        ctx.fillStyle = c.bg;
+        ctx.fillRect(0, 0, strip.width, strip.height);
+
+        ctx.drawImage(
+          canvas,
+          0, srcY,               // source x, y
+          canvas.width, strip.height, // source w, h
+          0, 0,                  // dest x, y
+          canvas.width, strip.height  // dest w, h
+        );
+
+        const imgData   = strip.toDataURL("image/png");
+        const destH     = strip.height * scale;
+        pdf.addImage(imgData, "PNG", 0, 0, pageW, destH);
+      }
+
       pdf.save(`${tmpl}-planner-filled.pdf`);
     } catch(e) { alert("PDF export failed: " + e.message); }
     setExp(false);
@@ -1150,7 +1265,13 @@ export default function PlannerGenerator() {
 
         {/* Preview / Edit area */}
         <div style={{ overflowY:"auto", background:"#e9ecef", padding:24 }}>
-          <div style={{ background:"white", borderRadius:4, boxShadow:"0 4px 24px rgba(0,0,0,0.12)", maxWidth:794, margin:"0 auto" }}>
+
+          {/* Page count indicator */}
+          <PageBreakIndicator previewRef={previewRef} c={c} />
+
+          <div style={{ background:"white", borderRadius:4, boxShadow:"0 4px 24px rgba(0,0,0,0.12)", maxWidth:794, margin:"0 auto", position:"relative" }}>
+            {/* Page break dashed lines — outside previewRef so they don't appear in export */}
+            <PageBreakLines previewRef={previewRef} />
             <div ref={previewRef} style={{ background:c.bg, fontFamily:font, padding:36, minHeight:1000, position:"relative" }}>
               {/* Background pattern overlay */}
               {pattern !== "none" && PATTERNS[pattern].render(patternOpacity)}
